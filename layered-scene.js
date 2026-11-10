@@ -1,5 +1,5 @@
-import { waterSampleInterval } from './render-budget.js?v=20261110-motion12';
-import { paintScreen } from './screen-content.js?v=20261110-motion12';
+import { waterSampleInterval } from './render-budget.js?v=20261110-motion13';
+import { paintScreen } from './screen-content.js?v=20261110-motion13';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 
 function screenMatrix(quad,w,h,scale){
@@ -60,7 +60,9 @@ export class LayeredScene {
     this.waterCtx=this.waterStage.getContext('2d');
     this.waterCtx.setTransform(dpr,0,0,dpr,-water.x*dpr,-water.y*dpr);
     this.resetWater();this.cloudFrame=-1;
-    this.ambientSizes=new Float32Array(r.dynamic.length).fill(-1);
+    // Cache the same Number precision as the size calculation; float32
+    // rounding made unchanged 0.35/0.6/etc. bins compare unequal every frame.
+    this.ambientSizes=new Float64Array(r.dynamic.length).fill(-1);
   }
   resetWater(){this.waterIndices=[-1,-1,-1];}
   draw(time){

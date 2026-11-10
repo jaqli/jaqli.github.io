@@ -1,8 +1,8 @@
-import { scenePixelRatio } from './render-budget.js?v=20261110-motion12';
+import { scenePixelRatio } from './render-budget.js?v=20261110-motion13';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-motion12';
-import { screens, paintScreen } from './screen-content.js?v=20261110-motion12';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-motion13';
+import { screens, paintScreen } from './screen-content.js?v=20261110-motion13';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
