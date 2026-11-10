@@ -1,254 +1,152 @@
 import { site } from './site.config.js';
+import './navigation.js';
 
+const viewport = document.querySelector('#scene-viewport');
+const world = document.querySelector('#scene-world');
+const image = document.querySelector('#scene-image');
 const canvas = document.querySelector('#ascii-canvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 const sampleCanvas = document.createElement('canvas');
 const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
-const artwork = document.querySelector('#artwork');
-const density = document.querySelector('#density');
-const pauseButton = document.querySelector('#pause');
-const imageInput = document.querySelector('#image-input');
-const status = document.querySelector('#status');
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const pause = document.querySelector('#pause');
+const status = document.querySelector('#scene-status');
+const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const glyphs = ' .,:;i!+*?%$#@';
-const background = '#090b0c';
-
-let source = site.image ? null : makeStudy();
-let cells = [];
-let width = 0;
-let height = 0;
-let cellWidth = 0;
-let cellHeight = 0;
-let paused = reducedMotion.matches;
-let frameId = null;
-let lastFrame = 0;
-let time = 0;
-let imageRequest = 0;
-let toastTimer;
+const svgNS = 'http://www.w3.org/2000/svg';
+let cells = [], width = 0, height = 0, cellW = 0, cellH = 0;
+let frame = null, elapsed = 0, previousFrame = 0;
+let paused = motion.matches, ready = false, resizeFrame = null;
 const pointer = { x: -10000, y: -10000 };
 
-// Fallback artwork for an unset or unavailable image.
-function makeStudy() {
-  const study = document.createElement('canvas');
-  study.width = 780;
-  study.height = 720;
-  const studyCtx = study.getContext('2d');
-  const pixels = studyCtx.createImageData(study.width, study.height);
-  const palette = [[85, 197, 223], [188, 206, 133], [247, 168, 109], [212, 118, 150], [99, 117, 212], [85, 197, 223]];
-  for (let y = 0; y < study.height; y++) {
-    for (let x = 0; x < study.width; x++) {
-      const nx = (x / study.width - .5) * 2;
-      const ny = (y / study.height - .5) * 2;
-      const angle = Math.atan2(ny, nx);
-      const radius = Math.hypot(nx * 1.05, ny * 1.12);
-      const center = .55 + .065 * Math.sin(angle * 3 + .7);
-      const band = (radius - center) / .17;
-      const light = Math.exp(-band * band * 1.7);
-      const rib = .64 + .36 * Math.pow(.5 + .5 * Math.sin(radius * 100 + angle * 4), 2);
-      const brightness = light * rib;
-      const position = ((angle / (2 * Math.PI) + 1.65) % 1) * (palette.length - 1);
-      const index = Math.floor(position);
-      const mix = position - index;
-      const offset = (y * study.width + x) * 4;
-      for (let channel = 0; channel < 3; channel++) {
-        pixels.data[offset + channel] = (palette[index][channel] * (1 - mix) + palette[index + 1][channel] * mix) * brightness;
-      }
-      pixels.data[offset + 3] = 255;
-    }
+function svgElement(tag, attributes) {
+  const element = document.createElementNS(svgNS, tag);
+  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+  return element;
+}
+for (const hotspot of site.hotspots) {
+  const link = svgElement('a', {
+    href: hotspot.href, 'aria-label': hotspot.label, tabindex: '0',
+    class: `hotspot${hotspot.secret ? ' secret-hotspot' : ''}`,
+    'data-hotspot': hotspot.id, 'data-transition': hotspot.secret ? 'LIFE' : hotspot.label,
+  });
+  link.append(svgElement('polygon', { points: hotspot.points, class: 'hit-area' }));
+  if (hotspot.hint) {
+    const label = svgElement('g', { class: `hotspot-label ${hotspot.reveal === 'hover' ? 'on-hover' : ''}`, 'aria-hidden': 'true', transform: `translate(${hotspot.hintAt.join(' ')})` });
+    label.append(svgElement('rect', { x: '-59', y: '-17', width: '118', height: '28', rx: '3' }));
+    const text = svgElement('text', { 'text-anchor': 'middle', y: '1' });
+    text.textContent = hotspot.hint;
+    label.append(text);
+    link.append(label);
   }
-  studyCtx.putImageData(pixels, 0, 0);
-  return study;
+  document.querySelector('#hotspots').append(link);
 }
 
-function sample() {
-  const bounds = artwork.getBoundingClientRect();
-  width = Math.max(1, bounds.width);
-  height = Math.max(1, bounds.height);
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+function layout() {
+  const bounds = viewport.getBoundingClientRect();
+  const oldCenter = width ? (viewport.scrollLeft + bounds.width / 2) / width : .42;
+  const scale = Math.max(bounds.width / site.width, bounds.height / site.height);
+  width = site.width * scale;
+  height = site.height * scale;
+  world.style.width = `${width}px`;
+  world.style.height = `${height}px`;
+  world.style.top = `${(bounds.height - height) / 2}px`;
+  viewport.scrollLeft = Math.max(0, Math.min(width - bounds.width, oldCenter * width - bounds.width / 2));
+  const pannable = width > bounds.width + 5;
+  document.querySelector('#pan-hint').hidden = !pannable;
+  viewport.classList.toggle('is-pannable', pannable);
+  if (!ctx || !sampleCtx || !ready) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  if (!source) {
-    cells = [];
-    draw();
-    return;
-  }
-  const sourceWidth = source.naturalWidth || source.width;
-  const sourceHeight = source.naturalHeight || source.height;
-  const scale = Math.min(width / sourceWidth, height / sourceHeight) * .98;
-  const imageWidth = sourceWidth * scale;
-  const imageHeight = sourceHeight * scale;
-  // Spend the character budget on the image, not the surrounding letterbox.
-  const columns = Math.max(40, Math.round(Number(density.value) * Math.min(1, Math.max(.5, imageWidth / 800))));
-  cellWidth = imageWidth / columns;
-  const rows = Math.max(1, Math.round(imageHeight / (cellWidth / .6)));
-  cellHeight = imageHeight / rows;
-  const offsetX = (width - imageWidth) / 2;
-  const offsetY = (height - imageHeight) / 2;
+  const columns = Math.min(280, Math.max(150, Math.round(width / 5.3)));
+  const rows = Math.round(columns * site.height / site.width * .6);
+  cellW = width / columns;
+  cellH = height / rows;
   sampleCanvas.width = columns;
   sampleCanvas.height = rows;
-  sampleCtx.clearRect(0, 0, columns, rows);
-  sampleCtx.drawImage(source, 0, 0, columns, rows);
+  sampleCtx.drawImage(image, 0, 0, columns, rows);
   const pixels = sampleCtx.getImageData(0, 0, columns, rows).data;
   cells = [];
   for (let row = 0; row < rows; row++) {
-    for (let column = 0; column < columns; column++) {
-      const i = (row * columns + column) * 4;
-      const alpha = pixels[i + 3] / 255;
-      const r = pixels[i] * alpha;
-      const g = pixels[i + 1] * alpha;
-      const b = pixels[i + 2] * alpha;
-      const luminance = (.2126 * r + .7152 * g + .0722 * b) / 255;
-      if (luminance < .018 || alpha < .05) continue;
-      cells.push({
-        x: offsetX + (column + .5) * cellWidth,
-        y: offsetY + (row + .5) * cellHeight,
-        glyph: Math.max(1, Math.round(Math.sqrt(luminance) * (glyphs.length - 1))),
-        phase: column * .23 + row * .17,
-        // Lift shadows slightly to compensate for the space between glyphs.
-        color: `rgb(${[r, g, b].map(value => Math.round(255 * (value / 255) ** .82)).join(' ')})`,
+    for (let col = 0; col < columns; col++) {
+      const i = (row * columns + col) * 4;
+      const [r, g, b] = pixels.slice(i, i + 3);
+      const light = (.2126 * r + .7152 * g + .0722 * b) / 255;
+      cells.push({ x: (col + .5) * cellW, y: (row + .5) * cellH,
+        glyph: Math.max(1, Math.round(Math.sqrt(light) * (glyphs.length - 1))),
+        phase: col * .23 + row * .19, water: row / rows > .57,
+        color: `rgb(${[r, g, b].map(v => Math.round(255 * (v / 255) ** .78)).join(' ')})`,
       });
     }
   }
   draw();
 }
-
 function draw() {
-  ctx.fillStyle = background;
+  if (!ctx) return;
+  ctx.fillStyle = '#080d13';
   ctx.fillRect(0, 0, width, height);
-  ctx.font = `${Math.max(3, cellHeight * .95)}px "Courier New", monospace`;
+  ctx.font = `bold ${Math.max(4, cellH * .97)}px "Courier New", monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const cell of cells) {
-    const wave = Math.sin(time * .7 + cell.phase);
+    const wave = Math.sin(elapsed * 1.4 + cell.phase);
     const distance = Math.hypot(cell.x - pointer.x, cell.y - pointer.y);
-    const interaction = paused ? 0 : Math.max(0, 1 - distance / 120);
-    const shift = Math.round(Math.sin(time * 1.15 + cell.phase) * .85);
-    const glyph = glyphs[Math.max(1, Math.min(glyphs.length - 1, cell.glyph + shift + Math.round(interaction * 2)))];
+    const influence = paused ? 0 : Math.max(0, 1 - distance / 120);
+    const shift = Math.round(Math.sin(elapsed * 1.1 + cell.phase) * .9);
+    const character = glyphs[Math.max(1, Math.min(glyphs.length - 1, cell.glyph + shift))];
+    const ripple = influence * Math.sin(elapsed * 5 - distance * .04) * 4;
     ctx.fillStyle = cell.color;
-    ctx.fillText(glyph, cell.x, cell.y + wave * cellHeight * .09 + interaction * Math.sin(time * 4 - distance * .04) * 3);
+    ctx.fillText(character, cell.x + (cell.water ? wave * cellW * .15 : 0), cell.y + wave * cellH * .13 + ripple);
   }
 }
-
 function tick(now) {
-  frameId = null;
-  if (paused || document.hidden) return;
-  if (!lastFrame) lastFrame = now;
-  const delta = now - lastFrame;
+  frame = null;
+  if (!ready || paused || document.hidden) return;
+  if (!previousFrame) previousFrame = now;
+  const delta = now - previousFrame;
   if (delta >= 1000 / 24) {
-    time += Math.min(delta, 100) / 1000;
-    lastFrame = now;
+    elapsed += Math.min(delta, 100) / 1000;
+    previousFrame = now;
     draw();
   }
-  frameId = requestAnimationFrame(tick);
+  frame = requestAnimationFrame(tick);
 }
-
-function syncAnimation() {
-  if (frameId !== null) cancelAnimationFrame(frameId);
-  frameId = null;
-  lastFrame = 0;
-  pauseButton.setAttribute('aria-pressed', String(paused));
-  pauseButton.setAttribute('aria-label', paused ? '播放动效' : '暂停动效');
-  document.querySelector('#play-icon').textContent = paused ? '▷' : 'Ⅱ';
-  document.querySelector('#play-label').textContent = paused ? '播放' : '暂停';
-  if (!paused && !document.hidden) frameId = requestAnimationFrame(tick);
+function syncMotion() {
+  if (frame !== null) cancelAnimationFrame(frame);
+  frame = null;
+  previousFrame = 0;
+  pause.textContent = paused ? '▷' : 'Ⅱ';
+  pause.setAttribute('aria-pressed', String(paused));
+  pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
+  pause.title = paused ? '播放动效' : '暂停动效';
+  if (ready && !paused && !document.hidden) frame = requestAnimationFrame(tick);
 }
-
-function notify(message) {
-  clearTimeout(toastTimer);
-  status.textContent = message;
-  status.hidden = false;
-  toastTimer = setTimeout(() => { status.hidden = true; }, 6000);
-}
-
-async function setImage(url, description) {
-  const request = ++imageRequest;
-  const image = new Image();
-  image.src = url;
-  await image.decode();
-  if (request !== imageRequest) return false;
-  source = image;
-  canvas.setAttribute('aria-label', description);
-  document.querySelector('#art-label').textContent = 'PHOTO STUDY / 001';
-  sample();
-  return true;
-}
-
-async function loadFile(file) {
-  if (!file) return;
-  if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(file.type)) {
-    notify('请选择 PNG、JPG、WEBP、AVIF 或 GIF 图片。');
-    return;
-  }
-  if (file.size > 20 * 1024 * 1024) {
-    notify('图片太大了，请选择 20 MB 以内的照片。');
-    return;
-  }
-  const url = URL.createObjectURL(file);
-  try {
-    if (await setImage(url, '由所选照片转换而成的动态彩色 ASCII 字符画')) {
-      notify('照片已转成字符画，仅在本次浏览中使用。');
-    }
-  } catch {
-    notify('这张图片无法读取，请尝试其他图片。');
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-pauseButton.addEventListener('click', () => { paused = !paused; syncAnimation(); });
-density.addEventListener('input', sample);
-document.querySelector('#choose-image').addEventListener('click', () => imageInput.click());
-imageInput.addEventListener('change', () => {
-  const file = imageInput.files[0];
-  imageInput.value = '';
-  void loadFile(file);
-});
-artwork.addEventListener('pointermove', (event) => {
-  const bounds = artwork.getBoundingClientRect();
+pause.addEventListener('click', () => { paused = !paused; syncMotion(); });
+motion.addEventListener('change', event => { paused = event.matches; syncMotion(); });
+document.addEventListener('visibilitychange', syncMotion);
+viewport.addEventListener('pointermove', event => {
+  const bounds = world.getBoundingClientRect();
   pointer.x = event.clientX - bounds.left;
   pointer.y = event.clientY - bounds.top;
 });
-artwork.addEventListener('pointerleave', () => { pointer.x = pointer.y = -10000; });
-reducedMotion.addEventListener('change', (event) => { paused = event.matches; syncAnimation(); });
-document.addEventListener('visibilitychange', syncAnimation);
-
-let dragDepth = 0;
-document.addEventListener('dragenter', (event) => {
-  if (!Array.from(event.dataTransfer?.types || []).includes('Files')) return;
-  event.preventDefault();
-  dragDepth++;
-  document.body.classList.add('is-dragging');
-});
-document.addEventListener('dragover', (event) => {
-  if (Array.from(event.dataTransfer?.types || []).includes('Files')) event.preventDefault();
-});
-document.addEventListener('dragleave', () => {
-  dragDepth = Math.max(0, dragDepth - 1);
-  if (!dragDepth) document.body.classList.remove('is-dragging');
-});
-document.addEventListener('drop', (event) => {
-  event.preventDefault();
-  dragDepth = 0;
-  document.body.classList.remove('is-dragging');
-  void loadFile(event.dataTransfer?.files[0]);
-});
-
-new ResizeObserver(sample).observe(artwork);
-sample();
-syncAnimation();
-if (site.image) {
-  setImage(site.image, site.imageAlt).catch(() => {
-    // Keep a newer local selection if it completed before the default failed.
-    if (imageRequest !== 1) return;
-    source = makeStudy();
-    document.querySelector('#art-label').textContent = 'GENERATIVE STUDY / 001';
-    canvas.setAttribute('aria-label', '由彩色字符组成的流动光环');
-    sample();
-    notify('首页照片暂时无法读取，正在展示生成图案。');
-  });
-} else {
-  document.querySelector('#art-label').textContent = 'GENERATIVE STUDY / 001';
-  canvas.setAttribute('aria-label', '由彩色字符组成的流动光环');
+viewport.addEventListener('pointerleave', () => { pointer.x = pointer.y = -10000; });
+new ResizeObserver(() => {
+  if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(() => { layout(); resizeFrame = null; });
+}).observe(viewport);
+layout();
+syncMotion();
+try {
+  await image.decode();
+  if (!ctx || !sampleCtx) throw new Error('Canvas unavailable');
+  ready = true;
+  layout();
+  document.body.classList.add('scene-ready');
+  status.hidden = true;
+  syncMotion();
+} catch {
+  status.textContent = '动态场景暂时无法载入，仍可点击画面入口。';
+  document.body.classList.add('scene-fallback');
+  pause.hidden = true;
 }
