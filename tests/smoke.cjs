@@ -153,7 +153,25 @@ async function duckBodyPoint(page) {
         return sum/(p.length/4);
       };
       const spriteSizes=[...renderer.details,...renderer.sprites].flatMap(sprite=>sprite.cells.map(cell=>cell.size));
+      // Sample actual building interiors independently of the skyline mask.
+      const cityBoxes=[[1183,380,14,55],[1253,400,10,35],[1480,309,14,30],[1405,354,5,40]];
+      const citySizes=cityBoxes.map(([x,y,w,h])=>[...new Set(renderer.cells.filter(c=>c.sx>x&&c.sx<x+w&&c.sy>y&&c.sy<y+h).map(c=>c.size))]);
+      const cityAnimates=renderer.dynamic.some(c=>cityBoxes.some(([x,y,w,h])=>c.sx>x&&c.sx<x+w&&c.sy>y&&c.sy<y+h));
+      const {FlightLayer}=await import('./flight-layer.js');
+      const flightLayer=new FlightLayer(document.createElement('div'));flightLayer.configure(renderer.getFlightData());
+      let fixedBirdSizeError=0,fallbackBirdSizeError=0;
+      const stamp=renderer.stamp;
+      renderer.stamp=function(cell,x,y,size,...args){fallbackBirdSizeError=Math.max(fallbackBirdSizeError,Math.abs(size-.6));return stamp.call(this,cell,x,y,size,...args);};
+      for(const time of [0,.001,.01,6.2,14,27,60]){
+        flightLayer.draw(time);renderer.drawBirds(time);
+        for(const sprite of flightLayer.sprites){
+          const matrix=new DOMMatrix(sprite.canvas.style.transform),scale=Math.hypot(matrix.a,matrix.b);
+          for(const cell of sprite.cells)fixedBirdSizeError=Math.max(fixedBirdSizeError,Math.abs(cell.drawSize*scale-.6));
+        }
+      }
+      renderer.stamp=stamp;
       return { ...changed, coverage, columns: renderer.columns,
+        citySizes,cityAnimates,fixedBirdSizeError,fallbackBirdSizeError,
         faceTilt, floatMotion, paperCrossings,
         cityContrast:regionLight([1160,365,17,25])/regionLight([1191,365,17,35]),
         spriteSizeRange:[Math.min(...spriteSizes),Math.max(...spriteSizes)],
@@ -178,10 +196,13 @@ async function duckBodyPoint(page) {
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns >= 420, 'the unified desktop grid should retain fine skyline and hair detail');
-    assert(changes.spriteSizeRange[0]>=.35 && changes.spriteSizeRange[1]<=.8, 'moving objects must share the smaller font range');
+    assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert.deepEqual(changes.sizes,[.35,.4,.45,.5,.55,.6,.65,.7,.75,.8], 'all ten requested font sizes must be present');
+    assert.deepEqual(changes.sizes,[.6,.65,.7,.75,.8,.85,.9,.95,1], 'all nine requested font sizes must be present');
+    assert(changes.citySizes.every(sizes=>sizes.length===1&&sizes[0]===.6)&&!changes.cityAnimates, 'distant buildings must always use the minimum size');
+    // CSS serializes matrix coefficients to six significant digits.
+    assert(changes.fixedBirdSizeError<1e-5&&changes.fallbackBirdSizeError===0, 'flight perspective must never enlarge or shrink the minimum-sized bird glyphs');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.repeatedBlink<.1, 'the robot should blink again after 3.2 seconds');
     assert(changes.cloudSpeed>6 && changes.cloudSpeed<8, 'clouds should move noticeably faster');

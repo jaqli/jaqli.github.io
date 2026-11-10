@@ -1,6 +1,7 @@
-import { waterSampleInterval } from './render-budget.js?v=20261110-quality14';
-import { paintScreen } from './screen-content.js?v=20261110-quality14';
+import { waterSampleInterval } from './render-budget.js?v=20261110-type15';
+import { paintScreen } from './screen-content.js?v=20261110-type15';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
+import { fontStep } from './ascii-renderer.js?v=20261110-type15';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -66,7 +67,7 @@ export class LayeredScene {
     this.waterCtx.setTransform(dpr,0,0,dpr,-water.x*dpr,-water.y*dpr);
     this.resetWater();this.cloudFrame=-1;
     // Cache the same Number precision as the size calculation; float32
-    // rounding made unchanged 0.35/0.6/etc. bins compare unequal every frame.
+    // rounding made unchanged fractional bins compare unequal every frame.
     this.ambientSizes=new Float64Array(r.dynamic.length).fill(-1);
   }
   resetWater(){this.waterIndices=[-1,-1,-1];}
@@ -88,7 +89,7 @@ export class LayeredScene {
     }
     r.drawLights(time,false);
     for(let i=0;i<r.dynamic.length;i++){
-      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:.35+Math.max(0,Math.min(9,Math.round((cell.size+.05*Math.round(Math.sin(time*.75+cell.phase))-.35)/.05)))*.05;
+      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
       if(cell.kind!=='hem'&&size===this.ambientSizes[i])continue;
       this.ambientSizes[i]=size;
       const pad=r.fontSize,x=cell.x-pad,y=cell.y-pad;

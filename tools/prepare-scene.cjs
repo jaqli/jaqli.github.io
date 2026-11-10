@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
 
 (async () => {
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i',
+  if (!process.argv.includes('--preview-only')) execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i',
     path.join(root, 'assets/IMG_1183.PNG'), '-c:v', 'libwebp', '-quality', '86',
     '-compression_level', '6', path.join(root, 'assets/scene.webp')]);
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });

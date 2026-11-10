@@ -1,4 +1,4 @@
-import { birdPose } from './ascii-renderer.js?v=20261110-quality14';
+import { birdPose, minFontSize } from './ascii-renderer.js?v=20261110-type15';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do
@@ -47,7 +47,9 @@ export class FlightLayer {
         ctx.clearRect(0,0,width,height); ctx.fillStyle='#080d13';
         for (const cell of cells) {
           cell.dy=cell.y+pose.flap*cell.wing*this.scale;
-          cell.drawSize=clamp(cell.size*pose.scale,.35,.8)/pose.scale;
+          // Perspective changes the flock's spacing, never its minimum-sized
+          // letters: cancel the scale applied by the composited bird canvas.
+          cell.drawSize=minFontSize/pose.scale;
           ctx.fillRect(cell.x-this.cellW*.43*cell.drawSize,cell.dy-this.cellH*.4*cell.drawSize,
             this.cellW*.86*cell.drawSize,this.cellH*.8*cell.drawSize);
         }
@@ -56,7 +58,9 @@ export class FlightLayer {
           ctx.drawImage(this.atlas,cell.tx,cell.ty,this.tile,this.tile,cell.x-side/2,cell.dy-side/2,side,side);
         }
       }
-      const a=pose.cos*pose.scale,b=pose.sin*pose.scale,c=-b,d=a;
+      // Match the scale of the cached glyphs exactly, including frames where
+      // a subpixel perspective change does not require another rasterization.
+      const a=pose.cos*sprite.scale,b=pose.sin*sprite.scale,c=-b,d=a;
       const tx=pose.position[0]*this.scale+a*x+c*y,ty=pose.position[1]*this.scale+b*x+d*y;
       canvas.style.transform=`matrix3d(${a},${b},0,0,${c},${d},0,0,0,0,1,0,${tx},${ty},0,1)`;
     }

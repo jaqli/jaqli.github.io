@@ -1,8 +1,8 @@
-import { scenePixelRatio } from './render-budget.js?v=20261110-quality14';
+import { scenePixelRatio } from './render-budget.js?v=20261110-type15';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-quality14';
-import { screens, paintScreen } from './screen-content.js?v=20261110-quality14';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-type15';
+import { screens, paintScreen } from './screen-content.js?v=20261110-type15';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
@@ -42,7 +42,8 @@ export function inside(x, y, polygon) {
 }
 const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
-const sizeStops=[.01,.035,.1,.22,.44,.70,.87,.95,.985,1];
+// Nine sizes, weighted toward the readable middle rather than the extremes.
+const sizeStops=[.02,.07,.17,.35,.61,.81,.92,.98,1];
 const bands = ['.,', ':;', '-=', '+*', 'xo', '%#', 'MW', '@'];
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
@@ -51,8 +52,9 @@ const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
-export const fontSizes = [.35,.4,.45,.5,.55,.6,.65,.7,.75,.8];
-const fontStep = size => fontSizes[clamp(Math.round((size-.35)/.05),0,fontSizes.length-1)];
+export const fontSizes = [.6,.65,.7,.75,.8,.85,.9,.95,1];
+export const minFontSize=fontSizes[0];
+export const fontStep = size => fontSizes[clamp(Math.round((size-minFontSize)/.05),0,fontSizes.length-1)];
 
 function flight(bird, time) {
   const route = bird.route, count = route.length;
@@ -96,6 +98,22 @@ const waterAreas = [
   [[870,436],[1367,433],[1363,548],[1200,578],[1120,659],[995,657],[984,579],[875,572]],
   [[716,697],[1007,686],[1114,652],[1200,696],[1126,775],[1010,800],[966,854],[865,908],[725,900],[630,836],[555,827]],
   [[255,804],[428,815],[605,863],[725,902],[866,902],[948,884],[1074,929],[1234,931],[1349,986],[1069,1023],[694,1023],[535,948],[372,938],[242,899],[154,850]],
+];
+// Trace the distant buildings in source coordinates. Keep the common sampling
+// grid and colors; only their glyph size is fixed. Window frames and the nearer
+// monitor, shelving and plant remain outside these silhouettes.
+const distantCity = [
+  [[1114,447],[1134,437],[1143,437],[1143,416],[1152,415],[1152,404],[1162,404],[1163,420],[1171,419],
+   [1171,376],[1178,373],[1179,357],[1186,356],[1187,345],[1191,345],[1191,359],[1197,359],[1198,376],
+   [1205,379],[1205,402],[1211,402],[1211,384],[1222,384],[1222,412],[1229,406],[1238,407],[1239,417],
+   [1251,418],[1251,398],[1266,397],[1266,415],[1279,413],[1279,423],[1293,425],[1293,402],[1306,399],
+   [1306,423],[1317,421],[1317,435],[1324,434],[1325,411],[1335,412],[1335,423],[1341,423],[1341,412],
+   [1352,411],[1352,397],[1362,397],[1362,451],[1335,452],[1318,448],[1280,453],[1256,449],[1224,450],
+   [1195,450],[1160,447],[1133,453]],
+  [[1384,399],[1393,391],[1394,379],[1403,377],[1403,347],[1411,337],[1411,431],[1384,431]],
+  [[1427,360],[1439,360],[1439,332],[1448,332],[1448,314],[1464,314],[1464,325],[1477,325],
+   [1477,307],[1496,307],[1496,300],[1527,300],[1527,332],[1512,338],[1512,351],[1494,354],
+   [1471,355],[1460,351],[1450,358],[1444,361],[1427,367]],
 ];
 const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],[890,524],[876,613],[848,643],[812,642],[802,599],[771,564],[689,560]];
 // Trace the actual curls separately from the broad body/motion exclusion area.
@@ -314,10 +332,10 @@ export class AsciiRenderer {
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
     // Keep the previous ~5.8px reference font on desktop while packing the
-    // smaller 0.35–0.8 glyphs on a single finer lattice.
+    // readable 0.6–1.0 glyphs on a single fine lattice.
     this.fontSize = this.cellH * 1.28;
     for (const screen of this.screens) {
-      screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?.75:.65);
+      screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?.85:.8);
       screen.frame=-1;
     }
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
@@ -337,29 +355,30 @@ export class AsciiRenderer {
       for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
       const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*.34,syStep*.34), seed = hash(col, row);
-      const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
+      const isCity=distantCity.some(polygon=>inside(sx,sy,polygon));
+      const isWater = !isCity && waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
       const isHem = inside(sx, sy, hemArea) && rgb[0] > rgb[2] * 1.8;
-      const cloudIndex = this.cloudIndex(sx,sy,rgb);
+      const cloudIndex = isCity ? -1 : this.cloudIndex(sx,sy,rgb);
       const skyWeight = Math.max(...this.cloudSources.map(source=>{
         const [x,y,w,h]=source.box;
         return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
       }));
-      // Most letters share a calm middle weight. Retain all ten size steps,
+      // Most letters share a calm middle weight. Retain all nine size steps,
       // but use the extremes sparingly instead of making every surface noisy.
       const variedSize=fontSizes[sizeStops.findIndex(stop=>seed<stop)];
-      const calmSize=variedSize+(.6-variedSize)*skyWeight;
+      const calmSize=variedSize+(.8-variedSize)*skyWeight;
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=calmSize+(Math.min(calmSize,.65)-calmSize)*smooth((contrast-45)/100);
-      const size=fontStep(edgeSize);
-      // Ten discrete sizes, with one occupied cell at every grid position.
+      const edgeSize=calmSize+(Math.min(calmSize,.85)-calmSize)*smooth((contrast-45)/100);
+      const size=isCity ? minFontSize : fontStep(edgeSize);
+      // Nine discrete sizes, with one occupied cell at every grid position.
       const cell = { sx, sy, rgb, size,
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
-      const isAmbient = !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
+      const isAmbient = !isCity && !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
       if (cloudIndex>=0) {
         this.cloudCells.push({...cell,cloudIndex});
@@ -405,14 +424,14 @@ export class AsciiRenderer {
         }
         if (count < 3) continue;
         const rgb = sum.map(v => v / count);
-        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: fontStep(detail*(.6 + .15 * clamp(count / (xStep * yStep)))) });
+        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: region.bird ? minFontSize : fontStep(detail*(.8 + .15 * clamp(count / (xStep * yStep)))) });
       }
       return cells;
     };
     this.sprites = [];
     for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region)}); yield .75; }
     this.details = [];
-    for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}); yield .78; }
+    for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.6:1)}); yield .78; }
     this.lights = emitters.map(emitter => {
       const [bx,by,w,h]=emitter.box, cells=[];
       if (emitter.plane) {
@@ -666,13 +685,13 @@ export class AsciiRenderer {
       ctx.fillStyle = '#080d13';
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
-        const size = clamp(cell.size * pose.scale,.35,.8);
+        const size = minFontSize;
         ctx.fillRect(x * this.scale - this.cellW * .43 * size, y * this.scale - this.cellH * .4 * size,
           this.cellW * .86 * size, this.cellH * .8 * size);
       }
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
-        this.stamp(cell, x * this.scale, y * this.scale, clamp(cell.size * pose.scale,.35,.8));
+        this.stamp(cell, x * this.scale, y * this.scale, minFontSize);
       }
     }
   }

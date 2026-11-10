@@ -1,5 +1,5 @@
-import { AsciiRenderer } from './ascii-renderer.js?v=20261110-quality14';
-import { LayeredScene } from './layered-scene.js?v=20261110-quality14';
+import { AsciiRenderer } from './ascii-renderer.js?v=20261110-type15';
+import { LayeredScene } from './layered-scene.js?v=20261110-type15';
 let renderer,display,layers,revision=0;
 let queue=Promise.resolve();
 self.onmessage=({data})=>{
