@@ -109,11 +109,18 @@ const screenOccluder = [[722,460],[724,457],[727,457],[725,454],[728,452],[729,4
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
 const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
-export const cityOutline = [[1127,438],[1143,426],[1145,407],[1157,407],[1158,395],[1176,397],
-  [1177,376],[1188,376],[1189,354],[1193,354],[1193,332],[1199,332],[1199,356],[1214,358],
-  [1214,397],[1226,397],[1227,386],[1243,387],[1243,399],[1266,403],[1267,398],[1280,399],
-  [1280,412],[1297,411],[1300,402],[1318,402],[1320,385],[1336,384],[1347,371],[1360,369],
-  [1360,453],[1127,453]];
+// Refine a neighborhood, not an object's silhouette. Both grids fade over a
+// generous margin so rooftops and curls never acquire a clipped character rim.
+const detailRegions = [
+  { id: 'city', box: [1054,257,405,272], pitch: .48, size: .384 },
+  { id: 'head', box: [642,382,202,200], pitch: .52, size: .468 },
+];
+function detailWeight(x, y, region) {
+  const [bx,by,w,h]=region.box;
+  const distance=Math.hypot((x-bx-w/2)/(w/2),(y-by-h/2)/(h/2));
+  return 1-smooth((distance-.44)/.56);
+}
+const detailCoverage = (x,y) => Math.max(...detailRegions.map(region=>detailWeight(x,y,region)));
 const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
 
 function nearPolygon(x, y, polygon) {
@@ -202,6 +209,20 @@ export class AsciiRenderer {
     }
     ctx.putImageData(bitmap, 0, 0);
     this.platePixels = bitmap.data;
+    this.headMask = document.createElement('canvas');
+    this.headMaskBox = [693,437,111,104];
+    const [hx,hy,hw,hh]=this.headMaskBox;
+    this.headMask.width=hw; this.headMask.height=hh;
+    const maskCtx=this.headMask.getContext('2d'), mask=maskCtx.createImageData(hw,hh);
+    for (let y=0;y<hh;y++) for (let x=0;x<hw;x++) {
+      const sx=x+hx, sy=y+hy, i=(sy*this.sourceW+sx)*4;
+      const r=this.original[i], g=this.original[i+1], b=this.original[i+2];
+      // Keep dark curls and warm hair/skin highlights. White/cyan background
+      // inside the rough outline must remain part of the display behind it.
+      const foreground=Math.max(r,g,b)<135 || (r>g*1.08 && r>b*1.5);
+      if (foreground && nearPolygon(sx,sy,screenOccluder)) mask.data[(y*hw+x)*4+3]=255;
+    }
+    maskCtx.putImageData(mask,0,0);
     this.cloudSources = [];
     for (const window of cloudWindows) {
       const [x0,y0,width,height] = window.box, pixels = new Uint8ClampedArray(width*height*4);
@@ -237,6 +258,7 @@ export class AsciiRenderer {
     this.base = document.createElement('canvas');
     this.cloudLayer = document.createElement('canvas');
     this.lightLayer = document.createElement('canvas');
+    this.screenLayer = document.createElement('canvas');
     this.screens = screens.map(screen => {
       const canvas = document.createElement('canvas');
       canvas.width = screen.width * 3; canvas.height = screen.height * 3;
@@ -264,7 +286,7 @@ export class AsciiRenderer {
     this.scale = width / this.sourceW;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     this.pixelRatio = dpr;
-    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.lightLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.lightLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
@@ -273,47 +295,45 @@ export class AsciiRenderer {
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
     this.lightCtx = this.lightLayer.getContext('2d'); this.lightCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.cloudFrame = this.lightFrame = -1;
-    const texture = document.createElement('canvas');
-    texture.width = this.columns * 2; texture.height = this.rows * 2;
-    const texCtx = texture.getContext('2d', { willReadFrequently: true });
-    texCtx.drawImage(this.plate, 0, 0, texture.width, texture.height);
-    this.texture = texCtx.getImageData(0, 0, texture.width, texture.height).data;
-    this.texW = texture.width; this.texH = texture.height;
+    this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,0,0);
+    this.cloudFrame = this.lightFrame = this.screenFrame = -1;
     const baseCtx = this.base.getContext('2d', { alpha: false });
     baseCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     baseCtx.fillStyle = '#080d13'; baseCtx.fillRect(0, 0, width, height);
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
-    this.cloudCells = []; this.cells = []; this.cityCells = [];
+    this.cloudCells = []; this.cells = []; this.cityCells = []; this.fineCells = [];
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
-      const rgb = this.sample(sx, sy), seed = hash(col, row);
-      // The skyline has a separate, half-pitch grid so windows and narrow
-      // rooftops survive at this distance. Don't draw the coarse grid beneath it.
-      if (inside(sx,sy,cityOutline)) continue;
+      const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*.34,syStep*.34), seed = hash(col, row);
+      const alpha=1-detailCoverage(sx,sy);
       const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
       const isHem = inside(sx, sy, hemArea) && rgb[0] > rgb[2] * 1.8;
-      const cloudIndex = skyPixel(rgb) ? this.cloudSources.findIndex(source => {
-        const [x,y,w,h]=source.box; return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
-      }) : -1;
+      const cloudIndex = this.cloudIndex(sx,sy,rgb);
+      const skyWeight = Math.max(...this.cloudSources.map(source=>{
+        const [x,y,w,h]=source.box;
+        return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
+      }));
+      const variedSize=fontSizes[Math.floor(seed**1.08*fontSizes.length)];
+      const calmSize=variedSize+(.8-variedSize)*skyWeight;
+      // Large glyphs crossing high-contrast silhouettes made bright outlines.
+      // Keep the requested size bins, with smaller glyphs at those edges.
+      const edgeSize=calmSize+(Math.min(calmSize,.8)-calmSize)*smooth((contrast-45)/100);
+      const size=fontSizes[clamp(Math.round((edgeSize-.5)*10),0,8)];
       // Nine discrete sizes, with one occupied cell at every grid position.
-      const cell = { sx, sy, rgb, size: fontSizes[Math.floor(seed**1.08*fontSizes.length)],
+      const cell = { sx, sy, rgb, size, alpha,
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
-      const isAmbient = !isWater && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
+      const isAmbient = !isWater && alpha===1 && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
       if (cloudIndex>=0) {
-        // Calm typography for the sky; independent random sizes at every cell
-        // made moving cloud colors look like multicolored noise.
-        cell.size = .8;
         this.cloudCells.push({...cell,cloudIndex});
       }
       else if (isHem || isAmbient) this.dynamic.push(cell);
@@ -332,25 +352,37 @@ export class AsciiRenderer {
     // interleaved atlas uploads previously dominated startup CPU time.
     for (let i=0;i<staticCells.length;i++) {
       const cell=staticCells[i];
+      baseCtx.globalAlpha=cell.alpha;
       this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .6 + .15*i/staticCells.length;
     }
-    const cityStepX=sxStep*.48, cityStepY=syStep*.48;
-    for (let sy=332+cityStepY/2;sy<454;sy+=cityStepY) for (let sx=1127+cityStepX/2;sx<1361;sx+=cityStepX) {
-      if (!inside(sx,sy,cityOutline)) continue;
-      const rgb=[0,0,0];
-      for (const dy of [-.65,.65]) for (const dx of [-.65,.65]) {
-        const i=(Math.floor(sy+dy)*this.sourceW+Math.floor(sx+dx))*4;
-        for (let c=0;c<3;c++) rgb[c]+=this.platePixels[i+c]/4;
+    baseCtx.globalAlpha=1;
+    for (const region of detailRegions) {
+      const [bx,by,w,h]=region.box, stepX=sxStep*region.pitch, stepY=syStep*region.pitch;
+      for (let sy=by+stepY/2;sy<by+h;sy+=stepY) {
+        for (let sx=bx+stepX/2;sx<bx+w;sx+=stepX) {
+          const alpha=detailWeight(sx,sy,region);
+          if (alpha<.001) continue;
+          const {rgb}=this.sampleEdge(sx,sy,stepX*.34,stepY*.34);
+          const cell={sx,sy,x:sx*this.scale,y:sy*this.scale,rgb,size:region.size,
+            alpha,glyph:glyph(rgb,hash(sx,sy))};
+          this.fineCells.push(cell);
+          if (region.id==='city') this.cityCells.push(cell);
+          this.palette.get(cell.glyph,rgb);
+          cell.cloudIndex=this.cloudIndex(sx,sy,rgb);
+          if (cell.cloudIndex>=0) this.cloudCells.push(cell);
+        }
+        if (!(Math.floor((sy-by)/stepY)%8)) yield .75;
       }
-      const cell={sx,sy,x:sx*this.scale,y:sy*this.scale,rgb,size:.5,glyph:glyph(rgb,hash(sx,sy))};
-      this.cityCells.push(cell); this.palette.get(cell.glyph,rgb);
     }
-    baseCtx.save();
-    baseCtx.beginPath(); cityOutline.forEach(([x,y],i)=>i ? baseCtx.lineTo(x*this.scale,y*this.scale) : baseCtx.moveTo(x*this.scale,y*this.scale)); baseCtx.closePath(); baseCtx.clip();
-    baseCtx.fillStyle='#080d13'; baseCtx.fillRect(1127*this.scale,332*this.scale,234*this.scale,122*this.scale);
-    for (const cell of this.cityCells) this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
-    baseCtx.restore();
+    // No polygon clips or background clearing: retain complete glyphs on both
+    // sides of the transition, with complementary opacity for the two grids.
+    for (const cell of this.fineCells) {
+      if (cell.cloudIndex>=0) continue;
+      baseCtx.globalAlpha=cell.alpha;
+      this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
+    }
+    baseCtx.globalAlpha=1;
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
       const cells = [];
@@ -418,13 +450,27 @@ export class AsciiRenderer {
     }
   }
 
-  sample(sx, sy) {
-    const x = clamp(sx / this.sourceW * this.texW - .5, 0, this.texW - 1);
-    const y = clamp(sy / this.sourceH * this.texH - .5, 0, this.texH - 1);
-    const x0 = Math.floor(x), y0 = Math.floor(y), x1 = Math.min(x0 + 1, this.texW - 1), y1 = Math.min(y0 + 1, this.texH - 1);
-    const fx = x - x0, fy = y - y0, pixels = this.texture, stride = this.texW;
-    return [0, 1, 2].map(c => (pixels[(y0 * stride + x0) * 4 + c] * (1 - fx) + pixels[(y0 * stride + x1) * 4 + c] * fx) * (1 - fy) +
-      (pixels[(y1 * stride + x0) * 4 + c] * (1 - fx) + pixels[(y1 * stride + x1) * 4 + c] * fx) * fy);
+  cloudIndex(sx,sy,rgb) {
+    return skyPixel(rgb) ? this.cloudSources.findIndex(source=>{
+      const [x,y,w,h]=source.box;
+      return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
+    }) : -1;
+  }
+  sampleEdge(sx,sy,rx,ry) {
+    const pixel=(x,y)=>(clamp(Math.floor(y),0,this.sourceH-1)*this.sourceW+clamp(Math.floor(x),0,this.sourceW-1))*4;
+    const p=this.platePixels, center=pixel(sx,sy), rgb=[p[center]*2,p[center+1]*2,p[center+2]*2];
+    let weight=2, contrast=0;
+    for (const [dx,dy] of [[-rx,-ry],[rx,-ry],[-rx,ry],[rx,ry]]) {
+      const i=pixel(sx+dx,sy+dy);
+      const difference=Math.max(Math.abs(p[i]-p[center]),Math.abs(p[i+1]-p[center+1]),Math.abs(p[i+2]-p[center+2]));
+      contrast=Math.max(contrast,difference);
+      // Average within the same surface. Don't mix the sky into a dark roof or
+      // white monitor pixels into the hair merely because they share a cell.
+      const w=(1-smooth((difference-24)/64));
+      weight+=w;
+      for (let c=0;c<3;c++) rgb[c]+=p[i+c]*w;
+    }
+    return {rgb:rgb.map(v=>v/weight),contrast};
   }
   prepare(ctx) { ctx.font = `500 ${this.fontSize}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; }
   paint(ctx, cell, x, y, size, fill) {
@@ -459,26 +505,30 @@ export class AsciiRenderer {
       // Finish atlas writes before reading from it; interleaving them forces a
       // full texture upload for every newly encountered color on some devices.
       for (const cell of this.cloudCells) {
+        this.cloudCtx.globalAlpha=cell.alpha;
         this.palette.draw(this.cloudCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
       }
     }
+    this.cloudCtx.globalAlpha=1;
     this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
   }
   drawScreens(time) {
-    const frame = Math.floor(time * 12), ctx = this.ctx;
-    for (const screen of this.screens) {
-      if (screen.frame !== frame) { screen.frame = frame; paintScreen(screen, time); }
-      ctx.save();
-      ctx.scale(this.scale,this.scale);
-      if (screen.kind==='plot') {
-        // The expanded right display remains behind the person's hair/shoulder.
-        ctx.beginPath(); ctx.rect(0,0,this.sourceW,this.sourceH);
-        screenOccluder.forEach(([x,y],i)=>i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath();
-        ctx.clip('evenodd');
+    const frame = Math.floor(time * 12), ctx = this.screenCtx;
+    if (frame!==this.screenFrame) {
+      this.screenFrame=frame;
+      ctx.clearRect(0,0,this.width,this.height);
+      ctx.save(); ctx.scale(this.scale,this.scale);
+      for (const screen of this.screens) {
+        if (screen.frame!==frame) { screen.frame=frame; paintScreen(screen,time); }
+        drawQuad(ctx,screen.canvas,screen.quad,screen.width,screen.height);
       }
-      drawQuad(ctx,screen.canvas,screen.quad,screen.width,screen.height);
+      // Project the complete parallelogram, then remove only real foreground
+      // pixels. A broad polygon clip retained bright background letters as a halo.
+      ctx.globalCompositeOperation='destination-out';
+      ctx.drawImage(this.headMask,...this.headMaskBox);
       ctx.restore();
     }
+    this.ctx.drawImage(this.screenLayer,0,0,this.width,this.height);
   }
   drawLights(time) {
     const frame=Math.floor(time*12);
@@ -533,7 +583,7 @@ export class AsciiRenderer {
         if (edge < 9) shine += (1 - edge / 9) ** 2 * Math.sin(Math.PI * age / 7.5) * .65;
       }
       if (shine < .035) continue;
-      ctx.globalAlpha = Math.min(.85, shine);
+      ctx.globalAlpha = Math.min(.85, shine)*cell.alpha;
       this.stamp(cell, cell.x, cell.y, cell.size);
     }
     ctx.globalAlpha = 1;
@@ -544,8 +594,10 @@ export class AsciiRenderer {
       } else {
         size = fontSizes[Math.max(0,Math.min(8,Math.round((cell.size-.5)*10) + Math.round(Math.sin(time*.75+cell.phase))))];
       }
+      ctx.globalAlpha=cell.alpha;
       this.stamp(cell, x, y, size);
     }
+    ctx.globalAlpha=1;
     this.drawScreens(time);
     this.drawDetails(time);
     this.drawLights(time);
