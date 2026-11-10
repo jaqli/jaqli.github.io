@@ -1,14 +1,17 @@
-import { site } from './site.config.js?v=20261110-depth6';
-import { birds, birdPoint } from './ascii-renderer.js?v=20261110-fps10';
-import { createSceneRenderer } from './scene-renderer.js?v=20261110-fps10';
+import { site } from './site.config.js?v=20261110-flight11';
+import { FlightLayer } from './flight-layer.js?v=20261110-flight11';
+import { detailShapes, detailPoint } from './scene-details.js?v=20261110-depth6';
+import { createSceneRenderer } from './scene-renderer.js?v=20261110-flight11';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import './navigation.js?v=20261110-load1';
+import './navigation.js?v=20261110-flight11';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
 const image = document.querySelector('#scene-image');
 const poster = document.querySelector('#scene-poster');
 const canvas = document.querySelector('#ascii-canvas');
+const flightLayer = new FlightLayer(document.querySelector('#flight-layer'));
+const duck = detailShapes.find(shape=>shape.id==='duck');
 const ctx = canvas.getContext('2d', { alpha: false });
 const pause = document.querySelector('#pause');
 const status = document.querySelector('#scene-status');
@@ -77,20 +80,20 @@ function layout() {
     await drawTask;
     do { await renderer.resizeAsync(width,height); }
     while (renderer.width!==width || renderer.height!==height || renderer.pixelRatio!==Math.min(devicePixelRatio||1,2));
+    flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed);
     await draw();
   })().finally(()=>{resizeTask=null;});
 }
-function updateGull(time) {
-  const gull = birds.find(bird => bird.id === 'life');
-  const points = gull.points.map(([x, y]) => birdPoint(gull, x, y, time).join(',')).join(' ');
+function updateLife(time) {
+  const points = duck.polygon.map(([x,y])=>detailPoint(duck,x,y,time).join(',')).join(' ');
   document.querySelector('[data-hotspot="life"] polygon').setAttribute('points', points);
 }
 function draw() {
   if (drawTask) return drawTask;
   const time=elapsed, requestedAt=performance.now();
   const result=renderer.draw(time);
-  if (!result?.then) { updateGull(time); return; }
-  drawTask=result.then(painted=>{if(painted!==false) updateGull(time);}).catch(error=>{
+  if (!result?.then) { updateLife(time); return; }
+  drawTask=result.then(painted=>{if(painted!==false) updateLife(time);}).catch(error=>{
     if (!ready) throw error;
     paused=true; syncMotion();
     status.hidden=false; status.textContent='动效已暂停，刷新页面可重试。';
@@ -116,6 +119,7 @@ function tick(now) {
   // Keep real-time speed on slower devices. Visibility/pause resets the clock,
   // so background tabs do not accumulate a large jump on return.
   elapsed += delta / 1000;
+  if (!resizeTask) flightLayer.draw(elapsed);
   // One frame in flight: never queue expensive work behind input or display
   // stale worker frames. The clock still advances when a device misses a frame.
   if (!drawTask && !resizeTask) draw();
@@ -149,6 +153,7 @@ try {
   renderer = await createSceneRenderer(image, canvas, value => reportProgress(35 + value * 20, '准备动效'));
   do { await renderer.resizeAsync(width, height, value => reportProgress(55 + value * 44, '绘制字符')); }
   while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== Math.min(devicePixelRatio || 1, 2));
+  flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed);
   await draw();
   ready = true;
   document.body.classList.add('scene-ready');

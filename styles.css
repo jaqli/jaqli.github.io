@@ -13,7 +13,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .scene-image { object-fit: fill; opacity: .2; }
 .scene-poster { object-fit: fill; transition: opacity 0s .18s; }
 #ascii-canvas { opacity: 0; transition: opacity .18s ease; }
-.scene-ready #ascii-canvas { opacity: 1; }
+.flight-layer { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .18s ease; }
+.flight-layer canvas { position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; }
+.scene-ready #ascii-canvas, .scene-ready .flight-layer { opacity: 1; }
 .scene-ready .scene-poster { opacity: 0; }
 .scene-ready .scene-image { opacity: 0; }
 .scene-fallback .scene-image { opacity: .65; }

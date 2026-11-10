@@ -1,4 +1,4 @@
-import { AsciiRenderer } from './ascii-renderer.js?v=20261110-fps10';
+import { AsciiRenderer } from './ascii-renderer.js?v=20261110-flight11';
 
 class WorkerRenderer {
   constructor(worker,canvas) {
@@ -14,7 +14,7 @@ class WorkerRenderer {
         const current=pending.revision===this.revision;
         if (current) this.ctx.drawImage(data.bitmap,0,0);
         data.bitmap.close(); pending.resolve(current);
-      } else pending.resolve();
+      } else pending.resolve(data);
     };
     worker.onerror=error=>{
       this.error=new Error(error.message);
@@ -33,10 +33,12 @@ class WorkerRenderer {
   async resizeAsync(width,height,progress) {
     this.cancelFrame();
     const dpr=Math.min(devicePixelRatio||1,2);
-    await this.request('resize',{width,height,dpr},[],progress);
+    const result=await this.request('resize',{width,height,dpr},[],progress);
+    this.flightData=result.flight;
     this.width=width; this.height=height; this.pixelRatio=dpr;
     this.canvas.width=Math.round(width*dpr); this.canvas.height=Math.round(height*dpr);
   }
+  getFlightData() { return this.flightData; }
   draw(time) { return this.request('draw',{time}); }
   cancelFrame() { this.revision++; }
   dispose() { this.worker.terminate(); }
@@ -46,7 +48,7 @@ export async function createSceneRenderer(image,canvas,onProgress) {
   if (typeof Worker!=='undefined' && typeof OffscreenCanvas!=='undefined' && typeof createImageBitmap==='function') {
     let renderer;
     try {
-      const worker=new Worker(new URL('./scene-worker.js?v=20261110-fps10',import.meta.url),{type:'module'});
+      const worker=new Worker(new URL('./scene-worker.js?v=20261110-flight11',import.meta.url),{type:'module'});
       renderer=new WorkerRenderer(worker,canvas);
       const bitmap=await createImageBitmap(image);
       await renderer.request('init',{image:bitmap,dpr:Math.min(devicePixelRatio||1,2)},[bitmap],onProgress);
@@ -57,5 +59,7 @@ export async function createSceneRenderer(image,canvas,onProgress) {
     }
   }
   canvas.dataset.renderer='main';
-  return AsciiRenderer.create(image,canvas,onProgress);
+  const renderer=await AsciiRenderer.create(image,canvas,onProgress);
+  renderer.separateFlight=true;
+  return renderer;
 }

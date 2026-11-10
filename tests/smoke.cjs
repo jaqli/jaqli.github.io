@@ -19,12 +19,12 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
   else await page.mouse.click(point.x, point.y);
 }
 
-async function gullBodyPoint(page) {
-  // Freeze the visible flying bird while choosing a point inside its body.
+async function duckBodyPoint(page) {
+  // Freeze the visible duck while choosing a point well inside its body.
   if (await page.locator('#pause').getAttribute('aria-pressed') === 'false') await page.locator('#pause').click();
   return page.locator('[data-hotspot="life"] polygon').evaluate(polygon => {
     const point = new DOMPoint();
-    for (const index of [5, 6, 9, 10]) {
+    for (const index of [0, 10, 14, 16]) {
       const vertex = polygon.points.getItem(index);
       point.x += vertex.x / 4; point.y += vertex.y / 4;
     }
@@ -201,7 +201,7 @@ async function gullBodyPoint(page) {
     console.log('PASS mixed sizes, integrated monitor rims, blinking eyes, floating duck, pinned paper, drifting clouds and anchored leaves');
     console.log('PASS slanted robot face, expanded right display, fine skyline, quicker paper and eleven intact floating objects');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);
-    const bounds = await page.locator('canvas').boundingBox();
+    const bounds = await page.locator('#ascii-canvas').boundingBox();
     assert(bounds.x <= 0 && bounds.y <= 0 && bounds.width >= 1440 && bounds.height >= 900);
     assert.equal(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight), false);
     console.log('PASS full-viewport artwork, no uploader or control panel');
@@ -212,8 +212,10 @@ async function gullBodyPoint(page) {
     assert.notEqual(await snapshot(), first);
     await page.locator('#pause').click();
     first = await snapshot();
+    const pausedFlight=await page.locator('#flight-layer').evaluate(e=>[...e.children].map(c=>c.style.transform+c.toDataURL()));
     await page.waitForTimeout(200);
     assert.equal(await snapshot(), first);
+    assert.deepEqual(await page.locator('#flight-layer').evaluate(e=>[...e.children].map(c=>c.style.transform+c.toDataURL())),pausedFlight);
     console.log('PASS scene animates and can pause');
 
     await clickScenePoint(page, 510, 420);
@@ -232,17 +234,23 @@ async function gullBodyPoint(page) {
     await clickScenePoint(page, 790, 530);
     await page.waitForURL(`${origin}/cv/`);
     await openScene(page);
-    const gull = page.locator('[data-hotspot="life"]');
-    assert.equal(await gull.locator('text, title, .hotspot-label').count(), 0);
-    const gullPoint = await gullBodyPoint(page);
-    await page.mouse.move(gullPoint.x, gullPoint.y);
-    const style = await gull.locator('polygon').evaluate(p => ({ cursor: getComputedStyle(p).cursor, stroke: getComputedStyle(p).stroke, fill: getComputedStyle(p).fill }));
+    const duckEntry = page.locator('[data-hotspot="life"]');
+    assert.equal(await duckEntry.locator('text, title, .hotspot-label').count(), 0);
+    const duckPoint = await duckBodyPoint(page);
+    const world=await page.locator('#scene-world').boundingBox();
+    const sourcePoint={x:(duckPoint.x-world.x)/world.width*1536,y:(duckPoint.y-world.y)/world.height*1024};
+    assert(sourcePoint.x>320 && sourcePoint.x<385 && sourcePoint.y>820 && sourcePoint.y<875,'Life must be attached to the yellow duck');
+    const flyingBird=await page.locator('[data-bird=primary]').boundingBox();
+    await page.mouse.click(flyingBird.x+flyingBird.width/2,flyingBird.y+flyingBird.height/2);
+    assert.equal(page.url(),`${origin}/`,'the gull is no longer a navigation entrance');
+    await page.mouse.move(duckPoint.x, duckPoint.y);
+    const style = await duckEntry.locator('polygon').evaluate(p => ({ cursor: getComputedStyle(p).cursor, stroke: getComputedStyle(p).stroke, fill: getComputedStyle(p).fill }));
     assert.equal(style.cursor, 'default');
     assert.equal(style.stroke, 'rgba(0, 0, 0, 0)');
     assert.equal(style.fill, 'rgba(0, 0, 0, 0)');
-    await page.mouse.click(gullPoint.x, gullPoint.y);
+    await page.mouse.click(duckPoint.x, duckPoint.y);
     await page.waitForURL(`${origin}/life/`);
-    console.log('PASS person opens CV; unmarked gull opens Life without hover hint');
+    console.log('PASS person opens CV; unmarked yellow duck opens Life without hover hint');
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openScene(page);
@@ -279,7 +287,7 @@ async function gullBodyPoint(page) {
       return clockPage.evaluate(step => {
         advanceFrame(1000);
         for (let time = 1000 + step; time <= 4000; time += step) advanceFrame(time);
-        return document.querySelector('[data-hotspot="life"] polygon').getAttribute('points').split(/[ ,]/).map(Number);
+        return [...document.querySelector('[data-hotspot="life"] polygon').getAttribute('points').split(/[ ,]/).map(Number),...new DOMMatrix(document.querySelector('[data-bird=primary]').style.transform).toFloat64Array()];
       }, step);
     }
     const fastPosition = await runCadence(50);
@@ -287,12 +295,11 @@ async function gullBodyPoint(page) {
     assert(fastPosition.every((value, i) => Math.abs(value - slowPosition[i]) < .001), 'low frame rates must not slow the animation clock');
     await clockPage.emulateMedia({ reducedMotion: 'reduce' });
     await clockPage.waitForFunction(() => document.querySelector('#pause').getAttribute('aria-pressed') === 'true', null, { polling: 50 });
-    const flyingTarget = await gullBodyPoint(clockPage);
-    assert(Math.abs(flyingTarget.x - 991 / 1536 * 960) > 50, 'test the bird after it has left its original location');
-    await clockPage.mouse.click(flyingTarget.x, flyingTarget.y);
+    const floatingTarget = await duckBodyPoint(clockPage);
+    await clockPage.mouse.click(floatingTarget.x, floatingTarget.y);
     await clockPage.waitForURL(`${origin}/life/`);
     await clockPage.close();
-    console.log('PASS real-time motion and the hidden entry after the gull flies away');
+    console.log('PASS real-time flight, duck motion and the hidden entry on the floating duck');
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     mobile.on('pageerror', e => errors.push(e.message));
@@ -305,14 +312,14 @@ async function gullBodyPoint(page) {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await mobile.waitForFunction(before => document.querySelector('#scene-viewport').scrollLeft > before + 30, scrollBefore);
     console.log('PASS touch drag pans the room');
-    for (const [x, y, route] of [[510, 420, 'tech'], [790, 530, 'cv'], [991, 259, 'life']]) {
+    for (const [x, y, route] of [[510, 420, 'tech'], [790, 530, 'cv'], [350, 835, 'life']]) {
       await openScene(mobile);
       await clickScenePoint(mobile, x, y, { pan: true, tap: true });
       await mobile.waitForURL(`${origin}/${route}/`);
     }
     await mobile.setViewportSize({ width: 844, height: 390 });
     await openScene(mobile);
-    await clickScenePoint(mobile, 991, 259, { tap: true });
+    await clickScenePoint(mobile, 350, 835, { tap: true });
     await mobile.waitForURL(`${origin}/life/`);
     console.log('PASS all touch targets remain aligned after panning and rotation');
 

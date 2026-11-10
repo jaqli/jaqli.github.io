@@ -7,7 +7,7 @@ import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
-  { id: 'life', center: [991,263], phase: 0, lift: 17, duration: 28,
+  { id: 'primary', center: [991,263], phase: 0, lift: 17, duration: 28,
     route: [[991,263],[1155,225],[1200,155],[1065,140],[933,195],[941,295],[1115,315]],
     points: [[939,223],[962,235],[980,250],[1016,237],[1041,241],[1014,254],[1001,270],[1017,275],[1008,283],[982,275],[974,260],[958,250],[944,233]] },
   { id: 'upper', center: [957,112], phase: 1.2, lift: 12, duration: 34,
@@ -69,7 +69,7 @@ function flight(bird, time) {
   }
   return { position, bank: Math.atan2(velocity[1], Math.abs(velocity[0]) + 1) * .14 };
 }
-function birdPose(bird, time) {
+export function birdPose(bird, time) {
   const path = flight(bird, time);
   // A short sequence of wingbeats, followed by an extended glide. Different
   // routes and rhythms prevent the flock moving like a synchronized wave.
@@ -584,6 +584,10 @@ export class AsciiRenderer {
       }
     }
   }
+  getFlightData() {
+    return {fontSize:this.fontSize,cellW:this.cellW,cellH:this.cellH,scale:this.scale,pixelRatio:this.pixelRatio,
+      sprites:this.sprites.map(({bird,cells})=>({bird,cells:cells.map(({sx,sy,glyph,color,size})=>({sx,sy,glyph,color,size}))}))};
+  }
   draw(time) {
     const ctx = this.ctx;
     ctx.globalAlpha = 1;
@@ -616,6 +620,7 @@ export class AsciiRenderer {
     this.drawScreens(time);
     this.drawDetails(time);
     this.drawLights(time);
+    if (this.separateFlight) return;
     for (const sprite of this.sprites) {
       const pose = birdPose(sprite.bird, time);
       // Occlude only occupied feather cells. Filling the whole hit polygon can

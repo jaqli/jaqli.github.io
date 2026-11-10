@@ -36,6 +36,17 @@ document.addEventListener('click', event => {
   if (scene) {
     const rect = scene.getBoundingClientRect();
     snap.drawImage(scene, rect.x, rect.y, rect.width, rect.height);
+    if (document.body.classList.contains('scene-ready')) {
+      const flight=document.querySelector('#flight-layer');
+      if (flight) {
+        const origin=flight.getBoundingClientRect();
+        for (const bird of flight.querySelectorAll('canvas')) {
+          const style=getComputedStyle(bird),m=new DOMMatrix(style.transform);
+          snap.save(); snap.translate(origin.x,origin.y); snap.transform(m.a,m.b,m.c,m.d,m.e,m.f);
+          snap.drawImage(bird,0,0,parseFloat(style.width),parseFloat(style.height)); snap.restore();
+        }
+      }
+    }
   }
   const pixels = snap.getImageData(0, 0, snapshot.width, snapshot.height).data;
   const fragments = [];
