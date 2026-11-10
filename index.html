@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090b0c" />
+    <meta name="description" content="LIJIA7 的个人空间。照片、字符与流动的色彩。" />
+    <title>LIJIA7 — In characters.</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <a class="wordmark" href="./" aria-label="LIJIA7 首页">li<span class="mark">/</span>jia7<span class="wordmark-dot">.</span></a>
+        <span class="header-note">A PERSONAL SPACE</span>
+        <a class="github-link" href="https://github.com/lijia7" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </header>
+
+      <section class="stage" aria-label="彩色 ASCII 艺术">
+        <div class="stage-top">
+          <div class="stage-meta"><span class="live-dot" aria-hidden="true"></span><span id="art-label">LOADING STUDY / 001</span></div>
+          <div class="art-caption" aria-hidden="true"><span>FIG. 01</span><span>LIGHT, TRANSLATED.</span></div>
+        </div>
+        <div class="artwork" id="artwork">
+          <canvas id="ascii-canvas" role="img" aria-label="正在载入彩色 ASCII 字符画">你的浏览器不支持 Canvas，请使用现代浏览器查看彩色字符画。</canvas>
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">IN CHARACTERS.</p>
+          <h1>A different kind of <em>hello.</em></h1>
+          <p class="intro">换一种方式，看见我。</p>
+        </div>
+        <div class="drop-overlay" id="drop-overlay" aria-hidden="true">放下照片，让字符接住它。<span>PNG / JPG / WEBP · 最大 20 MB</span></div>
+      </section>
+
+      <footer class="footer">
+        <div class="footnote"><span class="asterisk" aria-hidden="true">✳</span><p>Made of little things.<span>每一个字符，都有自己的颜色。</span></p></div>
+        <div class="controls" aria-label="字符画控制">
+          <label class="density-control" for="density"><span>细节</span><input id="density" type="range" min="100" max="280" value="220" step="10" aria-label="字符密度" /></label>
+          <button class="pause-button" id="pause" type="button" aria-label="暂停动效" aria-pressed="false"><span id="play-icon" aria-hidden="true">Ⅱ</span><span id="play-label">暂停</span></button>
+          <button class="image-button" id="choose-image" type="button"><span aria-hidden="true">＋</span> 选择照片</button>
+          <input id="image-input" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" tabindex="-1" aria-label="选择用于字符画的照片" />
+        </div>
+      </footer>
+      <p class="privacy-note">照片仅在当前浏览器中处理</p>
+      <p class="toast" id="status" role="status" aria-live="polite" hidden></p>
+      <noscript><p class="no-script">请启用 JavaScript 查看动态字符画。</p></noscript>
+    </main>
+  </body>
+</html>
