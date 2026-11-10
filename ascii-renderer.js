@@ -1,7 +1,8 @@
+import { scenePixelRatio } from './render-budget.js?v=20261110-motion12';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-fps10';
-import { screens, paintScreen } from './screen-content.js?v=20261110-fps10';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-motion12';
+import { screens, paintScreen } from './screen-content.js?v=20261110-motion12';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
@@ -199,6 +200,8 @@ export class AsciiRenderer {
     }
     ctx.putImageData(bitmap, 0, 0);
     this.platePixels = bitmap.data;
+    // Sampling uses the retained pixels; release the redundant source canvas.
+    this.plate.width=1; this.plate.height=1;
     this.headMask = createCanvas();
     this.headMaskBox = [693,437,111,104];
     const [hx,hy,hw,hh]=this.headMaskBox;
@@ -291,9 +294,17 @@ export class AsciiRenderer {
   *prepareSize(width, height) {
     this.width = width; this.height = height;
     this.scale = width / this.sourceW;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const dpr = scenePixelRatio(width,height);
     this.pixelRatio = dpr;
-    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.cloudBase, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    for (const canvas of [this.canvas, this.base]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    // Transparent caches cover only their content, not the whole room.
+    const box=([x,y,w,h])=>{const left=Math.floor(x*this.scale*dpr)/dpr,top=Math.floor(y*this.scale*dpr)/dpr;
+      return[left,top,Math.ceil((x+w)*this.scale*dpr)/dpr-left,Math.ceil((y+h)*this.scale*dpr)/dpr-top];};
+    this.cloudBox=box([522,68,1024,355]);
+    this.screenBox=box([325,350,420,165]);
+    for (const [canvas,box] of [[this.cloudLayer,this.cloudBox],[this.cloudBase,this.cloudBox],[this.screenLayer,this.screenBox]]) {
+      canvas.width=Math.ceil(box[2]*dpr); canvas.height=Math.ceil(box[3]*dpr);
+    }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // One sampling lattice across the entire room: local half-pitch overlays
     // created visible islands of different texture around the head and skyline.
@@ -308,8 +319,8 @@ export class AsciiRenderer {
       screen.frame=-1;
     }
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
-    this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,0,0);
+    this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,-this.cloudBox[0]*dpr,-this.cloudBox[1]*dpr);
+    this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,-this.screenBox[0]*dpr,-this.screenBox[1]*dpr);
     this.screenFrame = -1;
     const baseCtx = this.base.getContext('2d', { alpha: false });
     baseCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -371,7 +382,7 @@ export class AsciiRenderer {
       this.palette.drawTile(baseCtx,cell.tile,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .6 + .15*i/staticCells.length;
     }
-    const cloudBaseCtx=this.cloudBase.getContext('2d'); cloudBaseCtx.setTransform(dpr,0,0,dpr,0,0);
+    const cloudBaseCtx=this.cloudBase.getContext('2d'); cloudBaseCtx.setTransform(dpr,0,0,dpr,-this.cloudBox[0]*dpr,-this.cloudBox[1]*dpr);
     for (const cell of this.cloudCells) cell.tile=this.palette.get(cell.glyph,cell.rgb);
     for (let i=0;i<this.cloudCells.length;i++) {
       const cell=this.cloudCells[i]; this.palette.drawTile(cloudBaseCtx,cell.tile,cell.x,cell.y,cell.size);
@@ -439,18 +450,26 @@ export class AsciiRenderer {
     this.tilePixels = Math.ceil(this.fontSize * 1.6 * dpr);
     this.tileSize = this.tilePixels / dpr;
     const atlasColumns = 64;
+    const unique=new Map();
+    for (const cell of movingCells) {
+      const key=cell.glyph+cell.color;
+      if (!unique.has(key)) unique.set(key,{cell,index:unique.size});
+      const {index}=unique.get(key);
+      cell.tx=index%atlasColumns*this.tilePixels;
+      cell.ty=Math.floor(index/atlasColumns)*this.tilePixels;
+    }
     this.atlas.width = atlasColumns * this.tilePixels;
-    this.atlas.height = Math.ceil(movingCells.length / atlasColumns) * this.tilePixels;
+    this.atlas.height = Math.ceil(unique.size / atlasColumns) * this.tilePixels;
     const atlasCtx = this.atlas.getContext('2d');
     atlasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.prepare(atlasCtx);
-    for (let index=0; index<movingCells.length; index++) {
-      const cell=movingCells[index];
-      cell.tx = (index % atlasColumns) * this.tilePixels;
-      cell.ty = Math.floor(index / atlasColumns) * this.tilePixels;
-      this.paint(atlasCtx, cell, cell.tx / dpr + this.tileSize / 2,
-        cell.ty / dpr + this.tileSize / 2, 1, cell.color);
-      if (!(index%512)) yield .8 + .18*index/movingCells.length;
+    for (const {cell,index} of unique.values()) {
+      this.paint(atlasCtx,cell,cell.tx/dpr+this.tileSize/2,cell.ty/dpr+this.tileSize/2,1,cell.color);
+      if (!(index%512)) yield .8+.12*index/unique.size;
+    }
+    for (const sprite of this.details) for (const cell of sprite.cells) {
+      cell.free=sprite.shape.kind==='paper' ? clamp((cell.sy-sprite.shape.anchor[1])/sprite.shape.length)**2 : clamp((sprite.shape.anchor[1]-cell.sy)/63);
+      cell.sinX=Math.sin(cell.sx*.07); cell.cosX=Math.cos(cell.sx*.07);
     }
     for (const sprite of this.details) {
       if (sprite.shape.kind!=='float') continue;
@@ -466,6 +485,9 @@ export class AsciiRenderer {
       sprite.texture={canvas,x,y,width,height};
       yield .99;
     }
+    // Static glyphs are baked into their textures. Lighting gets a separate,
+    // bounded LRU atlas rather than retaining/growing the full photo palette.
+    this.palette=new GlyphAtlas(this.fontSize,Math.max(2,dpr),2048);
   }
 
   cloudIndex(sx,sy,rgb) {
@@ -501,10 +523,10 @@ export class AsciiRenderer {
     ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
       x - side / 2, y - side / 2, side, side);
   }
-  drawClouds(time) {
+  drawClouds(time,present=true) {
     const ctx=this.cloudCtx;
-    ctx.clearRect(0,0,this.width,this.height);
-    ctx.drawImage(this.cloudBase,0,0,this.width,this.height);
+    ctx.clearRect(...this.cloudBox);
+    ctx.drawImage(this.cloudBase,...this.cloudBox);
     ctx.globalCompositeOperation='source-atop';
     for (const source of this.cloudSources) {
       const {width:w,height:h,texture,fade,layer}=source, field=source.ctx;
@@ -516,13 +538,13 @@ export class AsciiRenderer {
       ctx.drawImage(layer,x*this.scale,y*this.scale,w*this.scale,h*this.scale);
     }
     ctx.globalCompositeOperation='source-over';
-    this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
+    if(present)this.ctx.drawImage(this.cloudLayer,...this.cloudBox);
   }
   drawScreens(time) {
     const frame = Math.floor(time * 30), ctx = this.screenCtx;
     if (frame!==this.screenFrame) {
       this.screenFrame=frame;
-      ctx.clearRect(0,0,this.width,this.height);
+      ctx.clearRect(...this.screenBox);
       ctx.save(); ctx.scale(this.scale,this.scale);
       for (const screen of this.screens) {
         if (screen.frame!==frame) { screen.frame=frame; paintScreen(screen,time); }
@@ -534,9 +556,9 @@ export class AsciiRenderer {
       ctx.drawImage(this.headMask,...this.headMaskBox);
       ctx.restore();
     }
-    this.ctx.drawImage(this.screenLayer,0,0,this.width,this.height);
+    this.ctx.drawImage(this.screenLayer,...this.screenBox);
   }
-  drawLights(time) {
+  drawLights(time,present=true) {
     const frame=Math.floor(time*30);
     for (const light of this.lights) {
       const {emitter,cells,ctx}=light;
@@ -559,28 +581,36 @@ export class AsciiRenderer {
           } else this.palette.drawTile(ctx,cell.tile,cell.x,cell.y,cell.size);
         }
       }
-      this.ctx.drawImage(light.canvas,light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
+      if(present)this.ctx.drawImage(light.canvas,light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
     }
   }
-  drawDetails(time) {
-    for (const sprite of this.details) {
+  drawDetails(time,details=this.details,ctx=this.ctx) {
+    for (const sprite of details) {
       if (sprite.texture) {
         const {canvas,x,y,width,height}=sprite.texture, [ax,ay]=sprite.shape.anchor;
         const p=detailPoint(sprite.shape,ax,ay,time), px=detailPoint(sprite.shape,ax+1,ay,time), py=detailPoint(sprite.shape,ax,ay+1,time);
         const a=px[0]-p[0], b=px[1]-p[1], c=py[0]-p[0], d=py[1]-p[1];
-        this.ctx.save(); this.ctx.transform(a,b,c,d,(p[0]-a*ax-c*ay)*this.scale,(p[1]-b*ax-d*ay)*this.scale);
-        this.ctx.drawImage(canvas,x,y,width,height); this.ctx.restore();
+        ctx.save(); ctx.transform(a,b,c,d,(p[0]-a*ax-c*ay)*this.scale,(p[1]-b*ax-d*ay)*this.scale);
+        ctx.drawImage(canvas,x,y,width,height); ctx.restore();
         continue;
       }
-      this.ctx.fillStyle='#080d13';
+      const shape=sprite.shape, [ax,ay]=shape.anchor;
+      const paperX=(.7*Math.sin(time*1.5+shape.phase)+.3*Math.sin(time*3.7+shape.phase)-Math.sin(shape.phase))*2.8;
+      const sinY=Math.sin(time*2.9),cosY=Math.cos(time*2.9);
+      const gaze=1.25*Math.sin(time*.7),opening=eyeOpening(time,shape.phase);
+      const leavesX=Math.sin(time*.8)*1.8+Math.sin(time*1.8)*.5,leavesY=Math.sin(time*1.15)*.65;
+      ctx.fillStyle='#080d13';
       for (const cell of sprite.cells) {
-        const [x,y]=detailPoint(sprite.shape,cell.sx,cell.sy,time);
+        let x=cell.sx,y=cell.sy;
+        if (shape.kind==='paper') { x+=paperX*cell.free; y+=(sinY*cell.cosX+(cosY-1)*cell.sinX)*.7*cell.free; }
+        else if (shape.kind==='eye') { x+=gaze; y=ay+(y-ay)*opening; }
+        else { x+=leavesX*cell.free; y+=leavesY*cell.free; }
         cell.dx=x*this.scale; cell.dy=y*this.scale;
-        this.ctx.fillRect(x*this.scale-this.cellW*.47*cell.size,y*this.scale-this.cellH*.44*cell.size,
+        ctx.fillRect(x*this.scale-this.cellW*.47*cell.size,y*this.scale-this.cellH*.44*cell.size,
           this.cellW*.94*cell.size,this.cellH*.88*cell.size);
       }
       for (const cell of sprite.cells) {
-        this.stamp(cell,cell.dx,cell.dy,cell.size);
+        this.stamp(cell,cell.dx,cell.dy,cell.size,ctx);
       }
     }
   }
@@ -593,6 +623,23 @@ export class AsciiRenderer {
     ctx.globalAlpha = 1;
     ctx.drawImage(this.base, 0, 0, this.width, this.height);
     this.drawClouds(time);
+    this.drawWater(time);
+    for (const cell of this.dynamic) {
+      let x = cell.x, y = cell.y, size = cell.size;
+      if (cell.kind === 'hem') {
+        y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
+      } else {
+        size = fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
+      }
+      this.stamp(cell, x, y, size);
+    }
+    this.drawScreens(time);
+    this.drawDetails(time);
+    this.drawLights(time);
+    if (this.separateFlight) return;
+    this.drawBirds(time);
+  }
+  drawWater(time,ctx=this.ctx) {
     const sinA=Math.sin(time*1.8),cosA=Math.cos(time*1.8),sinB=Math.sin(time*.9),cosB=Math.cos(time*.9);
     const rings=rippleSources.map(([, ,phase])=>{const age=(time+phase)%7.5; return {radius:age*20,strength:Math.sin(Math.PI*age/7.5)*.65};});
     for (const cell of this.water) {
@@ -604,23 +651,12 @@ export class AsciiRenderer {
       }
       if (shine < .035) continue;
       ctx.globalAlpha = Math.min(.85, shine);
-      this.stamp(cell, cell.x, cell.y, cell.size);
+      this.stamp(cell, cell.x, cell.y, cell.size,ctx);
     }
     ctx.globalAlpha = 1;
-    for (const cell of this.dynamic) {
-      let x = cell.x, y = cell.y, size = cell.size;
-      if (cell.kind === 'hem') {
-        y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
-      } else {
-        size = fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
-      }
-      this.stamp(cell, x, y, size);
-    }
-    ctx.globalAlpha=1;
-    this.drawScreens(time);
-    this.drawDetails(time);
-    this.drawLights(time);
-    if (this.separateFlight) return;
+  }
+  drawBirds(time) {
+    const ctx=this.ctx;
     for (const sprite of this.sprites) {
       const pose = birdPose(sprite.bird, time);
       // Occlude only occupied feather cells. Filling the whole hit polygon can

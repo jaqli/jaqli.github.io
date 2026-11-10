@@ -19,6 +19,8 @@ const lines = [
 // Cache repeated code lines, grid rows and waveform symbols. Bound dynamic
 // labels so a long-running page cannot grow the cache without limit.
 const textCache=new Map();
+let textCacheBytes=0;
+const maxTextCacheBytes=2*1024*1024;
 function text(ctx, value, x, y, color = '#84d6cd') {
   if (!value) return;
   const key=`${ctx.font}:${color}:${value}`;
@@ -30,7 +32,11 @@ function text(ctx, value, x, y, color = '#84d6cd') {
     const paint=canvas.getContext('2d'); paint.scale(ratio,ratio);
     paint.font=ctx.font; paint.textBaseline='top'; paint.fillStyle=color; paint.fillText(value,0,0);
     tile={canvas,width:canvas.width/ratio,height:canvas.height/ratio};
-    if (textCache.size>=512) textCache.delete(textCache.keys().next().value);
+    tile.bytes=canvas.width*canvas.height*4;
+    while(textCache.size && (textCache.size>=384 || textCacheBytes+tile.bytes>maxTextCacheBytes)){
+      const oldest=textCache.keys().next().value;textCacheBytes-=textCache.get(oldest).bytes;textCache.delete(oldest);
+    }
+    textCacheBytes+=tile.bytes;
     textCache.set(key,tile);
   }
   ctx.drawImage(tile.canvas,x,y,tile.width,tile.height);

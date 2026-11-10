@@ -1,18 +1,20 @@
+import { scenePixelRatio, sceneFrameInterval } from './render-budget.js?v=20261110-motion12';
 import { site } from './site.config.js?v=20261110-flight11';
-import { FlightLayer } from './flight-layer.js?v=20261110-flight11';
+import { FlightLayer } from './flight-layer.js?v=20261110-motion12';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261110-depth6';
-import { createSceneRenderer } from './scene-renderer.js?v=20261110-flight11';
+import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261110-motion12';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import './navigation.js?v=20261110-flight11';
+import './navigation.js?v=20261110-motion12';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
 const image = document.querySelector('#scene-image');
 const poster = document.querySelector('#scene-poster');
 const canvas = document.querySelector('#ascii-canvas');
+const preparedRenderer=prepareSceneRenderer(canvas);
 const flightLayer = new FlightLayer(document.querySelector('#flight-layer'));
 const duck = detailShapes.find(shape=>shape.id==='duck');
-const ctx = canvas.getContext('2d', { alpha: false });
+
 const pause = document.querySelector('#pause');
 const status = document.querySelector('#scene-status');
 const progress = document.querySelector('#scene-progress');
@@ -29,8 +31,8 @@ function reportProgress(value, label) {
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
-let frame = null, elapsed = 0, previousFrame = 0;
-let drawTask=null, resizeTask=null;
+let frame = null, elapsed = 0, previousFrame = 0, nextVisualAt = 0;
+let drawTask=null, resizeTask=null, drawTimer=null;
 let paused = motion.matches, ready = false, resizeFrame = null;
 
 
@@ -73,14 +75,14 @@ function layout() {
   wasPannable = pannable;
   document.querySelector('#pan-hint').hidden = !pannable;
   viewport.classList.toggle('is-pannable', pannable);
-  if (!ctx || !ready) return;
-  if (renderer.width === width && renderer.height === height && renderer.pixelRatio === Math.min(devicePixelRatio || 1, 2)) return;
+  if (!ready) return;
+  if (renderer.width === width && renderer.height === height && renderer.pixelRatio === scenePixelRatio(width,height)) return;
   if (!resizeTask) resizeTask=(async()=>{
     renderer.cancelFrame?.();
     await drawTask;
     do { await renderer.resizeAsync(width,height); }
-    while (renderer.width!==width || renderer.height!==height || renderer.pixelRatio!==Math.min(devicePixelRatio||1,2));
-    flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed);
+    while (renderer.width!==width || renderer.height!==height || renderer.pixelRatio!==scenePixelRatio(width,height));
+    flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed); renderer.animate?.(elapsed);
     await draw();
   })().finally(()=>{resizeTask=null;});
 }
@@ -93,19 +95,19 @@ function draw() {
   const time=elapsed, requestedAt=performance.now();
   const result=renderer.draw(time);
   if (!result?.then) { updateLife(time); return; }
-  drawTask=result.then(painted=>{if(painted!==false) updateLife(time);}).catch(error=>{
+  drawTask=result.then(painted=>{if(painted!==false && !renderer.animate) updateLife(time);}).catch(error=>{
     if (!ready) throw error;
     paused=true; syncMotion();
     status.hidden=false; status.textContent='动效已暂停，刷新页面可重试。';
   }).finally(()=>{
     drawTask=null;
-    // The worker can start its next frame as soon as the previous one arrives;
-    // waiting for another browser tick added an unnecessary 0–16ms each frame.
-    // Fast renders still follow display ticks instead of running unbounded.
-    if (ready && !paused && !document.hidden && !resizeTask && performance.now()-requestedAt>=16) {
-      const now=performance.now();
-      elapsed+=previousFrame?(now-previousFrame)/1000:0; previousFrame=now;
-      draw();
+    if (ready && !paused && !document.hidden && !resizeTask) {
+      drawTimer=setTimeout(()=>{
+        drawTimer=null;
+        if(paused || document.hidden || resizeTask)return;
+        const now=performance.now();elapsed+=previousFrame?(now-previousFrame)/1000:0;previousFrame=now;
+        draw();
+      },Math.max(0,sceneFrameInterval-(performance.now()-requestedAt)));
     }
   });
   return drawTask;
@@ -119,16 +121,21 @@ function tick(now) {
   // Keep real-time speed on slower devices. Visibility/pause resets the clock,
   // so background tabs do not accumulate a large jump on return.
   elapsed += delta / 1000;
-  if (!resizeTask) flightLayer.draw(elapsed);
+  if (!resizeTask && now>=nextVisualAt-.5) {
+    if(nextVisualAt<now-sceneFrameInterval)nextVisualAt=now;
+    nextVisualAt+=sceneFrameInterval;
+    flightLayer.draw(elapsed);renderer.animate?.(elapsed);updateLife(elapsed);
+  }
   // One frame in flight: never queue expensive work behind input or display
   // stale worker frames. The clock still advances when a device misses a frame.
-  if (!drawTask && !resizeTask) draw();
+  if (!drawTask && !resizeTask && drawTimer===null) draw();
   frame = requestAnimationFrame(tick);
 }
 function syncMotion() {
+  if(drawTimer!==null){clearTimeout(drawTimer);drawTimer=null;}
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
-  previousFrame = 0;
+  previousFrame = 0; nextVisualAt = 0;
   if (paused || document.hidden) renderer?.cancelFrame?.();
   pause.textContent = paused ? '▷ 播放动效' : 'Ⅱ';
   pause.setAttribute('aria-pressed', String(paused));
@@ -149,11 +156,10 @@ poster.decode().then(() => performance.mark('scene-preview-ready')).catch(() => 
 try {
   await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
-  if (!ctx) throw new Error('Canvas unavailable');
-  renderer = await createSceneRenderer(image, canvas, value => reportProgress(35 + value * 20, '准备动效'));
+  renderer = await createSceneRenderer(image, canvas, value => reportProgress(35 + value * 20, '准备动效'),preparedRenderer);
   do { await renderer.resizeAsync(width, height, value => reportProgress(55 + value * 44, '绘制字符')); }
-  while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== Math.min(devicePixelRatio || 1, 2));
-  flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed);
+  while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== scenePixelRatio(width,height));
+  flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed); renderer.animate?.(elapsed);
   await draw();
   ready = true;
   document.body.classList.add('scene-ready');
@@ -162,6 +168,7 @@ try {
   setTimeout(() => { status.hidden = true; }, 200);
   syncMotion();
 } catch {
+  preparedRenderer?.dispose();
   status.textContent = '动态场景暂时无法载入，仍可点击画面入口。';
   document.body.classList.add('scene-fallback');
   pause.hidden = true;

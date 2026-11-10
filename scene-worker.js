@@ -1,7 +1,9 @@
-import { AsciiRenderer } from './ascii-renderer.js?v=20261110-flight11';
-let renderer;
+import { AsciiRenderer } from './ascii-renderer.js?v=20261110-motion12';
+import { LayeredScene } from './layered-scene.js?v=20261110-motion12';
+let renderer,display,layers,revision=0;
 let queue=Promise.resolve();
 self.onmessage=({data})=>{
+  if(data.type==='cancel'){revision=data.revision;layers?.resetWater();return;}
   // Initialization/resizing yield to the worker event loop. Serialize messages
   // so a newer draw cannot observe partially rebuilt caches.
   queue=queue.then(async()=>{
@@ -12,14 +14,22 @@ self.onmessage=({data})=>{
       renderer.separateFlight=true;
       data.image.close();
       self.postMessage({id,done:true});
+    } else if(type==='attach') {
+      display=data.canvas;layers=new LayeredScene(renderer,display);
+      self.postMessage({id,done:true});
+    } else if(type==='layers'){
+      layers.attach(data.targets);self.postMessage({id,done:true});
     } else if (type==='resize') {
       self.devicePixelRatio=data.dpr;
       await renderer.resizeAsync(data.width,data.height,value=>self.postMessage({id,progress:value}));
-      self.postMessage({id,done:true,flight:renderer.getFlightData()});
+      const specs=await layers.prepare();
+      self.postMessage({id,done:true,flight:renderer.getFlightData(),layers:specs},specs.flatMap(s=>s.bitmap?[s.bitmap]:[]));
     } else if (type==='draw') {
-      renderer.draw(data.time);
-      const bitmap=renderer.canvas.transferToImageBitmap();
-      self.postMessage({id,bitmap,time:data.time},[bitmap]);
+      // Yield before presenting so a pause/resize can discard this frame.
+      await new Promise(resolve=>setTimeout(resolve,0));
+      const painted=data.revision===revision;
+      const waterFrames=painted?layers.draw(data.time):[];
+      self.postMessage({id,painted,time:data.time,waterFrames},waterFrames.map(frame=>frame.bitmap));
     }
   }).catch(error=>self.postMessage({id:data.id,error:error.message}));
 };

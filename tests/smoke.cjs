@@ -137,7 +137,7 @@ async function duckBodyPoint(page) {
       const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
       const floatRest=detailPoint(duck,352,850,0), floatPeak=detailPoint(duck,352,850,1.1);
       const duckLength=time=>distance(detailPoint(duck,316,798,time),detailPoint(duck,390,825,time));
-      const distantWing=renderer.plate.getContext('2d').getImageData(1234,185,1,1).data;
+      const distantWing=renderer.platePixels.subarray((185*1536+1234)*4,(185*1536+1234)*4+4);
       const floatMotion=detailShapes.filter(s=>s.kind==='float').map(shape=>{
         const [a,b]=shape.polygon, initial=distance(a,b);
         const levels=Array.from({length:41},(_,i)=>detailPoint(shape,...shape.anchor,i*.3)[1]);
@@ -206,7 +206,12 @@ async function duckBodyPoint(page) {
     assert.equal(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight), false);
     console.log('PASS full-viewport artwork, no uploader or control panel');
 
-    const snapshot = () => page.locator('#ascii-canvas').evaluate(c => c.toDataURL());
+    const snapshot = async () => {
+      // Transferred canvases commit at a compositor boundary. Let the last
+      // already-painted frame settle before comparing a paused surface.
+      if(await page.locator('#pause').getAttribute('aria-pressed')==='true')await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      return page.locator('#ascii-canvas').evaluate(c => c.toDataURL());
+    };
     let first = await snapshot();
     await page.waitForTimeout(250);
     assert.notEqual(await snapshot(), first);

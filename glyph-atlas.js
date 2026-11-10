@@ -6,7 +6,8 @@ const channel=v=>bins[Math.max(0,Math.min(4096,Math.round(v*4096/255)))];
 // A bounded color/glyph cache shared by the sky and monitor layers. Reusing
 // rasterized letters keeps color changes from invoking fillText every frame.
 export class GlyphAtlas {
-  constructor(fontSize, dpr) {
+  constructor(fontSize, dpr, limit=Infinity) {
+    this.limit=limit;
     this.dpr = dpr;
     this.fontSize = fontSize;
     this.tile = Math.ceil(fontSize * 1.6 * dpr);
@@ -30,21 +31,25 @@ export class GlyphAtlas {
     const key = glyph.charCodeAt(0)*4913+(r*17+g)*17+b;
     let tile = this.cache.get(key);
     if (!tile) {
+      let reused;
+      if(this.cache.size>=this.limit){const key=this.cache.keys().next().value;reused=this.cache.get(key);this.cache.delete(key);}
       const index = this.cache.size;
       // Allocate only colors encountered so far, particularly on large/high-DPI
       // displays. Growth preserves cached tiles and their existing coordinates.
-      if (index === this.columns * this.rows) {
+      if (!reused && index === this.columns * this.rows) {
         const previous = createCanvas();
         previous.width = this.canvas.width; previous.height = this.canvas.height;
         previous.getContext('2d').drawImage(this.canvas,0,0);
         this.rows *= 2; this.canvas.height = this.tile * this.rows;
         this.prepare(); this.ctx.drawImage(previous,0,0);
       }
-      tile = { x: index % this.columns * this.tile, y: Math.floor(index / this.columns) * this.tile };
+      tile = reused || { x: index % this.columns * this.tile, y: Math.floor(index / this.columns) * this.tile };
+      if(reused)this.ctx.clearRect(tile.x,tile.y,this.tile,this.tile);
       this.ctx.fillStyle = `rgb(${Math.min(255,r*16)} ${Math.min(255,g*16)} ${Math.min(255,b*16)})`;
       this.ctx.fillText(glyph, tile.x + this.tile / 2, tile.y + this.tile / 2);
       this.cache.set(key, tile);
     }
+    if(Number.isFinite(this.limit)){this.cache.delete(key);this.cache.set(key,tile);}
     return tile;
   }
   draw(ctx, glyph, rgb, x, y, size = 1) {
