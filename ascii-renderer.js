@@ -1,6 +1,6 @@
 import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
 import { GlyphAtlas } from './glyph-atlas.js?v=20261110-depth6';
-import { screens, paintScreen } from './screen-content.js?v=20261110-screens7';
+import { screens, paintScreen } from './screen-content.js?v=20261110-style9';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-depth6';
 
@@ -40,6 +40,7 @@ export function inside(x, y, polygon) {
 }
 const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
+const sizeStops=[.01,.035,.1,.22,.44,.70,.87,.95,.985,1];
 const bands = ['.,', ':;', '-=', '+*', 'xo', '%#', 'MW', '@'];
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
@@ -49,7 +50,8 @@ const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] 
 const mix = (a, b, amount) => a.map((v, i) => v * (1 - amount) + b[i] * amount);
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
-export const fontSizes = [.5,.6,.7,.8,.9,1,1.1,1.2,1.3];
+export const fontSizes = [.35,.4,.45,.5,.55,.6,.65,.7,.75,.8];
+const fontStep = size => fontSizes[clamp(Math.round((size-.35)/.05),0,fontSizes.length-1)];
 
 function flight(bird, time) {
   const route = bird.route, count = route.length;
@@ -109,18 +111,6 @@ const screenOccluder = [[722,460],[724,457],[727,457],[725,454],[728,452],[729,4
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
 const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
-// Refine a neighborhood, not an object's silhouette. Both grids fade over a
-// generous margin so rooftops and curls never acquire a clipped character rim.
-const detailRegions = [
-  { id: 'city', box: [1054,257,405,272], pitch: .48, size: .384 },
-  { id: 'head', box: [642,382,202,200], pitch: .52, size: .468 },
-];
-function detailWeight(x, y, region) {
-  const [bx,by,w,h]=region.box;
-  const distance=Math.hypot((x-bx-w/2)/(w/2),(y-by-h/2)/(h/2));
-  return 1-smooth((distance-.44)/.56);
-}
-const detailCoverage = (x,y) => Math.max(...detailRegions.map(region=>detailWeight(x,y,region)));
 const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
 
 function nearPolygon(x, y, polygon) {
@@ -288,10 +278,18 @@ export class AsciiRenderer {
     this.pixelRatio = dpr;
     for (const canvas of [this.canvas, this.base, this.cloudLayer, this.lightLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
+    // One sampling lattice across the entire room: local half-pitch overlays
+    // created visible islands of different texture around the head and skyline.
+    this.columns = Math.min(480, Math.max(320, Math.round(width / 3.5)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
-    this.fontSize = this.cellH * .98;
+    // Keep the previous ~5.8px reference font on desktop while packing the
+    // smaller 0.35–0.8 glyphs on a single finer lattice.
+    this.fontSize = this.cellH * 1.28;
+    for (const screen of this.screens) {
+      screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?.75:.65);
+      screen.frame=-1;
+    }
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
     this.lightCtx = this.lightLayer.getContext('2d'); this.lightCtx.setTransform(dpr,0,0,dpr,0,0);
@@ -303,14 +301,13 @@ export class AsciiRenderer {
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
-    this.cloudCells = []; this.cells = []; this.cityCells = []; this.fineCells = [];
+    this.cloudCells = []; this.cells = [];
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
       const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*.34,syStep*.34), seed = hash(col, row);
-      const alpha=1-detailCoverage(sx,sy);
       const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
       const isHem = inside(sx, sy, hemArea) && rgb[0] > rgb[2] * 1.8;
@@ -319,19 +316,21 @@ export class AsciiRenderer {
         const [x,y,w,h]=source.box;
         return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
       }));
-      const variedSize=fontSizes[Math.floor(seed**1.08*fontSizes.length)];
-      const calmSize=variedSize+(.8-variedSize)*skyWeight;
+      // Most letters share a calm middle weight. Retain all ten size steps,
+      // but use the extremes sparingly instead of making every surface noisy.
+      const variedSize=fontSizes[sizeStops.findIndex(stop=>seed<stop)];
+      const calmSize=variedSize+(.6-variedSize)*skyWeight;
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=calmSize+(Math.min(calmSize,.8)-calmSize)*smooth((contrast-45)/100);
-      const size=fontSizes[clamp(Math.round((edgeSize-.5)*10),0,8)];
-      // Nine discrete sizes, with one occupied cell at every grid position.
-      const cell = { sx, sy, rgb, size, alpha,
+      const edgeSize=calmSize+(Math.min(calmSize,.65)-calmSize)*smooth((contrast-45)/100);
+      const size=fontStep(edgeSize);
+      // Ten discrete sizes, with one occupied cell at every grid position.
+      const cell = { sx, sy, rgb, size,
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
-      const isAmbient = !isWater && alpha===1 && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
+      const isAmbient = !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
       if (cloudIndex>=0) {
         this.cloudCells.push({...cell,cloudIndex});
@@ -352,37 +351,9 @@ export class AsciiRenderer {
     // interleaved atlas uploads previously dominated startup CPU time.
     for (let i=0;i<staticCells.length;i++) {
       const cell=staticCells[i];
-      baseCtx.globalAlpha=cell.alpha;
       this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .6 + .15*i/staticCells.length;
     }
-    baseCtx.globalAlpha=1;
-    for (const region of detailRegions) {
-      const [bx,by,w,h]=region.box, stepX=sxStep*region.pitch, stepY=syStep*region.pitch;
-      for (let sy=by+stepY/2;sy<by+h;sy+=stepY) {
-        for (let sx=bx+stepX/2;sx<bx+w;sx+=stepX) {
-          const alpha=detailWeight(sx,sy,region);
-          if (alpha<.001) continue;
-          const {rgb}=this.sampleEdge(sx,sy,stepX*.34,stepY*.34);
-          const cell={sx,sy,x:sx*this.scale,y:sy*this.scale,rgb,size:region.size,
-            alpha,glyph:glyph(rgb,hash(sx,sy))};
-          this.fineCells.push(cell);
-          if (region.id==='city') this.cityCells.push(cell);
-          this.palette.get(cell.glyph,rgb);
-          cell.cloudIndex=this.cloudIndex(sx,sy,rgb);
-          if (cell.cloudIndex>=0) this.cloudCells.push(cell);
-        }
-        if (!(Math.floor((sy-by)/stepY)%8)) yield .75;
-      }
-    }
-    // No polygon clips or background clearing: retain complete glyphs on both
-    // sides of the transition, with complementary opacity for the two grids.
-    for (const cell of this.fineCells) {
-      if (cell.cloudIndex>=0) continue;
-      baseCtx.globalAlpha=cell.alpha;
-      this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
-    }
-    baseCtx.globalAlpha=1;
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
       const cells = [];
@@ -398,7 +369,7 @@ export class AsciiRenderer {
         }
         if (count < 3) continue;
         const rgb = sum.map(v => v / count);
-        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: detail*(.78 + .22 * clamp(count / (xStep * yStep))) });
+        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: fontStep(detail*(.6 + .15 * clamp(count / (xStep * yStep)))) });
       }
       return cells;
     };
@@ -414,7 +385,7 @@ export class AsciiRenderer {
           const u=x/width,v=y/height, p=quadPoint(emitter.polygon,u,v);
           const px=quadPoint(emitter.polygon,u+1/width,v), py=quadPoint(emitter.polygon,u,v+1/height);
           cells.push({x:p[0]*this.scale,y:p[1]*this.scale,u,v,
-            basis:[px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1]],glyph:'+*'[Math.floor(hash(x,y)*2)],size:2.8/syStep});
+            basis:[px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1]],glyph:'+*'[Math.floor(hash(x,y)*2)],size:fontStep(2.8*this.scale/this.fontSize)});
         }
         return {emitter,cells};
       }
@@ -424,7 +395,7 @@ export class AsciiRenderer {
         const intensity=(this.original[i]+this.original[i+1]+this.original[i+2])/765;
         if (emitter.kind==='lamp' && !(this.original[i+1]>120 && this.original[i+2]>130)) continue;
         cells.push({x:x*this.scale,y:y*this.scale,u:(x-bx)/w,v:(y-by)/h,intensity,
-          glyph: '+*'[Math.floor(hash(x,y)*2)],size:(emitter.kind==='lamp'?3.4:2.8)/syStep});
+          glyph: '+*'[Math.floor(hash(x,y)*2)],size:fontStep((emitter.kind==='lamp'?3.4:2.8)*this.scale/this.fontSize)});
       }
       return {emitter,cells};
     });
@@ -505,11 +476,9 @@ export class AsciiRenderer {
       // Finish atlas writes before reading from it; interleaving them forces a
       // full texture upload for every newly encountered color on some devices.
       for (const cell of this.cloudCells) {
-        this.cloudCtx.globalAlpha=cell.alpha;
         this.palette.draw(this.cloudCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
       }
     }
-    this.cloudCtx.globalAlpha=1;
     this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
   }
   drawScreens(time) {
@@ -583,7 +552,7 @@ export class AsciiRenderer {
         if (edge < 9) shine += (1 - edge / 9) ** 2 * Math.sin(Math.PI * age / 7.5) * .65;
       }
       if (shine < .035) continue;
-      ctx.globalAlpha = Math.min(.85, shine)*cell.alpha;
+      ctx.globalAlpha = Math.min(.85, shine);
       this.stamp(cell, cell.x, cell.y, cell.size);
     }
     ctx.globalAlpha = 1;
@@ -592,9 +561,8 @@ export class AsciiRenderer {
       if (cell.kind === 'hem') {
         y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
       } else {
-        size = fontSizes[Math.max(0,Math.min(8,Math.round((cell.size-.5)*10) + Math.round(Math.sin(time*.75+cell.phase))))];
+        size = fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
       }
-      ctx.globalAlpha=cell.alpha;
       this.stamp(cell, x, y, size);
     }
     ctx.globalAlpha=1;
@@ -608,13 +576,13 @@ export class AsciiRenderer {
       ctx.fillStyle = '#080d13';
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
-        const size = cell.size * pose.scale;
+        const size = clamp(cell.size * pose.scale,.35,.8);
         ctx.fillRect(x * this.scale - this.cellW * .43 * size, y * this.scale - this.cellH * .4 * size,
           this.cellW * .86 * size, this.cellH * .8 * size);
       }
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
-        this.stamp(cell, x * this.scale, y * this.scale, cell.size * pose.scale);
+        this.stamp(cell, x * this.scale, y * this.scale, clamp(cell.size * pose.scale,.35,.8));
       }
     }
   }

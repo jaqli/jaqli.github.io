@@ -1,4 +1,4 @@
-// These displays are already ASCII, at a finer pitch than the surrounding room.
+// Screen content shares the scene's reference font and requested size range.
 // Render once into their source-space textures; don't resample the text a second time.
 export const screens = [
   { kind: 'code', quad: [[434,359],[602,377],[608,479],[437,479]], width: 173, height: 120 },
@@ -28,7 +28,7 @@ export function paintScreen(screen, time) {
   const { ctx, width: w, height: h, kind } = screen;
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = '#0a1923'; ctx.fillRect(0, 0, w, h);
-  ctx.font = kind === 'code' ? '500 5px monospace' : '500 4.2px monospace'; ctx.textBaseline = 'top';
+  ctx.font = `500 ${screen.fontSize}px monospace`; ctx.textBaseline = 'top';
   // A dim character bed and a feathered perimeter integrate the fine display
   // into the original reflection and rim without a sharp rectangular patch.
   for (let y = 1; y < h; y += 4.8) text(ctx, '. : '.repeat(Math.ceil(w / 8)), 1, y, '#1e3440');

@@ -146,8 +146,17 @@ async function gullBodyPoint(page) {
       });
       const paperOffsets=Array.from({length:241},(_,i)=>detailPoint(paper,414,293,i*.05)[0]-414);
       const paperCrossings=paperOffsets.slice(1).filter((x,i)=>x*paperOffsets[i]<0).length;
+      renderer.draw(0);
+      const regionLight = box => {
+        const p=ctx.getImageData(...box).data; let sum=0;
+        for (let i=0;i<p.length;i+=4) sum+=.2126*p[i]+.7152*p[i+1]+.0722*p[i+2];
+        return sum/(p.length/4);
+      };
+      const spriteSizes=[...renderer.details,...renderer.sprites].flatMap(sprite=>sprite.cells.map(cell=>cell.size));
       return { ...changed, coverage, columns: renderer.columns,
-        faceTilt, floatMotion, paperCrossings, citySamples:renderer.cityCells.length,
+        faceTilt, floatMotion, paperCrossings,
+        cityContrast:regionLight([1160,365,17,25])/regionLight([1191,365,17,35]),
+        spriteSizeRange:[Math.min(...spriteSizes),Math.max(...spriteSizes)],
         distantWingCleared:distantWing[1]-distantWing[0]>20 && distantWing[2]-distantWing[0]>20,
         sizes:[...new Set(renderer.cells.map(c=>c.size))].sort((a,b)=>a-b), openEye, closedEye,
         repeatedBlink:eyeOpening(5.3), cloudSpeed, paperCount:detailShapes.filter(s=>s.kind==='paper').length,
@@ -168,10 +177,11 @@ async function gullBodyPoint(page) {
     assert(changes.leftTop>.02, 'the newly exposed top rows of the left display should animate');
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
-    assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
+    assert(changes.columns >= 420, 'the unified desktop grid should retain fine skyline and hair detail');
+    assert(changes.spriteSizeRange[0]>=.35 && changes.spriteSizeRange[1]<=.8, 'moving objects must share the smaller font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert.deepEqual(changes.sizes,[.5,.6,.7,.8,.9,1,1.1,1.2,1.3], 'all nine requested font sizes must be present');
+    assert.deepEqual(changes.sizes,[.35,.4,.45,.5,.55,.6,.65,.7,.75,.8], 'all ten requested font sizes must be present');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.repeatedBlink<.1, 'the robot should blink again after 3.2 seconds');
     assert(changes.cloudSpeed>6 && changes.cloudSpeed<8, 'clouds should move noticeably faster');
@@ -181,7 +191,7 @@ async function gullBodyPoint(page) {
     assert(changes.faceTilt>5, 'left robot eyes must follow the upward slope of its actual face panel');
     assert(changes.floatMotion.length>=11 && changes.floatMotion.every(s=>s.range>2 && s.rigidError<.001), 'floating objects should bob as intact objects');
     assert(changes.paperCrossings>=5, 'pinned papers should flutter more frequently');
-    assert(changes.city<.01 && changes.citySamples>2000, 'the distant skyline should retain fine, stable detail');
+    assert(changes.city<.01 && changes.cityContrast>1.2, 'the distant skyline must stay still and remain distinguishable from the sky');
     assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
     assert(changes.pinError<.001 && changes.paperTip>1, 'paper moves only away from its fixed attachment');
     assert(changes.stemError<.001 && changes.leafTip>1, 'leaf tips move while their stem stays attached');
