@@ -2,8 +2,9 @@
 // Render once into their source-space textures; don't resample the text a second time.
 export const screens = [
   { kind: 'code', quad: [[434,359],[602,377],[608,479],[437,479]], width: 173, height: 120 },
-  { kind: 'wave', quad: [[334,404],[439,412],[439,480],[334,472]], width: 105, height: 68 },
-  { kind: 'plot', quad: [[641,438],[717,444],[717,490],[641,484]], width: 76, height: 46 },
+  { kind: 'wave', quad: [[333,403],[439,409],[442,481],[335,482]], width: 108, height: 78 },
+  // Include the inner one to two rings of white characters, keeping the casing.
+  { kind: 'plot', quad: [[633,431],[725,437],[727,497],[634,490]], width: 93, height: 60 },
 ];
 const lines = [
   'import { field } from "./sim";', 'const state = new Map();', '',
@@ -59,12 +60,12 @@ export function paintScreen(screen, time) {
     text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, 61, '#a3d2b7');
   } else {
     text(ctx, `FIELD / ${Math.floor(time * 12)}`, 2, 1, '#bededa');
-    wave(ctx, time, 3, 17, 68, 7, .8, '#8cd9e8');
+    wave(ctx, time, 3, 20, w-8, 8, .8, '#8cd9e8');
     for (let col = 0; col < 14; col++) {
       const level = 1 + Math.floor((1 + Math.sin(time * 1.4 + col * .6)) * 2.5);
-      for (let y = 0; y < level; y++) text(ctx, '=', 3 + col * 5, 39 - y * 2.2, '#90c8b1');
+      for (let y = 0; y < level; y++) text(ctx, '=', 3 + col * 6, h-9 - y * 2.8, '#90c8b1');
     }
-    text(ctx, 'FFT  /  live', 2, 41, '#edca86');
+    text(ctx, 'FFT  /  live', 2, h-5, '#edca86');
   }
   // Alpha ramps at all four edges retain the original edge pixels/reflections.
   ctx.globalCompositeOperation = 'destination-in';

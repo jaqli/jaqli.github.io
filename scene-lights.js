@@ -1,4 +1,4 @@
-import { eyeOpening } from './scene-details.js?v=20261110-details5';
+import { eyeOpening } from './scene-details.js?v=20261110-depth6';
 
 const clamp = value => Math.max(0, Math.min(1, value));
 const stroke = (distance, thickness = .035) => clamp(1 - Math.abs(distance) / thickness);

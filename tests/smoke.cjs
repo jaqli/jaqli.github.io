@@ -72,6 +72,10 @@ async function gullBodyPoint(page) {
         redEye: [275,213,32,21], leftFace: [294,658,60,38], rightFace: [1464,391,52,35],
         wallPaper: [113,150,42,76], boardPaper: [415,196,41,48], monitorPaper: [457,467,45,51],
         duck: [290,785,130,89], paper: [394,250,44,48], cloud: [610,190,140,120],
+        boat: [1158,486,78,51], blueCan: [575,757,26,47], redCan: [1139,719,25,34],
+        floatingPages: [623,792,128,58], tablet: [953,795,166,86], phone: [724,940,102,55],
+        floatingPage: [395,881,214,100], paperBoat: [753,870,73,52], waterCar: [1090,844,252,123],
+        expandedPlot: [634,439,9,45], city: [1180,356,30,85],
         // The lower part of the central monitor's left rim is occluded by the
         // foreground waveform monitor; test only the exposed upper frame.
         windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [420,353,8,40] };
@@ -118,12 +122,31 @@ async function gullBodyPoint(page) {
         return Math.max(...rows)-Math.min(...rows)+1;
       };
       const openEye=eyeHeight(0), closedEye=eyeHeight(2.1);
+      renderer.draw(0);
+      const cyanCenter = ([x,y,w,h]) => {
+        const pixels=ctx.getImageData(x,y,w,h).data; let sum=0, count=0;
+        for (let row=0;row<h;row++) for (let col=0;col<w;col++) {
+          const i=(row*w+col)*4;
+          if (pixels[i+1]>85 && pixels[i+1]-pixels[i]>35 && pixels[i+2]-pixels[i]>35) { sum+=row+y; count++; }
+        }
+        return count ? sum/count : NaN;
+      };
+      const faceTilt=cyanCenter([313,663,13,19])-cyanCenter([338,651,15,20]);
       const duck=detailShapes.find(s=>s.id==='duck'), paper=detailShapes.find(s=>s.id==='paper-yellow'), leaves=detailShapes.find(s=>s.id==='leaves');
       const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
       const floatRest=detailPoint(duck,352,850,0), floatPeak=detailPoint(duck,352,850,1.1);
       const duckLength=time=>distance(detailPoint(duck,316,798,time),detailPoint(duck,390,825,time));
       const distantWing=renderer.plate.getContext('2d').getImageData(1234,185,1,1).data;
+      const floatMotion=detailShapes.filter(s=>s.kind==='float').map(shape=>{
+        const [a,b]=shape.polygon, initial=distance(a,b);
+        const levels=Array.from({length:41},(_,i)=>detailPoint(shape,...shape.anchor,i*.3)[1]);
+        return {id:shape.id,range:Math.max(...levels)-Math.min(...levels),
+          rigidError:Math.max(...[1,3,5,9].map(t=>Math.abs(distance(detailPoint(shape,...a,t),detailPoint(shape,...b,t))-initial)))};
+      });
+      const paperOffsets=Array.from({length:241},(_,i)=>detailPoint(paper,414,293,i*.05)[0]-414);
+      const paperCrossings=paperOffsets.slice(1).filter((x,i)=>x*paperOffsets[i]<0).length;
       return { ...changed, coverage, columns: renderer.columns,
+        faceTilt, floatMotion, paperCrossings, citySamples:renderer.cityCells.length,
         distantWingCleared:distantWing[1]-distantWing[0]>20 && distantWing[2]-distantWing[0]>20,
         sizes:[...new Set(renderer.cells.map(c=>c.size))].sort((a,b)=>a-b), openEye, closedEye,
         repeatedBlink:eyeOpening(5.3), cloudSpeed, paperCount:detailShapes.filter(s=>s.kind==='paper').length,
@@ -149,6 +172,11 @@ async function gullBodyPoint(page) {
     assert(changes.cloudSpeed>6 && changes.cloudSpeed<8, 'clouds should move noticeably faster');
     assert(changes.paperCount>=9, 'additional papers should join the wind animation');
     for (const key of ['sidebar','status','lamp','redEye','leftFace','rightFace','wallPaper','boardPaper','monitorPaper']) assert(changes[key]>.02, `${key} must visibly animate`);
+    for (const key of ['boat','blueCan','redCan','floatingPages','tablet','phone','floatingPage','paperBoat','waterCar','expandedPlot']) assert(changes[key]>.03, `${key} must animate in its actual image region`);
+    assert(changes.faceTilt>5, 'left robot eyes must follow the upward slope of its actual face panel');
+    assert(changes.floatMotion.length>=11 && changes.floatMotion.every(s=>s.range>2 && s.rigidError<.001), 'floating objects should bob as intact objects');
+    assert(changes.paperCrossings>=5, 'pinned papers should flutter more frequently');
+    assert(changes.city<.01 && changes.citySamples>2000, 'the distant skyline should retain fine, stable detail');
     assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
     assert(changes.pinError<.001 && changes.paperTip>1, 'paper moves only away from its fixed attachment');
     assert(changes.stemError<.001 && changes.leafTip>1, 'leaf tips move while their stem stays attached');
@@ -156,6 +184,7 @@ async function gullBodyPoint(page) {
     for (const key of ['windowFrame','sun','pot','rim']) assert(changes[key]<.01, `${key} must stay fixed while surrounding details move`);
     console.log('PASS finer ASCII, continuous water coverage, steady person, three live screens and broad gull flight');
     console.log('PASS mixed sizes, integrated monitor rims, blinking eyes, floating duck, pinned paper, drifting clouds and anchored leaves');
+    console.log('PASS slanted robot face, expanded right display, fine skyline, quicker paper and eleven intact floating objects');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);
     const bounds = await page.locator('canvas').boundingBox();
     assert(bounds.x <= 0 && bounds.y <= 0 && bounds.width >= 1440 && bounds.height >= 900);

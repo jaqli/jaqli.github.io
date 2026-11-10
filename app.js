@@ -1,6 +1,6 @@
-import { site } from './site.config.js?v=20261110-details5';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-details5';
-import { loadSceneImage } from './scene-loader.js?v=20261110-details5';
+import { site } from './site.config.js?v=20261110-depth6';
+import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-depth6';
+import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import './navigation.js?v=20261110-load1';
 
 const viewport = document.querySelector('#scene-viewport');

@@ -19,7 +19,9 @@ export class GlyphAtlas {
     this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
   }
   get(glyph, rgb) {
-    const values = rgb.map(v => Math.min(255, Math.round(255 * (Math.max(0, Math.min(1, v / 255)) ** .84) / 32) * 32));
+    // Finer color steps preserve the original blue / cream gradients; coarse
+    // independent RGB rounding introduced colored speckles in the sky.
+    const values = rgb.map(v => Math.min(255, Math.round(255 * (Math.max(0, Math.min(1, v / 255)) ** .84) / 16) * 16));
     const key = `${glyph}:${values.join(',')}`;
     let tile = this.cache.get(key);
     if (!tile) {

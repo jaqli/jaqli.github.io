@@ -1,7 +1,8 @@
-import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-details5';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-scene4';
-import { screens, paintScreen } from './screen-content.js?v=20261110-details5';
-import { faceLight, lampColor } from './scene-lights.js?v=20261110-details5';
+import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-depth6';
+import { screens, paintScreen } from './screen-content.js?v=20261110-depth6';
+import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
+import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-depth6';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -97,6 +98,11 @@ const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
 const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
+export const cityOutline = [[1127,438],[1143,426],[1145,407],[1157,407],[1158,395],[1176,397],
+  [1177,376],[1188,376],[1189,354],[1193,354],[1193,332],[1199,332],[1199,356],[1214,358],
+  [1214,397],[1226,397],[1227,386],[1243,387],[1243,399],[1266,403],[1267,398],[1280,399],
+  [1280,412],[1297,411],[1300,402],[1318,402],[1320,385],[1336,384],[1347,371],[1360,369],
+  [1360,453],[1127,453]];
 const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
 
 function nearPolygon(x, y, polygon) {
@@ -184,6 +190,7 @@ export class AsciiRenderer {
       }
     }
     ctx.putImageData(bitmap, 0, 0);
+    this.platePixels = bitmap.data;
     this.cloudSources = [];
     for (const window of cloudWindows) {
       const [x0,y0,width,height] = window.box, pixels = new Uint8ClampedArray(width*height*4);
@@ -251,7 +258,7 @@ export class AsciiRenderer {
     this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
-    this.fontSize = this.cellH * 1.06;
+    this.fontSize = this.cellH * .98;
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
     this.lightCtx = this.lightLayer.getContext('2d'); this.lightCtx.setTransform(dpr,0,0,dpr,0,0);
@@ -268,13 +275,16 @@ export class AsciiRenderer {
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
-    this.cloudCells = []; this.cells = [];
+    this.cloudCells = []; this.cells = []; this.cityCells = [];
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
       const rgb = this.sample(sx, sy), seed = hash(col, row);
+      // The skyline has a separate, half-pitch grid so windows and narrow
+      // rooftops survive at this distance. Don't draw the coarse grid beneath it.
+      if (inside(sx,sy,cityOutline)) continue;
       const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
       const isHem = inside(sx, sy, hemArea) && rgb[0] > rgb[2] * 1.8;
@@ -282,14 +292,19 @@ export class AsciiRenderer {
         const [x,y,w,h]=source.box; return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
       }) : -1;
       // Nine discrete sizes, with one occupied cell at every grid position.
-      const cell = { sx, sy, rgb, size: fontSizes[Math.floor(seed*fontSizes.length)],
+      const cell = { sx, sy, rgb, size: fontSizes[Math.floor(seed**1.08*fontSizes.length)],
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
       const isAmbient = !isWater && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
-      if (cloudIndex>=0) this.cloudCells.push({...cell,cloudIndex});
+      if (cloudIndex>=0) {
+        // Calm typography for the sky; independent random sizes at every cell
+        // made moving cloud colors look like multicolored noise.
+        cell.size = .8;
+        this.cloudCells.push({...cell,cloudIndex});
+      }
       else if (isHem || isAmbient) this.dynamic.push(cell);
       else { staticCells.push(cell); this.palette.get(cell.glyph,cell.rgb); }
       if (isWater) {
@@ -309,6 +324,22 @@ export class AsciiRenderer {
       this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .6 + .15*i/staticCells.length;
     }
+    const cityStepX=sxStep*.48, cityStepY=syStep*.48;
+    for (let sy=332+cityStepY/2;sy<454;sy+=cityStepY) for (let sx=1127+cityStepX/2;sx<1361;sx+=cityStepX) {
+      if (!inside(sx,sy,cityOutline)) continue;
+      const rgb=[0,0,0];
+      for (const dy of [-.65,.65]) for (const dx of [-.65,.65]) {
+        const i=(Math.floor(sy+dy)*this.sourceW+Math.floor(sx+dx))*4;
+        for (let c=0;c<3;c++) rgb[c]+=this.platePixels[i+c]/4;
+      }
+      const cell={sx,sy,x:sx*this.scale,y:sy*this.scale,rgb,size:.5,glyph:glyph(rgb,hash(sx,sy))};
+      this.cityCells.push(cell); this.palette.get(cell.glyph,rgb);
+    }
+    baseCtx.save();
+    baseCtx.beginPath(); cityOutline.forEach(([x,y],i)=>i ? baseCtx.lineTo(x*this.scale,y*this.scale) : baseCtx.moveTo(x*this.scale,y*this.scale)); baseCtx.closePath(); baseCtx.clip();
+    baseCtx.fillStyle='#080d13'; baseCtx.fillRect(1127*this.scale,332*this.scale,234*this.scale,122*this.scale);
+    for (const cell of this.cityCells) this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
+    baseCtx.restore();
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
       const cells = [];
@@ -334,6 +365,16 @@ export class AsciiRenderer {
     for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}); yield .78; }
     this.lights = emitters.map(emitter => {
       const [bx,by,w,h]=emitter.box, cells=[];
+      if (emitter.plane) {
+        const {width,height}=emitter.plane;
+        for (let y=1;y<height;y+=1.8) for (let x=1;x<width;x+=1.5) {
+          const u=x/width,v=y/height, p=quadPoint(emitter.polygon,u,v);
+          const px=quadPoint(emitter.polygon,u+1/width,v), py=quadPoint(emitter.polygon,u,v+1/height);
+          cells.push({x:p[0]*this.scale,y:p[1]*this.scale,u,v,
+            basis:[px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1]],glyph:'+*'[Math.floor(hash(x,y)*2)],size:2.8/syStep});
+        }
+        return {emitter,cells};
+      }
       for (let y=by+1;y<by+h;y+=1.8) for (let x=bx+1;x<bx+w;x+=1.5) {
         if (!inside(x,y,emitter.polygon)) continue;
         const i=(Math.floor(y)*this.sourceW+Math.floor(x))*4;
@@ -400,8 +441,8 @@ export class AsciiRenderer {
           (p[(y1*w+x0)*4+c]*(1-fx)+p[(y1*w+x1)*4+c]*fx)*fy);
         const edge=smooth(Math.min((cell.sx-bx)/24,(bx+w-cell.sx)/24,(cell.sy-by)/18,(by+h-cell.sy)/18));
         const sun=smooth((Math.hypot(cell.sx-1100,cell.sy-375)-35)/60);
-        const rgb=mix(cell.rgb,cloud,.84*edge*sun);
-        cell.frameRGB=rgb; cell.frameGlyph=glyph(rgb,cell.seed);
+        const rgb=mix(cell.rgb,cloud,.38*edge*sun);
+        cell.frameRGB=rgb; cell.frameGlyph=cell.glyph;
         this.palette.get(cell.frameGlyph,rgb);
       }
       // Finish atlas writes before reading from it; interleaving them forces a
@@ -416,22 +457,15 @@ export class AsciiRenderer {
     const frame = Math.floor(time * 12), ctx = this.ctx;
     for (const screen of this.screens) {
       if (screen.frame !== frame) { screen.frame = frame; paintScreen(screen, time); }
-      const [tl,tr,br,bl] = screen.quad;
       ctx.save();
       ctx.scale(this.scale,this.scale);
-      ctx.beginPath(); ctx.moveTo(...tl); ctx.lineTo(...tr); ctx.lineTo(...br); ctx.lineTo(...bl); ctx.closePath(); ctx.clip();
-      // Thin source-space strips follow all four corners of the perspective
-      // display, including the lower edge, without spilling onto its bezel.
-      for (let row=0;row<screen.height;row+=3) {
-        const v=row/screen.height, h=Math.min(3.08,screen.height-row);
-        const lx=tl[0]+(bl[0]-tl[0])*v, ly=tl[1]+(bl[1]-tl[1])*v;
-        const rx=tr[0]+(br[0]-tr[0])*v, ry=tr[1]+(br[1]-tr[1])*v;
-        ctx.save();
-        ctx.transform((rx-lx)/screen.width,(ry-ly)/screen.width,
-          (bl[0]-tl[0])/screen.height,(bl[1]-tl[1])/screen.height,lx,ly);
-        ctx.drawImage(screen.canvas,0,row*3,screen.canvas.width,h*3,0,0,screen.width,h);
-        ctx.restore();
+      if (screen.kind==='plot') {
+        // The expanded right display remains behind the person's hair/shoulder.
+        ctx.beginPath(); ctx.rect(0,0,this.sourceW,this.sourceH);
+        personArea.forEach(([x,y],i)=>i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath();
+        ctx.clip('evenodd');
       }
+      drawQuad(ctx,screen.canvas,screen.quad,screen.width,screen.height);
       ctx.restore();
     }
   }
@@ -450,7 +484,11 @@ export class AsciiRenderer {
         }
       }
       for (const {cells} of this.lights) for (const cell of cells) {
-        this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
+        if (cell.basis) {
+          this.lightCtx.save(); this.lightCtx.transform(...cell.basis,cell.x,cell.y);
+          this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,0,0,cell.size);
+          this.lightCtx.restore();
+        } else this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
       }
     }
     this.ctx.drawImage(this.lightLayer,0,0,this.width,this.height);
