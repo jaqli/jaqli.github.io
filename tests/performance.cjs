@@ -7,7 +7,8 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
  const results=[];
  try{
-  for(const config of [{name:'desktop',width:1440,height:900,dpr:1},{name:'mobile',width:390,height:844,dpr:2}]){
+  const cases=[{name:'desktop',width:1440,height:900,dpr:1},{name:'retina',width:1440,height:900,dpr:2},{name:'mobile',width:390,height:844,dpr:2}];
+  for(const config of cases.filter(c=>!process.env.PERF_CASE||c.name===process.env.PERF_CASE)){
    const page=await browser.newPage({viewport:{width:config.width,height:config.height},deviceScaleFactor:config.dpr,reducedMotion:'reduce'});
    await page.addInitScript(()=>{
     const Native=Worker;window.sceneFrames=[];

@@ -1,4 +1,4 @@
-import { birdPose } from './ascii-renderer.js?v=20261110-motion13';
+import { birdPose } from './ascii-renderer.js?v=20261110-quality14';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do

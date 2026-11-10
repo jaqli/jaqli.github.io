@@ -1,5 +1,5 @@
-import { waterSampleInterval } from './render-budget.js?v=20261110-motion13';
-import { paintScreen } from './screen-content.js?v=20261110-motion13';
+import { waterSampleInterval } from './render-budget.js?v=20261110-quality14';
+import { paintScreen } from './screen-content.js?v=20261110-quality14';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 
 function screenMatrix(quad,w,h,scale){
@@ -18,13 +18,18 @@ export class LayeredScene {
     const top=Math.floor(Math.min(...r.water.map(cell=>cell.y))-r.fontSize);
     for(let i=0;i<3;i++)add('water-'+i,[0,top,r.width,r.height-top],{water:true});
     for(let i=0;i<r.screens.length;i++){
-      const screen=r.screens[i];add('screen-'+i,[0,0,screen.width*s,screen.height*s],{matrix:screenMatrix(screen.quad,screen.width,screen.height,s),quad:screen.quad.map(p=>p.map(v=>v*s))});
+      // Retain the original 3× source texture for fine code and waveforms.
+      const screen=r.screens[i];add('screen-'+i,[0,0,screen.width*s,screen.height*s],{width:screen.width*3,height:screen.height*3,matrix:screenMatrix(screen.quad,screen.width,screen.height,s),quad:screen.quad.map(p=>p.map(v=>v*s))});
     }
     // Restore the actual foreground curls above the complete right monitor.
-    const [hx,hy,hw,hh]=r.headMaskBox,head=createCanvas();head.width=Math.ceil(hw*s*dpr);head.height=Math.ceil(hh*s*dpr);
-    const ctx=head.getContext('2d');ctx.drawImage(r.base,hx*s*dpr,hy*s*dpr,hw*s*dpr,hh*s*dpr,0,0,head.width,head.height);
-    ctx.globalCompositeOperation='destination-in';ctx.drawImage(r.headMask,0,0,head.width,head.height);
-    add('head',[hx*s,hy*s,hw*s,hh*s],{bitmap:await createImageBitmap(head)});
+    const [hx,hy,hw,hh]=r.headMaskBox,head=createCanvas();
+    const x=Math.floor(hx*s),y=Math.floor(hy*s),w=Math.ceil((hx+hw)*s)-x,h=Math.ceil((hy+hh)*s)-y;
+    head.width=Math.ceil(w*dpr);head.height=Math.ceil(h*dpr);
+    // Copy existing hair pixels without stretching a fractional crop. Only the
+    // source mask is scaled; the foreground glyphs retain the base's sharpness.
+    const ctx=head.getContext('2d');ctx.drawImage(r.base,x*dpr,y*dpr,head.width,head.height,0,0,head.width,head.height);
+    ctx.globalCompositeOperation='destination-in';ctx.drawImage(r.headMask,(hx*s-x)*dpr,(hy*s-y)*dpr,hw*s*dpr,hh*s*dpr);
+    add('head',[x,y,w,h],{bitmap:await createImageBitmap(head)});
     for(const sprite of r.details){
       if(sprite.texture){const {canvas,x,y,width,height}=sprite.texture;add(sprite.shape.id,[x,y,width,height],{bitmap:await createImageBitmap(canvas),shape:sprite.shape});}
       else{
@@ -50,7 +55,7 @@ export class LayeredScene {
     }));
     const clouds=this.targets.get('clouds');r.cloudLayer=clouds.canvas;r.cloudCtx=clouds.ctx;
     for(let i=0;i<r.screens.length;i++){
-      const {canvas,ctx}=this.targets.get('screen-'+i),screen=r.screens[i];screen.canvas=canvas;screen.ctx=ctx;ctx.setTransform(dpr*r.scale,0,0,dpr*r.scale,0,0);screen.frame=-1;
+      const {canvas,ctx}=this.targets.get('screen-'+i),screen=r.screens[i];screen.canvas=canvas;screen.ctx=ctx;ctx.setTransform(3,0,0,3,0,0);screen.frame=-1;
     }
     for(const light of r.lights){const target=this.targets.get(light.emitter.id);light.canvas=target.canvas;light.ctx=target.ctx;light.frame=null;}
     const water=this.specs.find(spec=>spec.water);

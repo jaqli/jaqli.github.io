@@ -1,8 +1,8 @@
-import { scenePixelRatio } from './render-budget.js?v=20261110-motion13';
+import { scenePixelRatio } from './render-budget.js?v=20261110-quality14';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-motion13';
-import { screens, paintScreen } from './screen-content.js?v=20261110-motion13';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-quality14';
+import { screens, paintScreen } from './screen-content.js?v=20261110-quality14';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
@@ -298,8 +298,10 @@ export class AsciiRenderer {
     this.pixelRatio = dpr;
     for (const canvas of [this.canvas, this.base]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     // Transparent caches cover only their content, not the whole room.
-    const box=([x,y,w,h])=>{const left=Math.floor(x*this.scale*dpr)/dpr,top=Math.floor(y*this.scale*dpr)/dpr;
-      return[left,top,Math.ceil((x+w)*this.scale*dpr)/dpr-left,Math.ceil((y+h)*this.scale*dpr)/dpr-top];};
+    // Integer CSS bounds avoid a second resampling of fractional-sized DOM
+    // canvases. Glyph coordinates remain on the original global lattice.
+    const box=([x,y,w,h])=>{const left=Math.floor(x*this.scale),top=Math.floor(y*this.scale);
+      return[left,top,Math.ceil((x+w)*this.scale)-left,Math.ceil((y+h)*this.scale)-top];};
     this.cloudBox=box([522,68,1024,355]);
     this.screenBox=box([325,350,420,165]);
     for (const [canvas,box] of [[this.cloudLayer,this.cloudBox],[this.cloudBase,this.cloudBox],[this.screenLayer,this.screenBox]]) {
@@ -435,10 +437,10 @@ export class AsciiRenderer {
     });
     for (const light of this.lights) {
       const [bx,by,w,h]=light.emitter.box, pad=this.fontSize;
-      light.x=bx*this.scale-pad; light.y=by*this.scale-pad;
+      light.x=Math.floor(bx*this.scale-pad); light.y=Math.floor(by*this.scale-pad);
       light.canvas=createCanvas();
-      light.canvas.width=Math.ceil((w*this.scale+2*pad)*dpr);
-      light.canvas.height=Math.ceil((h*this.scale+2*pad)*dpr);
+      light.canvas.width=Math.ceil((Math.ceil((bx+w)*this.scale+pad)-light.x)*dpr);
+      light.canvas.height=Math.ceil((Math.ceil((by+h)*this.scale+pad)-light.y)*dpr);
       light.ctx=light.canvas.getContext('2d');
       light.ctx.setTransform(dpr,0,0,dpr,-light.x*dpr,-light.y*dpr);
       light.frame=null;

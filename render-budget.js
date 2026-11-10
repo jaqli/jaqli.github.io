@@ -1,7 +1,8 @@
-// Bound backing-store area on high-DPI/large screens without changing the
-// sampling grid, font-size bins, source coordinates or motion speed.
-export function scenePixelRatio(width,height){
-  return Math.min(globalThis.devicePixelRatio||1,1.5,Math.sqrt(2400000/(width*height)));
+// Preserve the pre-optimization raster density. Tiny colored glyphs cannot
+// tolerate a low-resolution backing store stretched over a Retina display.
+// Save work through local updates and bounded caches, not image downscaling.
+export function scenePixelRatio(){
+  return Math.min(globalThis.devicePixelRatio||1,2);
 }
 export const sceneFrameInterval=1000/60;
 
