@@ -1,3 +1,4 @@
+import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 // Screen content shares the scene's reference font and requested size range.
 // Render once into their source-space textures; don't resample the text a second time.
 export const screens = [
@@ -15,8 +16,24 @@ const lines = [
   '  return state;', '}', '', 'const frame = step(clock.dt);',
   'render(frame);', 'await nextFrame();', '', 'export { step, state };',
 ];
+// Cache repeated code lines, grid rows and waveform symbols. Bound dynamic
+// labels so a long-running page cannot grow the cache without limit.
+const textCache=new Map();
 function text(ctx, value, x, y, color = '#84d6cd') {
-  ctx.fillStyle = color; ctx.fillText(value, x, y);
+  if (!value) return;
+  const key=`${ctx.font}:${color}:${value}`;
+  let tile=textCache.get(key);
+  if (!tile) {
+    const canvas=createCanvas(), ratio=3, size=parseFloat(ctx.font.split(' ')[1]);
+    canvas.width=Math.ceil((ctx.measureText(value).width+2)*ratio);
+    canvas.height=Math.ceil(size*1.6*ratio);
+    const paint=canvas.getContext('2d'); paint.scale(ratio,ratio);
+    paint.font=ctx.font; paint.textBaseline='top'; paint.fillStyle=color; paint.fillText(value,0,0);
+    tile={canvas,width:canvas.width/ratio,height:canvas.height/ratio};
+    if (textCache.size>=512) textCache.delete(textCache.keys().next().value);
+    textCache.set(key,tile);
+  }
+  ctx.drawImage(tile.canvas,x,y,tile.width,tile.height);
 }
 function wave(ctx, time, x, y, width, amplitude, phase = 0, color = '#56dfd5') {
   for (let i = 0; i < width; i += 1.65) {

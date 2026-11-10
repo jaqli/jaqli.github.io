@@ -264,6 +264,7 @@ async function gullBodyPoint(page) {
     // performance assertions that would depend on the test runner's load.
     const clockPage = await browser.newPage({ viewport: { width: 960, height: 640 } });
     await clockPage.addInitScript(() => {
+      Object.defineProperty(window,'Worker',{value:undefined});
       let nextId = 0;
       const callbacks = new Map();
       window.requestAnimationFrame = callback => { callbacks.set(++nextId, callback); return nextId; };

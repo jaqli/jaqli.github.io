@@ -19,7 +19,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .scene-fallback .scene-image { opacity: .65; }
 .hotspots { overflow: visible; }
 .hotspot { cursor: pointer; outline: none; }
-.hit-area { fill: transparent; stroke: transparent; stroke-width: 1.5; pointer-events: all; transition: fill .25s, stroke .25s; }
+.hit-area { fill: transparent; stroke: transparent; stroke-width: 1.5; pointer-events: all; transition: fill .1s; }
 .hotspot:not(.secret-hotspot):hover .hit-area, .hotspot:focus-visible .hit-area { fill: #b5e7d514; stroke: #b5e7d5a0; }
 .secret-hotspot, .secret-hotspot .hit-area { cursor: default; }
 .hotspot-label { pointer-events: all; }

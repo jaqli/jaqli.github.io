@@ -17,9 +17,16 @@ export function quadPoint(quad, u, v) {
 export function drawQuad(ctx, canvas, quad, width, height) {
   ctx.save();
   ctx.beginPath(); quad.forEach(([x,y],i)=>i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath(); ctx.clip();
+  const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad;
+  if (Math.abs(x0+x2-x1-x3)+Math.abs(y0+y2-y1-y3)<.001) {
+    ctx.transform((x1-x0)/width,(y1-y0)/width,(x3-x0)/height,(y3-y0)/height,x0,y0);
+    ctx.drawImage(canvas,0,0,width,height); ctx.restore(); return;
+  }
   const rx=canvas.width/width, ry=canvas.height/height;
-  for (let row=0;row<height;row+=2) {
-    const h=Math.min(2.12,height-row), v=row/height;
+  // These gently slanted panels need only a few strips. Two-pixel slices
+  // repeatedly uploaded the same texture and dominated each animation frame.
+  for (let row=0;row<height;row+=8) {
+    const h=Math.min(8.12,height-row), v=row/height;
     const left=quadPoint(quad,0,v), right=quadPoint(quad,1,v), next=quadPoint(quad,0,(row+h)/height);
     ctx.save();
     ctx.transform((right[0]-left[0])/width,(right[1]-left[1])/width,

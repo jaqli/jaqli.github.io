@@ -1,5 +1,6 @@
 import { site } from './site.config.js?v=20261110-depth6';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-style9';
+import { birds, birdPoint } from './ascii-renderer.js?v=20261110-fps10';
+import { createSceneRenderer } from './scene-renderer.js?v=20261110-fps10';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import './navigation.js?v=20261110-load1';
 
@@ -25,7 +26,8 @@ function reportProgress(value, label) {
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
-let frame = null, elapsed = 0, previousFrame = 0, accumulated = 0;
+let frame = null, elapsed = 0, previousFrame = 0;
+let drawTask=null, resizeTask=null;
 let paused = motion.matches, ready = false, resizeFrame = null;
 
 
@@ -70,35 +72,60 @@ function layout() {
   viewport.classList.toggle('is-pannable', pannable);
   if (!ctx || !ready) return;
   if (renderer.width === width && renderer.height === height && renderer.pixelRatio === Math.min(devicePixelRatio || 1, 2)) return;
-  renderer.resize(width, height);
-  draw();
+  if (!resizeTask) resizeTask=(async()=>{
+    renderer.cancelFrame?.();
+    await drawTask;
+    do { await renderer.resizeAsync(width,height); }
+    while (renderer.width!==width || renderer.height!==height || renderer.pixelRatio!==Math.min(devicePixelRatio||1,2));
+    await draw();
+  })().finally(()=>{resizeTask=null;});
+}
+function updateGull(time) {
+  const gull = birds.find(bird => bird.id === 'life');
+  const points = gull.points.map(([x, y]) => birdPoint(gull, x, y, time).join(',')).join(' ');
+  document.querySelector('[data-hotspot="life"] polygon').setAttribute('points', points);
 }
 function draw() {
-  renderer.draw(elapsed);
-  const gull = birds.find(bird => bird.id === 'life');
-  const points = gull.points.map(([x, y]) => birdPoint(gull, x, y, elapsed).join(',')).join(' ');
-  document.querySelector('[data-hotspot="life"] polygon').setAttribute('points', points);
+  if (drawTask) return drawTask;
+  const time=elapsed, requestedAt=performance.now();
+  const result=renderer.draw(time);
+  if (!result?.then) { updateGull(time); return; }
+  drawTask=result.then(painted=>{if(painted!==false) updateGull(time);}).catch(error=>{
+    if (!ready) throw error;
+    paused=true; syncMotion();
+    status.hidden=false; status.textContent='动效已暂停，刷新页面可重试。';
+  }).finally(()=>{
+    drawTask=null;
+    // The worker can start its next frame as soon as the previous one arrives;
+    // waiting for another browser tick added an unnecessary 0–16ms each frame.
+    // Fast renders still follow display ticks instead of running unbounded.
+    if (ready && !paused && !document.hidden && !resizeTask && performance.now()-requestedAt>=16) {
+      const now=performance.now();
+      elapsed+=previousFrame?(now-previousFrame)/1000:0; previousFrame=now;
+      draw();
+    }
+  });
+  return drawTask;
 }
 function tick(now) {
   frame = null;
   if (!ready || paused || document.hidden) return;
-  const delta = previousFrame ? now - previousFrame : 0;
-  previousFrame = now;
+  const current=Math.max(now,previousFrame);
+  const delta = previousFrame ? current - previousFrame : 0;
+  previousFrame = current;
   // Keep real-time speed on slower devices. Visibility/pause resets the clock,
   // so background tabs do not accumulate a large jump on return.
   elapsed += delta / 1000;
-  accumulated += delta;
-  if (accumulated >= 1000 / 30) {
-    accumulated %= 1000 / 30;
-    draw();
-  }
+  // One frame in flight: never queue expensive work behind input or display
+  // stale worker frames. The clock still advances when a device misses a frame.
+  if (!drawTask && !resizeTask) draw();
   frame = requestAnimationFrame(tick);
 }
 function syncMotion() {
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
   previousFrame = 0;
-  accumulated = 0;
+  if (paused || document.hidden) renderer?.cancelFrame?.();
   pause.textContent = paused ? '▷ 播放动效' : 'Ⅱ';
   pause.setAttribute('aria-pressed', String(paused));
   pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
@@ -119,11 +146,11 @@ try {
   await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
   if (!ctx) throw new Error('Canvas unavailable');
-  renderer = await AsciiRenderer.create(image, canvas, value => reportProgress(35 + value * 20, '准备动效'));
+  renderer = await createSceneRenderer(image, canvas, value => reportProgress(35 + value * 20, '准备动效'));
   do { await renderer.resizeAsync(width, height, value => reportProgress(55 + value * 44, '绘制字符')); }
   while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== Math.min(devicePixelRatio || 1, 2));
+  await draw();
   ready = true;
-  draw();
   document.body.classList.add('scene-ready');
   performance.mark('scene-ready');
   reportProgress(100, '就绪');

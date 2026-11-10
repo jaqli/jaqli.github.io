@@ -1,8 +1,9 @@
-import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-depth6';
-import { screens, paintScreen } from './screen-content.js?v=20261110-style9';
+import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
+import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-fps10';
+import { screens, paintScreen } from './screen-content.js?v=20261110-fps10';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
-import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-depth6';
+import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -47,7 +48,6 @@ const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).
 const glyph = (c, seed) => { const band = bands[Math.min(bands.length - 1, Math.floor(Math.sqrt(light(c)) * bands.length))]; return band[Math.floor(seed * band.length) % band.length]; };
 const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
-const mix = (a, b, amount) => a.map((v, i) => v * (1 - amount) + b[i] * amount);
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
 export const fontSizes = [.35,.4,.45,.5,.55,.6,.65,.7,.75,.8];
@@ -127,9 +127,9 @@ export class AsciiRenderer {
     this.image = image;
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false });
-    this.sourceW = image.naturalWidth;
-    this.sourceH = image.naturalHeight;
-    this.plate = document.createElement('canvas');
+    this.sourceW = image.naturalWidth || image.width;
+    this.sourceH = image.naturalHeight || image.height;
+    this.plate = createCanvas();
     this.plate.width = this.sourceW;
     this.plate.height = this.sourceH;
     const ctx = this.plate.getContext('2d', { willReadFrequently: true });
@@ -199,7 +199,7 @@ export class AsciiRenderer {
     }
     ctx.putImageData(bitmap, 0, 0);
     this.platePixels = bitmap.data;
-    this.headMask = document.createElement('canvas');
+    this.headMask = createCanvas();
     this.headMaskBox = [693,437,111,104];
     const [hx,hy,hw,hh]=this.headMaskBox;
     this.headMask.width=hw; this.headMask.height=hh;
@@ -243,16 +243,33 @@ export class AsciiRenderer {
         }
         if (!(y%24)) yield .3 + .7 * (this.cloudSources.length + y/height) / cloudWindows.length;
       }
-      this.cloudSources.push({ ...window,width,height,pixels });
+      const texture=createCanvas(), fade=createCanvas(), layer=createCanvas();
+      for (const canvas of [texture,fade,layer]) { canvas.width=width; canvas.height=height; }
+      const textureCtx=texture.getContext('2d'), colors=textureCtx.createImageData(width,height);
+      const fadeCtx=fade.getContext('2d'), opacity=fadeCtx.createImageData(width,height);
+      const gamma=Uint8Array.from({length:256},(_,i)=>Math.round(255*(i/255)**.84));
+      for (let y=0;y<height;y++) {
+        for (let x=0;x<width;x++) {
+          const i=(y*width+x)*4;
+          for (let c=0;c<3;c++) colors.data[i+c]=gamma[pixels[i+c]];
+          colors.data[i+3]=255;
+          const edge=smooth(Math.min(x/24,(width-x)/24,y/18,(height-y)/18));
+          const sun=smooth((Math.hypot(x+x0-1100,y+y0-375)-35)/60);
+          opacity.data[i+3]=Math.round(255*.38*edge*sun);
+        }
+        if (!(y%32)) yield .3 + .7*(this.cloudSources.length+.95)/cloudWindows.length;
+      }
+      textureCtx.putImageData(colors,0,0); fadeCtx.putImageData(opacity,0,0);
+      this.cloudSources.push({ ...window,width,height,texture,fade,layer,ctx:layer.getContext('2d') });
     }
-    this.base = document.createElement('canvas');
-    this.cloudLayer = document.createElement('canvas');
-    this.lightLayer = document.createElement('canvas');
-    this.screenLayer = document.createElement('canvas');
+    this.base = createCanvas();
+    this.cloudLayer = createCanvas();
+    this.cloudBase = createCanvas();
+    this.screenLayer = createCanvas();
     this.screens = screens.map(screen => {
-      const canvas = document.createElement('canvas');
+      const canvas = createCanvas();
       canvas.width = screen.width * 3; canvas.height = screen.height * 3;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const ctx = canvas.getContext('2d');
       ctx.scale(3, 3);
       return { ...screen, canvas, ctx, frame: -1 };
     });
@@ -276,7 +293,7 @@ export class AsciiRenderer {
     this.scale = width / this.sourceW;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     this.pixelRatio = dpr;
-    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.lightLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.cloudBase, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // One sampling lattice across the entire room: local half-pitch overlays
     // created visible islands of different texture around the head and skyline.
@@ -292,9 +309,8 @@ export class AsciiRenderer {
     }
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.lightCtx = this.lightLayer.getContext('2d'); this.lightCtx.setTransform(dpr,0,0,dpr,0,0);
     this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.cloudFrame = this.lightFrame = this.screenFrame = -1;
+    this.screenFrame = -1;
     const baseCtx = this.base.getContext('2d', { alpha: false });
     baseCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     baseCtx.fillStyle = '#080d13'; baseCtx.fillRect(0, 0, width, height);
@@ -336,13 +352,14 @@ export class AsciiRenderer {
         this.cloudCells.push({...cell,cloudIndex});
       }
       else if (isHem || isAmbient) this.dynamic.push(cell);
-      else { staticCells.push(cell); this.palette.get(cell.glyph,cell.rgb); }
+      else { cell.tile=this.palette.get(cell.glyph,cell.rgb); staticCells.push(cell); }
       if (isWater) {
         // Water keeps a complete, fixed character bed. Moving light is added on
         // top; no character leaves a hole at the edge of a moving region.
         this.water.push({ ...cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
-          waveA: sx * .052 + sy * .083, waveB: sx * .023 - sy * .037,
-          rings: rippleSources.map(([x, y, phase]) => ({ distance: Math.hypot((sx - x) / 1.7, (sy - y) * 2.2), phase })) });
+          sinA:Math.sin(sx*.052+sy*.083), cosA:Math.cos(sx*.052+sy*.083),
+          sinB:Math.sin(sx*.023-sy*.037), cosB:Math.cos(sx*.023-sy*.037),
+          rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) });
       }
       }
       if (!(row%4)) yield row / this.rows * .6;
@@ -351,8 +368,14 @@ export class AsciiRenderer {
     // interleaved atlas uploads previously dominated startup CPU time.
     for (let i=0;i<staticCells.length;i++) {
       const cell=staticCells[i];
-      this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
+      this.palette.drawTile(baseCtx,cell.tile,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .6 + .15*i/staticCells.length;
+    }
+    const cloudBaseCtx=this.cloudBase.getContext('2d'); cloudBaseCtx.setTransform(dpr,0,0,dpr,0,0);
+    for (const cell of this.cloudCells) cell.tile=this.palette.get(cell.glyph,cell.rgb);
+    for (let i=0;i<this.cloudCells.length;i++) {
+      const cell=this.cloudCells[i]; this.palette.drawTile(cloudBaseCtx,cell.tile,cell.x,cell.y,cell.size);
+      if (!(i%1024)) yield .75;
     }
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
@@ -399,10 +422,20 @@ export class AsciiRenderer {
       }
       return {emitter,cells};
     });
+    for (const light of this.lights) {
+      const [bx,by,w,h]=light.emitter.box, pad=this.fontSize;
+      light.x=bx*this.scale-pad; light.y=by*this.scale-pad;
+      light.canvas=createCanvas();
+      light.canvas.width=Math.ceil((w*this.scale+2*pad)*dpr);
+      light.canvas.height=Math.ceil((h*this.scale+2*pad)*dpr);
+      light.ctx=light.canvas.getContext('2d');
+      light.ctx.setTransform(dpr,0,0,dpr,-light.x*dpr,-light.y*dpr);
+      light.frame=null;
+    }
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
     const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
-    this.atlas = document.createElement('canvas');
+    this.atlas = createCanvas();
     this.tilePixels = Math.ceil(this.fontSize * 1.6 * dpr);
     this.tileSize = this.tilePixels / dpr;
     const atlasColumns = 64;
@@ -418,6 +451,20 @@ export class AsciiRenderer {
       this.paint(atlasCtx, cell, cell.tx / dpr + this.tileSize / 2,
         cell.ty / dpr + this.tileSize / 2, 1, cell.color);
       if (!(index%512)) yield .8 + .18*index/movingCells.length;
+    }
+    for (const sprite of this.details) {
+      if (sprite.shape.kind!=='float') continue;
+      const pad=this.tileSize, xs=sprite.cells.map(c=>c.sx*this.scale), ys=sprite.cells.map(c=>c.sy*this.scale);
+      const x=Math.floor(Math.min(...xs)-pad), y=Math.floor(Math.min(...ys)-pad);
+      const width=Math.ceil(Math.max(...xs)-x+pad), height=Math.ceil(Math.max(...ys)-y+pad);
+      const canvas=createCanvas(); canvas.width=Math.ceil(width*dpr); canvas.height=Math.ceil(height*dpr);
+      const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,-x*dpr,-y*dpr);
+      ctx.fillStyle='#080d13';
+      for (const cell of sprite.cells) ctx.fillRect(cell.sx*this.scale-this.cellW*.47*cell.size,cell.sy*this.scale-this.cellH*.44*cell.size,
+        this.cellW*.94*cell.size,this.cellH*.88*cell.size);
+      for (const cell of sprite.cells) this.stamp(cell,cell.sx*this.scale,cell.sy*this.scale,cell.size,ctx);
+      sprite.texture={canvas,x,y,width,height};
+      yield .99;
     }
   }
 
@@ -449,40 +496,30 @@ export class AsciiRenderer {
     if (Math.abs(size - 1) < .005) ctx.fillText(cell.glyph, x, y);
     else { ctx.save(); ctx.translate(x, y); ctx.scale(size, size); ctx.fillText(cell.glyph, 0, 0); ctx.restore(); }
   }
-  stamp(cell, x, y, size) {
+  stamp(cell, x, y, size, ctx=this.ctx) {
     const side = this.tileSize * size;
-    this.ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
+    ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
       x - side / 2, y - side / 2, side, side);
   }
   drawClouds(time) {
-    const frame=Math.floor(time*8);
-    if (frame!==this.cloudFrame) {
-      this.cloudFrame=frame;
-      this.cloudCtx.clearRect(0,0,this.width,this.height);
-      for (const cell of this.cloudCells) {
-        const source=this.cloudSources[cell.cloudIndex], [bx,by,w,h]=source.box;
-        const x=((cell.sx-bx-time*cloudSpeed)%w+w)%w, y=clamp(cell.sy-by,0,h-1);
-        const x0=Math.floor(x), x1=(x0+1)%w, y0=Math.floor(y), y1=Math.min(y0+1,h-1);
-        const fx=x-x0, fy=y-y0, p=source.pixels;
-        const cloud=[0,1,2].map(c=>
-          (p[(y0*w+x0)*4+c]*(1-fx)+p[(y0*w+x1)*4+c]*fx)*(1-fy)+
-          (p[(y1*w+x0)*4+c]*(1-fx)+p[(y1*w+x1)*4+c]*fx)*fy);
-        const edge=smooth(Math.min((cell.sx-bx)/24,(bx+w-cell.sx)/24,(cell.sy-by)/18,(by+h-cell.sy)/18));
-        const sun=smooth((Math.hypot(cell.sx-1100,cell.sy-375)-35)/60);
-        const rgb=mix(cell.rgb,cloud,.38*edge*sun);
-        cell.frameRGB=rgb; cell.frameGlyph=cell.glyph;
-        this.palette.get(cell.frameGlyph,rgb);
-      }
-      // Finish atlas writes before reading from it; interleaving them forces a
-      // full texture upload for every newly encountered color on some devices.
-      for (const cell of this.cloudCells) {
-        this.palette.draw(this.cloudCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
-      }
+    const ctx=this.cloudCtx;
+    ctx.clearRect(0,0,this.width,this.height);
+    ctx.drawImage(this.cloudBase,0,0,this.width,this.height);
+    ctx.globalCompositeOperation='source-atop';
+    for (const source of this.cloudSources) {
+      const {width:w,height:h,texture,fade,layer}=source, field=source.ctx;
+      const shift=((time*cloudSpeed)%w+w)%w;
+      field.globalCompositeOperation='copy'; field.drawImage(texture,shift,0);
+      field.globalCompositeOperation='source-over'; field.drawImage(texture,shift-w,0);
+      field.globalCompositeOperation='destination-in'; field.drawImage(fade,0,0);
+      const [x,y]=source.box;
+      ctx.drawImage(layer,x*this.scale,y*this.scale,w*this.scale,h*this.scale);
     }
+    ctx.globalCompositeOperation='source-over';
     this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
   }
   drawScreens(time) {
-    const frame = Math.floor(time * 12), ctx = this.screenCtx;
+    const frame = Math.floor(time * 30), ctx = this.screenCtx;
     if (frame!==this.screenFrame) {
       this.screenFrame=frame;
       ctx.clearRect(0,0,this.width,this.height);
@@ -500,40 +537,50 @@ export class AsciiRenderer {
     this.ctx.drawImage(this.screenLayer,0,0,this.width,this.height);
   }
   drawLights(time) {
-    const frame=Math.floor(time*12);
-    if (frame!==this.lightFrame) {
-      this.lightFrame=frame;
-      this.lightCtx.clearRect(0,0,this.width,this.height);
-      for (const {emitter,cells} of this.lights) {
-        const tint=emitter.kind==='lamp' ? lampColor(time) : emitter.tint;
+    const frame=Math.floor(time*30);
+    for (const light of this.lights) {
+      const {emitter,cells,ctx}=light;
+      const offset=emitter.id==='left-face'?0:1.6;
+      const key=emitter.kind==='face' ? `${Math.floor((time+offset)/3.8)%4}:${Math.round(eyeOpening(time,offset)*20)}` : frame;
+      if (key!==light.frame) {
+        light.frame=key;
+        ctx.clearRect(light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
+        const tint=emitter.kind==='lamp'?lampColor(time):emitter.tint;
         for (const cell of cells) {
-          const brightness=emitter.kind==='lamp' ? .5+cell.intensity*.5 : Math.sqrt(faceLight(emitter,cell.u,cell.v,time));
-          const core=emitter.kind==='lamp' ? clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*.7)**2) : 0;
+          const brightness=emitter.kind==='lamp'?.5+cell.intensity*.5:Math.sqrt(faceLight(emitter,cell.u,cell.v,time));
+          const core=emitter.kind==='lamp'?clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*.7)**2):0;
           cell.rgb=tint.map((c,i)=>[10,21,28][i]+c*brightness*(1-core)+255*core);
-          this.palette.get(cell.glyph,cell.rgb);
+          cell.tile=this.palette.get(cell.glyph,cell.rgb);
+        }
+        for (const cell of cells) {
+          if (cell.basis) {
+            ctx.save(); ctx.transform(...cell.basis,cell.x,cell.y);
+            this.palette.drawTile(ctx,cell.tile,0,0,cell.size); ctx.restore();
+          } else this.palette.drawTile(ctx,cell.tile,cell.x,cell.y,cell.size);
         }
       }
-      for (const {cells} of this.lights) for (const cell of cells) {
-        if (cell.basis) {
-          this.lightCtx.save(); this.lightCtx.transform(...cell.basis,cell.x,cell.y);
-          this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,0,0,cell.size);
-          this.lightCtx.restore();
-        } else this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
-      }
+      this.ctx.drawImage(light.canvas,light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
     }
-    this.ctx.drawImage(this.lightLayer,0,0,this.width,this.height);
   }
   drawDetails(time) {
     for (const sprite of this.details) {
+      if (sprite.texture) {
+        const {canvas,x,y,width,height}=sprite.texture, [ax,ay]=sprite.shape.anchor;
+        const p=detailPoint(sprite.shape,ax,ay,time), px=detailPoint(sprite.shape,ax+1,ay,time), py=detailPoint(sprite.shape,ax,ay+1,time);
+        const a=px[0]-p[0], b=px[1]-p[1], c=py[0]-p[0], d=py[1]-p[1];
+        this.ctx.save(); this.ctx.transform(a,b,c,d,(p[0]-a*ax-c*ay)*this.scale,(p[1]-b*ax-d*ay)*this.scale);
+        this.ctx.drawImage(canvas,x,y,width,height); this.ctx.restore();
+        continue;
+      }
       this.ctx.fillStyle='#080d13';
       for (const cell of sprite.cells) {
         const [x,y]=detailPoint(sprite.shape,cell.sx,cell.sy,time);
+        cell.dx=x*this.scale; cell.dy=y*this.scale;
         this.ctx.fillRect(x*this.scale-this.cellW*.47*cell.size,y*this.scale-this.cellH*.44*cell.size,
           this.cellW*.94*cell.size,this.cellH*.88*cell.size);
       }
       for (const cell of sprite.cells) {
-        const [x,y]=detailPoint(sprite.shape,cell.sx,cell.sy,time);
-        this.stamp(cell,x*this.scale,y*this.scale,cell.size);
+        this.stamp(cell,cell.dx,cell.dy,cell.size);
       }
     }
   }
@@ -542,14 +589,14 @@ export class AsciiRenderer {
     ctx.globalAlpha = 1;
     ctx.drawImage(this.base, 0, 0, this.width, this.height);
     this.drawClouds(time);
+    const sinA=Math.sin(time*1.8),cosA=Math.cos(time*1.8),sinB=Math.sin(time*.9),cosB=Math.cos(time*.9);
+    const rings=rippleSources.map(([, ,phase])=>{const age=(time+phase)%7.5; return {radius:age*20,strength:Math.sin(Math.PI*age/7.5)*.65};});
     for (const cell of this.water) {
-      const interference = .62 * Math.sin(cell.waveA - time * 1.8) + .38 * Math.sin(cell.waveB + time * .9);
-      let shine = Math.max(0, interference) ** 5 * .65;
+      const interference=Math.max(0,.62*(cell.sinA*cosA-cell.cosA*sinA)+.38*(cell.sinB*cosB+cell.cosB*sinB));
+      let shine = interference*interference*interference*interference*interference*.65;
       for (const ring of cell.rings) {
-        if (ring.distance > 150) continue;
-        const age = (time + ring.phase) % 7.5, radius = age * 20;
-        const edge = Math.abs(ring.distance - radius);
-        if (edge < 9) shine += (1 - edge / 9) ** 2 * Math.sin(Math.PI * age / 7.5) * .65;
+        const wave=rings[ring.index], edge=Math.abs(ring.distance-wave.radius);
+        if (edge<9) shine+=(1-edge/9)**2*wave.strength;
       }
       if (shine < .035) continue;
       ctx.globalAlpha = Math.min(.85, shine);

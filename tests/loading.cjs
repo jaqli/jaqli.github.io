@@ -36,6 +36,10 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     const resized = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
     // Exercise the scheduler fallback used by browsers without scheduler.yield.
     await resized.addInitScript(() => Object.defineProperty(globalThis, 'scheduler', { value: undefined }));
+    await resized.route('**/scene-worker.js*',async route=>{
+      const response=await route.fetch();
+      await route.fulfill({response,body:"Object.defineProperty(globalThis,'scheduler',{value:undefined});\n"+await response.text()});
+    });
     await resized.goto(origin, { waitUntil: 'commit' });
     await resized.waitForFunction(() => performance.getEntriesByName('scene-source-ready').length > 0);
     await resized.setViewportSize({ width: 390, height: 844 });
