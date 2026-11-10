@@ -38,6 +38,7 @@ const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
 const mix = (a, b, amount) => a.map((v, i) => v * (1 - amount) + b[i] * amount);
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
+const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
 
 function screenUV(x, y, screen) {
   const [a,b,,d] = screen.quad;
@@ -115,7 +116,7 @@ function nearPolygon(x, y, polygon) {
 }
 
 export class AsciiRenderer {
-  constructor(image, canvas) {
+  constructor(image, canvas, deferred = false) {
     this.image = image;
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false });
@@ -128,9 +129,19 @@ export class AsciiRenderer {
     ctx.drawImage(image, 0, 0);
     const bitmap = ctx.getImageData(0, 0, this.sourceW, this.sourceH);
     this.original = bitmap.data.slice();
+    this.preparation = this.prepareSource(bitmap, ctx);
+    if (!deferred) for (const _ of this.preparation) { /* synchronous API for exports and tests */ }
+  }
+  static async create(image, canvas) {
+    const renderer = new AsciiRenderer(image,canvas,true);
+    for (const _ of renderer.preparation) await yieldToBrowser();
+    return renderer;
+  }
+  *prepareSource(bitmap, ctx) {
     // Remove only bird-colored pixels from the sky plate. The bird pixels become
     // character sprites; this prevents a static ghost behind the flapping wings.
-    this.birdMasks = birds.map(bird => {
+    this.birdMasks = [];
+    for (const bird of birds) {
       const xs = bird.points.map(p => p[0]), ys = bird.points.map(p => p[1]);
       const x0 = Math.floor(Math.min(...xs)) - 3, x1 = Math.ceil(Math.max(...xs)) + 3;
       const y0 = Math.floor(Math.min(...ys)) - 3, y1 = Math.ceil(Math.max(...ys)) + 3;
@@ -145,9 +156,11 @@ export class AsciiRenderer {
         const mix = (x - x0) / stride;
         for (let channel = 0; channel < 3; channel++) bitmap.data[i + channel] = this.original[left + channel] * (1 - mix) + this.original[right + channel] * mix;
       }
-      return { bird, x0, y0, x1, y1, mask, stride };
-    });
-    this.detailMasks = detailShapes.map(shape => {
+      this.birdMasks.push({ bird, x0, y0, x1, y1, mask, stride });
+      yield;
+    }
+    this.detailMasks = [];
+    for (const shape of detailShapes) {
       const x0 = Math.floor(Math.min(...shape.polygon.map(p => p[0]))) - 2;
       const x1 = Math.ceil(Math.max(...shape.polygon.map(p => p[0]))) + 2;
       const y0 = Math.floor(Math.min(...shape.polygon.map(p => p[1]))) - 2;
@@ -165,10 +178,12 @@ export class AsciiRenderer {
             this.original[left+c]*(1-(x-x0)/stride)+this.original[right+c]*(x-x0)/stride;
         }
       }
-      return { shape,x0,x1,y0,y1,mask,stride };
-    });
+      this.detailMasks.push({ shape,x0,x1,y0,y1,mask,stride });
+      yield;
+    }
     ctx.putImageData(bitmap, 0, 0);
-    this.cloudSources = cloudWindows.map(window => {
+    this.cloudSources = [];
+    for (const window of cloudWindows) {
       const [x0,y0,width,height] = window.box, pixels = new Uint8ClampedArray(width*height*4);
       for (let y=0; y<height; y++) {
         const valid=[];
@@ -191,9 +206,10 @@ export class AsciiRenderer {
           const mean=(pixels[l]+pixels[r])/2, amount=(1-edge/32)**2;
           pixels[l]=pixels[l]*(1-amount)+mean*amount; pixels[r]=pixels[r]*(1-amount)+mean*amount;
         }
+        if (!(y%12)) yield;
       }
-      return { ...window,width,height,pixels };
-    });
+      this.cloudSources.push({ ...window,width,height,pixels });
+    }
     this.base = document.createElement('canvas');
     this.cloudLayer = document.createElement('canvas');
     this.screenLayer = document.createElement('canvas');
@@ -207,9 +223,20 @@ export class AsciiRenderer {
   }
 
   resize(width, height) {
+    for (const _ of this.prepareSize(width,height)) { /* synchronous resize after orientation changes */ }
+  }
+  async resizeAsync(width, height) {
+    for (const _ of this.prepareSize(width,height)) await yieldToBrowser();
+    this.drawClouds(0);
+    await yieldToBrowser();
+    this.drawScreens(0);
+    await yieldToBrowser();
+  }
+  *prepareSize(width, height) {
     this.width = width; this.height = height;
     this.scale = width / this.sourceW;
     const dpr = Math.min(devicePixelRatio || 1, 2);
+    this.pixelRatio = dpr;
     for (const canvas of [this.canvas, this.base, this.cloudLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
@@ -234,8 +261,8 @@ export class AsciiRenderer {
     this.water = [];
     this.cloudCells = []; this.screenCells = []; this.cells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
-    const grid=[];
-    for (let row = 0; row < this.rows; row++) for (let col = 0; col < this.columns; col++) {
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
       const rgb = this.sample(sx, sy), seed = hash(col, row);
       const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
@@ -245,31 +272,9 @@ export class AsciiRenderer {
         const [x,y,w,h]=source.box; return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
       }) : -1;
       const screenIndex = this.screens.findIndex(screen => inside(sx,sy,screen.quad));
-      grid.push({sx,sy,rgb,seed,isWater,isHem,cloudIndex,screenIndex});
-    }
-    const occupied=new Uint8Array(grid.length);
-    for (let row=0; row<this.rows; row++) for (let col=0; col<this.columns; col++) {
-      const index=row*this.columns+col;
-      if (occupied[index]) continue;
-      const first=grid[index];
-      let span=1, rgb=first.rgb, sx=first.sx, sy=first.sy;
-      // Merge a few smooth 2×2 patches into one larger letter. Edges, small
-      // objects and screens keep the fine grid; unlike arbitrary font inflation,
-      // each large character has its own space and cannot collide with neighbors.
-      if (!(col%2) && !(row%2) && col+1<this.columns && row+1<this.rows &&
-          first.screenIndex<0 && !first.isHem && hash(Math.floor(col/8),Math.floor(row/8))<.42 &&
-          !this.detailMasks.some(r=>sx>r.x0-4 && sx<r.x1+4 && sy>r.y0-4 && sy<r.y1+4)) {
-        const indices=[index,index+1,index+this.columns,index+this.columns+1], block=indices.map(i=>grid[i]);
-        const same=block.every(c=>c.cloudIndex===first.cloudIndex && c.screenIndex===first.screenIndex && c.isWater===first.isWater && !c.isHem);
-        const contrast=Math.max(...[0,1,2].map(c=>Math.max(...block.map(p=>p.rgb[c]))-Math.min(...block.map(p=>p.rgb[c]))));
-        if (same && contrast<38) {
-          span=2; sx+=sxStep/2; sy+=syStep/2;
-          rgb=[0,1,2].map(c=>block.reduce((sum,p)=>sum+p.rgb[c],0)/4);
-          indices.forEach(i=>occupied[i]=1);
-        }
-      }
-      const {seed,isWater,isHem,cloudIndex,screenIndex}=first;
-      const cell = { sx, sy, rgb, span, size: span===2 ? 1.8+seed*.18 : .84+seed*.28,
+      // Modest variation within one cell: shrinking the previous double-size
+      // letters must also restore their neighboring cells, not leave empty gaps.
+      const cell = { sx, sy, rgb, span: 1, size: .88+seed*.24,
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
@@ -287,6 +292,8 @@ export class AsciiRenderer {
           waveA: sx * .052 + sy * .083, waveB: sx * .023 - sy * .037,
           rings: rippleSources.map(([x, y, phase]) => ({ distance: Math.hypot((sx - x) / 1.7, (sy - y) * 2.2), phase })) });
       }
+      }
+      if (!(row%2)) yield;
     }
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
@@ -307,8 +314,10 @@ export class AsciiRenderer {
       }
       return cells;
     };
-    this.sprites = this.birdMasks.map(region=>({bird:region.bird,cells:spriteCells(region)}));
-    this.details = this.detailMasks.map(region=>({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}));
+    this.sprites = [];
+    for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region)}); yield; }
+    this.details = [];
+    for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}); yield; }
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
     const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
@@ -321,12 +330,14 @@ export class AsciiRenderer {
     const atlasCtx = this.atlas.getContext('2d');
     atlasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.prepare(atlasCtx);
-    movingCells.forEach((cell, index) => {
+    for (let index=0; index<movingCells.length; index++) {
+      const cell=movingCells[index];
       cell.tx = (index % atlasColumns) * this.tilePixels;
       cell.ty = Math.floor(index / atlasColumns) * this.tilePixels;
       this.paint(atlasCtx, cell, cell.tx / dpr + this.tileSize / 2,
         cell.ty / dpr + this.tileSize / 2, 1, cell.color);
-    });
+      if (!(index%256)) yield;
+    }
   }
 
   sample(sx, sy) {

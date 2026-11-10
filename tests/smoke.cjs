@@ -121,7 +121,7 @@ async function gullBodyPoint(page) {
       return { ...changed, coverage, columns: renderer.columns,
         distantWingCleared:distantWing[1]-distantWing[0]>20 && distantWing[2]-distantWing[0]>20,
         sizeRatio:Math.max(...renderer.cells.map(c=>c.size))/Math.min(...renderer.cells.map(c=>c.size)),
-        largeLetters:renderer.cells.filter(c=>c.size>1.5).length, openEye, closedEye,
+        largestLetter:Math.max(...renderer.cells.map(c=>c.size)), openEye, closedEye,
         floatRise:floatPeak[1]-floatRest[1], rigidError:Math.abs(duckLength(0)-duckLength(3)),
         pinError:distance(detailPoint(paper,...paper.anchor,3),paper.anchor),
         paperTip:distance(detailPoint(paper,414,293,0),detailPoint(paper,414,293,1.1)),
@@ -138,7 +138,7 @@ async function gullBodyPoint(page) {
     assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert(changes.sizeRatio>1.9 && changes.largeLetters>200, 'mixed typography needs visibly different sizes');
+    assert(changes.sizeRatio>1.2 && changes.sizeRatio<1.3 && changes.largestLetter<=1.12, 'mixed sizes should stay subtle, without oversized symbols');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
     assert(changes.pinError<.001 && changes.paperTip>1, 'paper moves only away from its fixed attachment');

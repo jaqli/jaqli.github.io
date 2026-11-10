@@ -31,8 +31,9 @@ document.addEventListener('click', event => {
   snapshot.height = innerHeight;
   const snap = snapshot.getContext('2d');
   if (!ctx || !snap) { location.assign(url.href); return; }
-  const scene = document.querySelector('#ascii-canvas');
-  if (scene?.width) {
+  const candidate = document.querySelector(document.body.classList.contains('scene-ready') ? '#ascii-canvas' : '#scene-poster');
+  const scene = candidate instanceof HTMLImageElement ? (candidate.complete && candidate.naturalWidth ? candidate : null) : candidate;
+  if (scene) {
     const rect = scene.getBoundingClientRect();
     snap.drawImage(scene, rect.x, rect.y, rect.width, rect.height);
   }

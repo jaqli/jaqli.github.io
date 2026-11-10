@@ -1,5 +1,5 @@
 export const site = {
-  image: './assets/IMG_1183.PNG', width: 1536, height: 1024,
+  image: './assets/scene.webp', width: 1536, height: 1024,
   // Coordinates refer to the original image, never the viewport.
   hotspots: [
     { id: 'tech', href: './tech/', label: '技术博客', hint: 'TECH BLOG ↗', hintAt: [497, 338], points: '423,347 608,367 600,493 422,478' },

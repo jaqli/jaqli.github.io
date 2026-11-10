@@ -1,10 +1,11 @@
-import { site } from './site.config.js';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-scene4b';
-import './navigation.js';
+import { site } from './site.config.js?v=20261110-load1';
+import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-load1';
+import './navigation.js?v=20261110-load1';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
 const image = document.querySelector('#scene-image');
+const poster = document.querySelector('#scene-poster');
 const canvas = document.querySelector('#ascii-canvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 const pause = document.querySelector('#pause');
@@ -56,6 +57,7 @@ function layout() {
   document.querySelector('#pan-hint').hidden = !pannable;
   viewport.classList.toggle('is-pannable', pannable);
   if (!ctx || !ready) return;
+  if (renderer.width === width && renderer.height === height && renderer.pixelRatio === Math.min(devicePixelRatio || 1, 2)) return;
   renderer.resize(width, height);
   draw();
 }
@@ -100,13 +102,18 @@ new ResizeObserver(() => {
 }).observe(viewport);
 layout();
 syncMotion();
+poster.decode().then(() => performance.mark('scene-preview-ready')).catch(() => {});
 try {
   await image.decode();
+  performance.mark('scene-source-ready');
   if (!ctx) throw new Error('Canvas unavailable');
-  renderer = new AsciiRenderer(image, canvas);
+  renderer = await AsciiRenderer.create(image, canvas);
+  do { await renderer.resizeAsync(width, height); }
+  while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== Math.min(devicePixelRatio || 1, 2));
   ready = true;
-  layout();
+  draw();
   document.body.classList.add('scene-ready');
+  performance.mark('scene-ready');
   status.hidden = true;
   syncMotion();
 } catch {
