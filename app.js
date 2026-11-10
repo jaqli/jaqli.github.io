@@ -1,5 +1,5 @@
 import { site } from './site.config.js';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-motion2';
+import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-scene3';
 import './navigation.js';
 
 const viewport = document.querySelector('#scene-viewport');

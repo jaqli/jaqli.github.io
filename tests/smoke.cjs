@@ -19,6 +19,20 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
   else await page.mouse.click(point.x, point.y);
 }
 
+async function gullBodyPoint(page) {
+  // Freeze the visible flying bird while choosing a point inside its body.
+  if (await page.locator('#pause').getAttribute('aria-pressed') === 'false') await page.locator('#pause').click();
+  return page.locator('[data-hotspot="life"] polygon').evaluate(polygon => {
+    const point = new DOMPoint();
+    for (const index of [5, 6, 9, 10]) {
+      const vertex = polygon.points.getItem(index);
+      point.x += vertex.x / 4; point.y += vertex.y / 4;
+    }
+    const screen = point.matrixTransform(polygon.getScreenCTM());
+    return { x: screen.x, y: screen.y };
+  });
+}
+
 (async () => {
   const actual = JSON.parse(fs.readFileSync(path.join(__dirname, '../content/site.json'), 'utf8'));
   assert(actual.notion.posts.length > 0 && actual.profile.publications.length > 0);
@@ -44,27 +58,60 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     assert.equal(await page.locator('.scene-signature, .scene-header > span').count(), 0);
     assert.equal(await page.locator('[data-hotspot="cv"] .hotspot-label').evaluate(e => getComputedStyle(e).opacity), '1');
     const changes = await page.evaluate(async () => {
-      const { AsciiRenderer } = await import('./ascii-renderer.js');
+      const { AsciiRenderer, birds, birdPoint } = await import('./ascii-renderer.js');
       const canvas = document.createElement('canvas');
       const renderer = new AsciiRenderer(document.querySelector('#scene-image'), canvas);
       renderer.resize(1536, 1024);
       renderer.draw(0);
       const ctx = canvas.getContext('2d');
-      // Source-image regions: fixed wall, gull, open water, and yellow hem.
-      const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80], cloth: [819,555,50,55] };
+      const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80],
+        body: [785,505,55,75], hand: [665,520,40,25],
+        code: [441,383,109,77], terminal: [337,414,95,56], plot: [643,446,70,39] };
       const first = Object.fromEntries(Object.entries(regions).map(([key, box]) => [key, ctx.getImageData(...box).data]));
-      renderer.draw(2.4);
-      return Object.fromEntries(Object.entries(regions).map(([key, box]) => {
+      renderer.draw(6.2);
+      const changed = Object.fromEntries(Object.entries(regions).map(([key, box]) => {
         const pixels = ctx.getImageData(...box).data; let changed = 0;
         for (let i = 0; i < pixels.length; i += 4) {
           if (Math.abs(pixels[i] - first[key][i]) + Math.abs(pixels[i + 1] - first[key][i + 1]) + Math.abs(pixels[i + 2] - first[key][i + 2]) > 12) changed++;
         }
         return [key, changed / (pixels.length / 4)];
       }));
+      // Check whole character-sized patches, not individual dark strokes. A
+      // displaced water grid previously left wide strips of unpainted pixels.
+      const box = [1008,475,96,90];
+      const energy = pixels => {
+        const patches = [];
+        for (let y = 0; y < box[3]; y += 6) for (let x = 0; x < box[2]; x += 6) {
+          let total = 0;
+          for (let dy = 0; dy < 6; dy++) for (let dx = 0; dx < 6; dx++) {
+            const i = ((y + dy) * box[2] + x + dx) * 4;
+            total += pixels[i] + pixels[i + 1] + pixels[i + 2];
+          }
+          patches.push(total);
+        }
+        return patches;
+      };
+      renderer.draw(0);
+      const baseline = energy(ctx.getImageData(...box).data);
+      let coverage = 1;
+      for (const time of [1.2, 4, 7.2, 12]) {
+        renderer.draw(time);
+        const current = energy(ctx.getImageData(...box).data);
+        current.forEach((value, index) => { coverage = Math.min(coverage, value / baseline[index]); });
+      }
+      const flight = Array.from({ length: 57 }, (_, i) => birdPoint(birds[0], 991, 263, i * .5));
+      return { ...changed, coverage, columns: renderer.columns,
+        flightX: Math.max(...flight.map(p => p[0])) - Math.min(...flight.map(p => p[0])),
+        flightY: Math.max(...flight.map(p => p[1])) - Math.min(...flight.map(p => p[1])) };
     });
     assert(changes.wall < .04, 'architecture should stay still');
-    for (const key of ['bird', 'water', 'cloth']) assert(changes[key] > changes.wall * 3 + .02, `${key} should move independently`);
-    console.log('PASS jaq/li branding, permanent About Me hint and localized scene motion');
+    assert.equal(changes.body, 0, 'the seated torso must not twist');
+    assert.equal(changes.hand, 0, 'hands stay resting on the desk');
+    for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
+    assert(changes.coverage > .65, 'water must not develop wide black gaps');
+    assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
+    assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
+    console.log('PASS finer ASCII, continuous water coverage, steady person, three live screens and broad gull flight');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);
     const bounds = await page.locator('canvas').boundingBox();
     assert(bounds.x <= 0 && bounds.y <= 0 && bounds.width >= 1440 && bounds.height >= 900);
@@ -99,13 +146,13 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     await openScene(page);
     const gull = page.locator('[data-hotspot="life"]');
     assert.equal(await gull.locator('text, title, .hotspot-label').count(), 0);
-    const world = await page.locator('#scene-world').boundingBox();
-    await page.mouse.move(world.x + 991 / 1536 * world.width, world.y + 259 / 1024 * world.height);
+    const gullPoint = await gullBodyPoint(page);
+    await page.mouse.move(gullPoint.x, gullPoint.y);
     const style = await gull.locator('polygon').evaluate(p => ({ cursor: getComputedStyle(p).cursor, stroke: getComputedStyle(p).stroke, fill: getComputedStyle(p).fill }));
     assert.equal(style.cursor, 'default');
     assert.equal(style.stroke, 'rgba(0, 0, 0, 0)');
     assert.equal(style.fill, 'rgba(0, 0, 0, 0)');
-    await clickScenePoint(page, 991, 259);
+    await page.mouse.click(gullPoint.x, gullPoint.y);
     await page.waitForURL(`${origin}/life/`);
     console.log('PASS person opens CV; unmarked gull opens Life without hover hint');
 
@@ -149,8 +196,14 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     const fastPosition = await runCadence(50);
     const slowPosition = await runCadence(250);
     assert(fastPosition.every((value, i) => Math.abs(value - slowPosition[i]) < .001), 'low frame rates must not slow the animation clock');
+    await clockPage.emulateMedia({ reducedMotion: 'reduce' });
+    await clockPage.waitForFunction(() => document.querySelector('#pause').getAttribute('aria-pressed') === 'true', null, { polling: 50 });
+    const flyingTarget = await gullBodyPoint(clockPage);
+    assert(Math.abs(flyingTarget.x - 991 / 1536 * 960) > 50, 'test the bird after it has left its original location');
+    await clockPage.mouse.click(flyingTarget.x, flyingTarget.y);
+    await clockPage.waitForURL(`${origin}/life/`);
     await clockPage.close();
-    console.log('PASS motion speed is independent of frame rate');
+    console.log('PASS real-time motion and the hidden entry after the gull flies away');
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     mobile.on('pageerror', e => errors.push(e.message));
