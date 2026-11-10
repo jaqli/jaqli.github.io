@@ -1,4 +1,4 @@
-import { birdPose, minFontSize } from './ascii-renderer.js?v=20261110-type15';
+import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-glyph16';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do

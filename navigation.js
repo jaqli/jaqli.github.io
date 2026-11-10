@@ -1,4 +1,4 @@
-import { drawSceneLayers } from './scene-snapshot.js?v=20261110-type15';
+import { drawSceneLayers } from './scene-snapshot.js?v=20261111-glyph16';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let navigating = false;
 let overlay;

@@ -63,6 +63,9 @@ async function duckBodyPoint(page) {
       const canvas = document.createElement('canvas');
       const renderer = new AsciiRenderer(document.querySelector('#scene-image'), canvas);
       renderer.resize(1536, 1024);
+      // Isolate object geometry here; global character substitutions have a
+      // separate regression check and may legitimately alter stationary pixels.
+      renderer.glyphMotion.enabled=false;
       renderer.draw(0);
       const ctx = canvas.getContext('2d');
       const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80],

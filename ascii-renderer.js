@@ -1,10 +1,11 @@
-import { scenePixelRatio } from './render-budget.js?v=20261110-type15';
+import { scenePixelRatio } from './render-budget.js?v=20261111-glyph16';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261110-type15';
-import { screens, paintScreen } from './screen-content.js?v=20261110-type15';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-glyph16';
+import { screens, paintScreen } from './screen-content.js?v=20261111-glyph16';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-glyph16';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -379,6 +380,8 @@ export class AsciiRenderer {
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
       const isAmbient = !isCity && !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
+      cell.glyphLayer=cloudIndex>=0?'cloud':isHem||isAmbient?'dynamic':'base';
+      cell.water=isWater;
       this.cells.push(cell);
       if (cloudIndex>=0) {
         this.cloudCells.push({...cell,cloudIndex});
@@ -509,6 +512,7 @@ export class AsciiRenderer {
     // Static glyphs are baked into their textures. Lighting gets a separate,
     // bounded LRU atlas rather than retaining/growing the full photo palette.
     this.palette=new GlyphAtlas(this.fontSize,Math.max(2,dpr),2048);
+    this.glyphMotion=new GlyphMotion(this);
   }
 
   cloudIndex(sx,sy,rgb) {
@@ -641,6 +645,7 @@ export class AsciiRenderer {
   }
   draw(time) {
     const ctx = this.ctx;
+    this.glyphMotion.update(time);
     ctx.globalAlpha = 1;
     ctx.drawImage(this.base, 0, 0, this.width, this.height);
     this.drawClouds(time);

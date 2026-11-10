@@ -24,6 +24,8 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     }
     if(layered){const{LayeredScene}=await import('/layered-scene.js'+version),draw=LayeredScene.prototype.draw;sceneProfile.layered=[];
      LayeredScene.prototype.draw=function(time){self.layerProbe=this;const start=performance.now(),result=draw.call(this,time);sceneProfile.layered.push(performance.now()-start);return result;};
+     const{GlyphMotion}=await import('/glyph-motion.js'+version),update=GlyphMotion.prototype.update;sceneProfile.glyphChanges=[];
+     GlyphMotion.prototype.update=function(...args){const start=performance.now(),result=update.apply(this,args);sceneProfile.glyphChanges.push(performance.now()-start);return result;};
     }
    },layered);
    await page.evaluate(()=>{

@@ -1,6 +1,6 @@
-import { scenePixelRatio } from './render-budget.js?v=20261110-type15';
-import { SceneLayers } from './scene-layers.js?v=20261110-type15';
-import { AsciiRenderer } from './ascii-renderer.js?v=20261110-type15';
+import { scenePixelRatio } from './render-budget.js?v=20261111-glyph16';
+import { SceneLayers } from './scene-layers.js?v=20261111-glyph16';
+import { AsciiRenderer } from './ascii-renderer.js?v=20261111-glyph16';
 
 class WorkerRenderer {
   constructor(worker,canvas) {
@@ -52,7 +52,7 @@ class WorkerRenderer {
 // Start loading the worker/modules while the compressed scene downloads.
 export function prepareSceneRenderer(canvas){
   if(typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'||typeof createImageBitmap!=='function'||typeof canvas.transferControlToOffscreen!=='function')return null;
-  try{return new WorkerRenderer(new Worker(new URL('./scene-worker.js?v=20261110-type15',import.meta.url),{type:'module'}),canvas);}catch{return null;}
+  try{return new WorkerRenderer(new Worker(new URL('./scene-worker.js?v=20261111-glyph16',import.meta.url),{type:'module'}),canvas);}catch{return null;}
 }
 
 export async function createSceneRenderer(image,canvas,onProgress,prepared=prepareSceneRenderer(canvas)) {

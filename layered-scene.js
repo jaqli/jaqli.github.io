@@ -1,7 +1,6 @@
-import { waterSampleInterval } from './render-budget.js?v=20261110-type15';
-import { paintScreen } from './screen-content.js?v=20261110-type15';
-import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { fontStep } from './ascii-renderer.js?v=20261110-type15';
+import { waterSampleInterval } from './render-budget.js?v=20261111-glyph16';
+import { paintScreen } from './screen-content.js?v=20261111-glyph16';
+import { fontStep } from './ascii-renderer.js?v=20261111-glyph16';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -23,14 +22,9 @@ export class LayeredScene {
       const screen=r.screens[i];add('screen-'+i,[0,0,screen.width*s,screen.height*s],{width:screen.width*3,height:screen.height*3,matrix:screenMatrix(screen.quad,screen.width,screen.height,s),quad:screen.quad.map(p=>p.map(v=>v*s))});
     }
     // Restore the actual foreground curls above the complete right monitor.
-    const [hx,hy,hw,hh]=r.headMaskBox,head=createCanvas();
+    const [hx,hy,hw,hh]=r.headMaskBox;
     const x=Math.floor(hx*s),y=Math.floor(hy*s),w=Math.ceil((hx+hw)*s)-x,h=Math.ceil((hy+hh)*s)-y;
-    head.width=Math.ceil(w*dpr);head.height=Math.ceil(h*dpr);
-    // Copy existing hair pixels without stretching a fractional crop. Only the
-    // source mask is scaled; the foreground glyphs retain the base's sharpness.
-    const ctx=head.getContext('2d');ctx.drawImage(r.base,x*dpr,y*dpr,head.width,head.height,0,0,head.width,head.height);
-    ctx.globalCompositeOperation='destination-in';ctx.drawImage(r.headMask,(hx*s-x)*dpr,(hy*s-y)*dpr,hw*s*dpr,hh*s*dpr);
-    add('head',[x,y,w,h],{bitmap:await createImageBitmap(head)});
+    add('head',[x,y,w,h]);
     for(const sprite of r.details){
       if(sprite.texture){const {canvas,x,y,width,height}=sprite.texture;add(sprite.shape.id,[x,y,width,height],{bitmap:await createImageBitmap(canvas),shape:sprite.shape});}
       else{
@@ -69,10 +63,38 @@ export class LayeredScene {
     // Cache the same Number precision as the size calculation; float32
     // rounding made unchanged fractional bins compare unequal every frame.
     this.ambientSizes=new Float64Array(r.dynamic.length).fill(-1);
+    this.drawHead();
+  }
+  drawHead(){
+    const r=this.r,{ctx,spec}=this.targets.get('head'),{x,y,w,h}=spec;
+    ctx.clearRect(x,y,w,h);ctx.drawImage(r.base,x*r.pixelRatio,y*r.pixelRatio,spec.width,spec.height,x,y,w,h);
+    ctx.globalCompositeOperation='destination-in';ctx.drawImage(r.headMask,...r.headMaskBox.map(v=>v*r.scale));ctx.globalCompositeOperation='source-over';
   }
   resetWater(){this.waterIndices=[-1,-1,-1];}
   draw(time){
     const r=this.r,cloudFrame=Math.floor(time*30);
+    const extra=[],first=this.ambientSizes[0]===-1;
+    for(let i=0;i<r.dynamic.length;i++){
+      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
+      cell.renderSize=size;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(time*1.3)*.35*Math.max(0,Math.min(1,(cell.sy-617)/17))*r.scale:0);
+      if(first)r.stamp(cell,cell.x,cell.renderY,size,this.baseCtx);
+      else if(cell.kind==='hem'||size!==this.ambientSizes[i])extra.push(cell);
+      this.ambientSizes[i]=size;
+    }
+    const head=this.targets.get('head');
+    r.glyphMotion.update(time,extra,(patch,{box:[x,y,w,h],dynamic})=>{
+      const source=[0,0,w*r.pixelRatio,h*r.pixelRatio,x,y,w,h];
+      // Transfer just the updated pixels, not the entire mutable room texture.
+      this.baseCtx.drawImage(patch,...source);
+      if(dynamic.length){
+        this.baseCtx.save();this.baseCtx.beginPath();this.baseCtx.rect(x,y,w,h);this.baseCtx.clip();
+        for(const cell of dynamic)r.stamp(cell,cell.x,cell.renderY,cell.renderSize,this.baseCtx);
+        this.baseCtx.restore();
+      }
+      if(x<head.spec.x+head.spec.w&&x+w>head.spec.x&&y<head.spec.y+head.spec.h&&y+h>head.spec.y){
+        head.ctx.globalCompositeOperation='source-atop';head.ctx.drawImage(patch,...source);head.ctx.globalCompositeOperation='source-over';
+      }
+    });
     // Slow cloud tint changes need fewer texture updates than water/wing motion.
     if(cloudFrame!==this.cloudFrame){r.drawClouds(time,false);this.cloudFrame=cloudFrame;}
     const waterFrames=[],waterIndex=Math.floor(time/waterSampleInterval);
@@ -88,15 +110,6 @@ export class LayeredScene {
       r.drawDetails(time,[sprite],ctx);
     }
     r.drawLights(time,false);
-    for(let i=0;i<r.dynamic.length;i++){
-      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
-      if(cell.kind!=='hem'&&size===this.ambientSizes[i])continue;
-      this.ambientSizes[i]=size;
-      const pad=r.fontSize,x=cell.x-pad,y=cell.y-pad;
-      this.baseCtx.drawImage(r.base,x*r.pixelRatio,y*r.pixelRatio,pad*2*r.pixelRatio,pad*2*r.pixelRatio,x,y,pad*2,pad*2);
-      const dy=cell.kind==='hem'?Math.sin(time*1.3)*.35*Math.max(0,Math.min(1,(cell.sy-617)/17))*r.scale:0;
-      r.stamp(cell,cell.x,cell.y+dy,size,this.baseCtx);
-    }
     return waterFrames;
   }
 }
