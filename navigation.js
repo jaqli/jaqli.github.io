@@ -46,7 +46,7 @@ document.addEventListener('click', event => {
     }
   }
   const start = performance.now();
-  const label = link.dataset.transition || 'BACK TO THE SEA';
+  const label = link.dataset.transition || 'jaq/li';
   function animate(now) {
     const progress = Math.min(1, (now - start) / 520);
     ctx.fillStyle = '#080d13';

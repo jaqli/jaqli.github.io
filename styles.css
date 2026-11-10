@@ -23,14 +23,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .hotspot-label { pointer-events: all; }
 .hotspot-label rect { fill: #0a1721db; stroke: #7cbdba88; stroke-width: .7; }
 .hotspot-label text { fill: #cef7e6; font-size: 11px; letter-spacing: 1px; }
-.hotspot-label.on-hover { opacity: 0; pointer-events: none; transition: opacity .2s; }
-.hotspot:hover .on-hover, .hotspot:focus-visible .on-hover { opacity: 1; pointer-events: all; }
 .scene-header { position: fixed; top: max(25px, env(safe-area-inset-top)); left: max(30px, env(safe-area-inset-left)); display: flex; align-items: center; gap: 20px; pointer-events: none; text-shadow: 0 2px 15px #000; }
 .scene-header a { pointer-events: auto; }
 .wordmark { font-family: Arial, sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -1.8px; }
 .wordmark span { color: var(--accent); }
-.scene-header > span { font-size: 8px; letter-spacing: 2px; color: #c1d2d5; }
-.scene-signature { position: fixed; bottom: max(21px, env(safe-area-inset-bottom)); left: max(30px, env(safe-area-inset-left)); margin: 0; font: italic 13px Georgia, serif; color: #d6dfd2; text-shadow: 0 1px 8px #000; pointer-events: none; }
 .pan-hint { position: fixed; left: 50%; bottom: max(25px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; white-space: nowrap; font-size: 9px; letter-spacing: 1px; padding: 8px 10px; border-radius: 3px; background: #08121ac7; color: #cfdddf; pointer-events: none; }
 .pan-hint span { margin-right: 7px; }
 .motion-toggle { position: fixed; right: max(25px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); width: 34px; height: 34px; border: 1px solid #a4c5cc4d; border-radius: 50%; color: #dcf1e5; background: #08121ab3; }
@@ -59,12 +55,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .article-card h2 { font-family: Arial, "PingFang SC", sans-serif; font-size: 21px; font-weight: 400; margin: 0 0 10px; }
 .article-card p { font-size: 12px; line-height: 1.8; color: #8fa5ad; margin: 0; }
 .article-card:hover h2, .article-arrow { color: var(--accent); }
-.article-body { font-family: Arial, "PingFang SC", sans-serif; color: #bacace; line-height: 1.95; font-size: 16px; }
+.article-body { font-family: Arial, "PingFang SC", sans-serif; color: #bacace; line-height: 1.95; font-size: 16px; overflow-wrap: anywhere; }
 .article-body h2, .article-body h3 { color: #e4efeb; font-weight: 500; line-height: 1.4; margin: 2em 0 1em; }
 .article-body a { color: var(--accent); text-decoration: underline; }
 .article-body pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 22px; background: #101c27; border: 1px solid var(--line); border-radius: 4px; font-size: 13px; }
 .article-body blockquote { margin-left: 0; padding-left: 22px; border-left: 2px solid #76bdc1; color: #94acb5; }
 .article-body img { max-width: 100%; height: auto; }
+.article-body figure { margin: 30px 0; }
+.article-body figure img { display: block; margin: auto; border-radius: 4px; }
+.article-body figcaption { text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px; }
+.article-body > p { white-space: pre-line; }
 .profile-section { display: grid; grid-template-columns: 170px 1fr; gap: 35px; padding: 28px 0; border-bottom: 1px solid var(--line); }
 .profile-section h2 { font-size: 11px; font-weight: 400; color: var(--accent); letter-spacing: 1px; }
 .profile-section p { color: #a4b8bf; line-height: 1.9; margin: 0; font-size: 14px; }
@@ -75,8 +75,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @keyframes page-in { from { opacity: 0; transform: translateY(16px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
 @media (max-width: 700px) {
   .scene-header { top: max(23px, env(safe-area-inset-top)); left: 23px; }
-  .scene-header > span { display: none; }
-  .scene-signature { display: none; }
   .motion-toggle { right: 18px; }
   .document-header { padding: 24px; }
   .document-main { padding: 60px 24px 75px; }

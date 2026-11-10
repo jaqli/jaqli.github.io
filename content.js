@@ -24,23 +24,38 @@ function renderBlock(block) {
   const tags = { paragraph: 'p', heading: 'h2', subheading: 'h3', quote: 'blockquote', code: 'pre' };
   if (tags[block.type]) {
     const node = el(tags[block.type], block.text || '');
+    if (Array.isArray(block.runs) && block.type !== 'code') {
+      node.replaceChildren();
+      for (const run of block.runs) {
+        const url = safeURL(run.url);
+        if (url) { const a = el('a', run.text || ''); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; node.append(a); }
+        else node.append(document.createTextNode(run.text || ''));
+      }
+    }
     if (block.type === 'code') { const code = el('code', block.text || ''); node.replaceChildren(code); }
     return node;
   }
   if (block.type === 'list') { const list = el(block.ordered ? 'ol' : 'ul'); for (const item of block.items || []) list.append(el('li', item)); return list; }
+  if (block.type === 'divider') return el('hr', null, 'doc-divider');
   if (block.type === 'link') return externalLink(block.text || '原文 ↗', block.url);
-  if (block.type === 'image' && safeURL(block.url)) { const img = el('img'); img.src = safeURL(block.url); img.alt = block.alt || ''; img.loading = 'lazy'; return img; }
+  if (block.type === 'image' && safeURL(block.url)) {
+    const figure = el('figure');
+    const img = el('img'); img.src = safeURL(block.url); img.alt = block.alt || ''; img.loading = 'lazy';
+    figure.append(img);
+    if (block.caption) figure.append(el('figcaption', block.caption));
+    return figure;
+  }
   return el('p', block.text || '');
 }
 function renderPosts(data) {
-  const posts = data.notion.posts.filter(post => post.category === section);
+  const posts = data.notion.posts.filter(post => post.category === section).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   if (!posts.length) return;
   root.replaceChildren();
   for (const post of posts) {
     const card = el('a', null, 'article-card');
     card.href = `../post/?id=${encodeURIComponent(post.id)}`;
     card.dataset.transition = section.toUpperCase();
-    card.append(el('span', post.date || 'UNDATED', 'article-date'));
+    card.append(el('span', post.date || '', 'article-date'));
     const text = el('div'); text.append(el('h2', post.title), el('p', post.summary || '')); card.append(text, el('span', '↗', 'article-arrow'));
     root.append(card);
   }
@@ -49,7 +64,7 @@ function renderPost(data) {
   const id = new URLSearchParams(location.search).get('id');
   const post = data.notion.posts.find(item => item.id === id);
   if (!post) { document.querySelector('#post-title').textContent = 'Not found.'; root.replaceChildren(el('p', '这篇文章尚未收录。请返回文章列表。')); return; }
-  document.title = `${post.title} — LIJIA7`;
+  document.title = `${post.title} — jaq/li`;
   document.querySelector('#post-title').textContent = post.title;
   document.querySelector('#post-meta').textContent = `${post.category.toUpperCase()} / ${post.date || 'NOTES'}`;
   document.querySelector('#post-back').href = `../${post.category === 'life' ? 'life' : 'tech'}/`;
@@ -71,7 +86,8 @@ function renderProfile(data) {
       const p = el('div', null, 'publication');
       const title = el('a', paper.title);
       if (safeURL(paper.url)) { title.href = safeURL(paper.url); title.target = '_blank'; title.rel = 'noopener noreferrer'; }
-      p.append(title, el('p', [paper.authors, paper.venue, paper.year].filter(Boolean).join(' · '))); publications.append(p);
+      const year = paper.venue?.includes(String(paper.year)) ? '' : paper.year;
+      p.append(title, el('p', [paper.authors, paper.venue, year].filter(Boolean).join(' · '))); publications.append(p);
     }
     addSection('PUBLICATIONS', publications);
   }

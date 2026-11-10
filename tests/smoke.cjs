@@ -1,5 +1,7 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
+const fs = require('node:fs');
+const path = require('node:path');
 const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
 
 async function openScene(page) {
@@ -18,6 +20,18 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
 }
 
 (async () => {
+  const actual = JSON.parse(fs.readFileSync(path.join(__dirname, '../content/site.json'), 'utf8'));
+  assert(actual.notion.posts.length > 0 && actual.profile.publications.length > 0);
+  assert(actual.notion.posts.every(post => post.sourceStatus === 'Published' && post.blocks.length > 0));
+  const ids = actual.notion.posts.map(post => post.id);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const post of actual.notion.posts) for (const block of post.blocks) {
+    if (block.type === 'image') {
+      assert(block.url.startsWith('../assets/notion/'), 'article images must be retained locally');
+      assert(fs.statSync(path.resolve(__dirname, '../post', block.url)).size > 0);
+    }
+  }
+  console.log('PASS verified published content, unique source mappings and retained images');
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -25,6 +39,32 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     page.on('pageerror', e => errors.push(e.message));
     page.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
     await openScene(page);
+    assert.equal(await page.title(), 'jaq/li');
+    assert.equal(await page.locator('.wordmark').textContent(), 'jaq/li');
+    assert.equal(await page.locator('.scene-signature, .scene-header > span').count(), 0);
+    assert.equal(await page.locator('[data-hotspot="cv"] .hotspot-label').evaluate(e => getComputedStyle(e).opacity), '1');
+    const changes = await page.evaluate(async () => {
+      const { AsciiRenderer } = await import('./ascii-renderer.js');
+      const canvas = document.createElement('canvas');
+      const renderer = new AsciiRenderer(document.querySelector('#scene-image'), canvas);
+      renderer.resize(1536, 1024);
+      renderer.draw(0);
+      const ctx = canvas.getContext('2d');
+      // Source-image regions: fixed wall, gull, open water, and yellow hem.
+      const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80], cloth: [819,555,50,55] };
+      const first = Object.fromEntries(Object.entries(regions).map(([key, box]) => [key, ctx.getImageData(...box).data]));
+      renderer.draw(2.4);
+      return Object.fromEntries(Object.entries(regions).map(([key, box]) => {
+        const pixels = ctx.getImageData(...box).data; let changed = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (Math.abs(pixels[i] - first[key][i]) + Math.abs(pixels[i + 1] - first[key][i + 1]) + Math.abs(pixels[i + 2] - first[key][i + 2]) > 12) changed++;
+        }
+        return [key, changed / (pixels.length / 4)];
+      }));
+    });
+    assert(changes.wall < .04, 'architecture should stay still');
+    for (const key of ['bird', 'water', 'cloth']) assert(changes[key] > changes.wall * 3 + .02, `${key} should move independently`);
+    console.log('PASS jaq/li branding, permanent About Me hint and localized scene motion');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);
     const bounds = await page.locator('canvas').boundingBox();
     assert(bounds.x <= 0 && bounds.y <= 0 && bounds.width >= 1440 && bounds.height >= 900);
@@ -100,6 +140,16 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     await clickScenePoint(mobile, 991, 259, { tap: true });
     await mobile.waitForURL(`${origin}/life/`);
     console.log('PASS all touch targets remain aligned after panning and rotation');
+
+    await openScene(mobile);
+    await mobile.setViewportSize({ width: 390, height: 844 });
+    await mobile.waitForFunction(() => {
+      return ['tech', 'cv'].every(id => {
+        const rect = document.querySelector(`[data-hotspot="${id}"] .hotspot-label`).getBoundingClientRect();
+        return rect.left >= 0 && rect.right <= innerWidth;
+      });
+    });
+    console.log('PASS portrait framing keeps both visible entry labels on screen');
 
     const fixture = {
       notion: { posts: [

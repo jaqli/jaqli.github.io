@@ -1,16 +1,3657 @@
 {
   "notion": {
-    "source": "https://app.notion.com/p/aad3da37ec704b17a0501a2605cc1a5b?v=03a38571dfd7444f9d921cbbf386a696",
-    "syncedAt": null,
-    "posts": []
+    "source": "https://familiar-koi-5e4.notion.site/aad3da37ec704b17a0501a2605cc1a5b",
+    "syncedAt": "2026-11-10T05:33:59+00:00",
+    "posts": [
+      {
+        "id": "39c3f933a9b64649966bcc69d1feb5fb",
+        "category": "life",
+        "title": "2023",
+        "date": "2024-03-09",
+        "summary": "允许一切发生，然后做个勇敢的人",
+        "source": "https://familiar-koi-5e4.notion.site/39c3f933a9b64649966bcc69d1feb5fb",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "现在是2024年3月9日晚，如图，我刚点上香薰蜡烛希望今晚有个好觉。",
+            "sourceBlockId": "1e2585ab-4e90-487a-a545-c76da4a0716d"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/098fc4189f258dd17662.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "7443b2a9-a734-4ce6-9c3e-dd45605e04ad"
+          },
+          {
+            "type": "paragraph",
+            "text": "突然觉得都烘托到这了，不写点什么好像对不起买蜡烛的钱。",
+            "sourceBlockId": "2d080da0-637e-4299-9b3a-2ac5f6a74140"
+          },
+          {
+            "type": "paragraph",
+            "text": "是时候跟2023年一刀两断了。",
+            "sourceBlockId": "0f6f2a9f-6aea-4ae8-a790-2c821ada6b3b"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "33ba0d34-87ee-4332-85ed-d2faeac63004"
+          },
+          {
+            "type": "paragraph",
+            "text": "事实上断不了一点，我先是写到这里被eccv压力一阵子写完论文赶ddl，然后直接躺到desk reject出来赶neurips，然后就到现在了——2024年10月7日凌晨4.30，距离原定的2024年终总结还有2个月。",
+            "sourceBlockId": "117a59b4-bb47-80a6-bf8d-df33b4ff692b"
+          },
+          {
+            "type": "paragraph",
+            "text": "还是先看看远处的2023吧家人们",
+            "sourceBlockId": "117a59b4-bb47-8083-b6fc-cf8eb10563a7"
+          },
+          {
+            "type": "paragraph",
+            "text": "2023年的工作大体上挺顺利的，MM水过之后实际上没啥毕业压力了（叩谢水会），王博数据集的ICCV也顺利中稿，扩展版本的TPAMI前一阵子也接收了。我MM结束后又由着毕业躺到8月份开始做第二个工作，在方向上兜兜转转最终去尝试了depth refinement，除了进度有点拖沓其实一切都还比较顺利，工作上这几年总归是还好的，唯一可能不足的是我想要的总是比目前要多，而我的能力又不足以撑起我的想象力hh。距离我所追求的学术好人似乎仍有许多距离，尽快成长，然后有能力帮助身边的人，应当是我2023年对自己的期许了。",
+            "sourceBlockId": "445b5bac-c880-409a-a9be-37c98e0530f8"
+          },
+          {
+            "type": "paragraph",
+            "text": "因为毕业，2023年也去了不少地方，年一过完就跟why约了一趟成都+青城山都江堰，也去看了眼大熊猫擦边，写到这里突然想起来还有张当地刮刮乐在我这放着没兑奖找不到了，痛失20r属于是；4月趁着本科的尾巴和朋友们去了趟长沙，大半夜翻到zt的爱晚亭生活照快压不住嘴角hhh；5月底还闪击襄阳，牛肉面真好吃x.x（；6月5号上午拍完毕业照就飞去青岛（改签费300r这辈子也忘不了了），中午喝啤酒喝到昏昏沉沉，鲅鱼饺子也好好吃ˋ( ° ▽、° )，作为一个内陆人还是很向往大海；紧接着就飞吉林和延吉，被东北人的热情culture shock，和孟老师why看着一桌子大份雪衣豆沙+锅包肉+卷饼大眼瞪小眼， 在延吉半天吃4顿，一冲动打了个的去看长白山，也去体验了一下当地极（ba）乐（ga）汤（（",
+            "sourceBlockId": "117a59b4-bb47-8003-ab2f-e0e6980f37ed"
+          },
+          {
+            "type": "paragraph",
+            "text": "然后就本科完结撒花嘞，具体可以看之前的毕业blog写了挺多的——怪不得我总感觉我写过2023年终总结",
+            "sourceBlockId": "117a59b4-bb47-80e8-8219-dd51bfaadcf4"
+          },
+          {
+            "type": "paragraph",
+            "text": "研究生还是有点意思的，接受邀请尝试去当研究生班主任，确实看着这群大一小孩会常常感慨自己老了，也看着他们憧憬、焦虑，即使说过许多规划也还是在用年轻为今后的选择不断试错hh——一如当初的我们。因为特殊的招生和选拔机制，30个来自五湖四海的年轻人聚在一起，然后在接下来的几年渐行渐远；这份学生工作到目前为止应该是最有意思的，尽管有不少麻烦。",
+            "sourceBlockId": "117a59b4-bb47-80fe-83f2-f59c0cd023e7"
+          },
+          {
+            "type": "paragraph",
+            "text": "10月还去了趟洛阳，胡辣汤出乎意料的不错，当地的洛邑古城真是幻视襄阳盛世唐城；10月28号上海-渥太华的航班同天到手的签证，十年签到手与未能成行的遗憾叠加，希望这次neurips签证官能对我们好一点吧hhh",
+            "sourceBlockId": "117a59b4-bb47-8061-92f8-e2d7f841b6a5"
+          },
+          {
+            "type": "paragraph",
+            "text": "再往后就很平淡了，和茫茫众多的科研狗一样，实验室和家两点一线，偶尔尝试不同的食物，出去逛逛。事实上我在这个时间节点把2023的年终总结写完的原因就在于eccv2024蹦完迪之后想写点什么，但考虑到单开一章我就会犯懒把2024年终总结往后拖，最后索性扔到这里来了。当时喝完两杯干红一杯香槟一杯鸡尾酒一杯啤酒已经微醺，eccv又有蹦迪的优良传统，塞了两口千层面之后就跟冰皇leo天齐和昕毅去人群中间happy了。我们的前面是经验丰富的韩国人，右边是一个在意大利念phd的土耳其人，后面有几个印度人和epfl的法国人，进去时还看见零星站在人群外围观的日本人，大伙语言不通但热情一致，用最简单的动作表达纯粹赤裸的开心（也确实是开心毕竟都中稿了hhh）。我们五个围在一起跟身边人跳起来的时候，情绪酝酿翻涌上头，学术圈此刻对我而言确实有种世界大同的奇妙感觉。",
+            "sourceBlockId": "117a59b4-bb47-808e-a5ad-cc03068d0a3a"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/8d87c679589f4cbf2b62.jpg",
+            "alt": "ECCV2024 10.3晚宴纪念",
+            "sourceBlockId": "117a59b4-bb47-8092-a597-e8cf91c6e768"
+          },
+          {
+            "type": "paragraph",
+            "text": "星奔川骛，岁岁年年。“人生值得欣慰之处便是，每一天都有结束的时候。今天亦不例外。”",
+            "sourceBlockId": "c28be93f-1fcb-4fce-8178-a400d5b84576"
+          },
+          {
+            "type": "quote",
+            "text": "我与我周旋久，宁做我",
+            "sourceBlockId": "b3feb222-2ab7-4035-8cb2-f736968554c3"
+          }
+        ]
+      },
+      {
+        "id": "117a59b4bb4780839619ea2ded8d4445",
+        "category": "life",
+        "title": "2025",
+        "date": "",
+        "summary": "且尽身前有限杯",
+        "source": "https://familiar-koi-5e4.notion.site/117a59b4bb4780839619ea2ded8d4445",
+        "sourceCategory": "",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "好久不见。",
+            "sourceBlockId": "2cfa59b4-bb47-805f-8dee-dfb9b0326fe3"
+          },
+          {
+            "type": "paragraph",
+            "text": "现在是2025年12月20日，跨年还有11天，我在两天之前完成了第一份工作的重大(?)决定，为了避免以后自己忘记还是list一下，oc的可选项有：美团北斗-longcatvideo、京东TGT-探索研究院视频生成世界模型、蚂蚁PlanA-百灵Ming多模态团队、字节筋斗云-中国区商业化GenAI、腾讯青云-混元多模态应用模型中心、淘天阿里星-拍立淘生成团队（试衣、虎鲸文娱阿里星-摩酷实验室世界模型、华为天才少年-车bu自动驾驶解决方案预研、Momenta MStar-自动驾驶算法、高德地图-世界模型与具身智能、通义实验室-通义万相世界模型、小红书-视觉算法发布团队、Soul-数字人视频生成、快手-可灵视频生成应用团队。",
+            "sourceBlockId": "2cfa59b4-bb47-802b-99b7-c0b5033f4fa5"
+          },
+          {
+            "type": "paragraph",
+            "text": "真不少啊，刚翻了下面试安排横跨7到10月，一共55场，峰值一天3场一周8场，致敬传奇面试王。",
+            "sourceBlockId": "2cfa59b4-bb47-8008-920f-f3b7c173fff7"
+          },
+          {
+            "type": "paragraph",
+            "text": "那就从后往前聊吧，这两年确实是个人认知发生飞跃的阶段，越往后的事情似乎确实重要性越高。发生的事情也很多，使我不由得后悔没写2024的年终总结，在现在回看过去，模糊感觉当时自己应该就是个等待入职腾讯狠狠恰半价Q币从而能给三角洲冲月卡的小P孩，一年不到真是瞬息万变。",
+            "sourceBlockId": "2cfa59b4-bb47-8078-8636-c929f99bdbd1"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "2e5a59b4-bb47-80a2-a51b-e4370e2709e4"
+          },
+          {
+            "type": "subheading",
+            "text": "Offer",
+            "sourceBlockId": "2e5a59b4-bb47-8084-ab7c-c507b7a65001"
+          },
+          {
+            "type": "paragraph",
+            "text": "先聊聊Offer选择吧，我尽可能详细的记录这一周的所有重要信息和节点，decision has done，但两年后如果自己完整回想现在的情形以及做个复盘的话倒也功德无量。",
+            "sourceBlockId": "2cfa59b4-bb47-801a-a7dd-c218d5c525da"
+          },
+          {
+            "type": "list",
+            "items": [
+              "上周五（2025.12.12）下午2. Allen哥打了个电话直接开了腾讯这边的package，符合&略微超出预期，职级和绩效&mentor压力反而确实让人犹豫了一下。但也没多想先同步给了其他家。"
+            ],
+            "ordered": true,
+            "sourceBlockId": "2cfa59b4-bb47-80ee-8245-c908332c4246"
+          },
+          {
+            "type": "list",
+            "items": [
+              "周一收到淘天方案，超出预期。与vshao&junshu&James老师们聊了一轮感觉淘天混元二选一了，同时想起来自己还有个通义的offer于是终于加上hr（蚌埠住了）也做了个同步。"
+            ],
+            "ordered": true,
+            "sourceBlockId": "2cfa59b4-bb47-805b-8ad3-dd99c6f59eae"
+          },
+          {
+            "type": "list",
+            "items": [
+              "周二京东Tommy老师保温，周三通义初步透露薪酬方案，由于团队技术基础以及侧重业务决定先排除淘天，在通义京东混元里三选一。"
+            ],
+            "ordered": true,
+            "sourceBlockId": "2cfa59b4-bb47-80d6-9c02-daeb8a688399"
+          },
+          {
+            "type": "list",
+            "items": [
+              "周四再次和julia&vshao&qinglin聊，促成最后选择混元的因素有几个方面："
+            ],
+            "ordered": true,
+            "sourceBlockId": "2cfa59b4-bb47-8063-992a-dec80ae187f8"
+          },
+          {
+            "type": "list",
+            "items": [
+              "+1和+2待我确实不错，合作愉快也非常熟悉，真拒掉了世界模型这块有承压风险（至少时间上delay风险），gamecraft一部分也是我自己的成果，一旦与竞品开始代差就有可能万劫不复，最大的因素出于厚道和工作连续性。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2cfa59b4-bb47-80cb-b946-c66e314a2c29"
+          },
+          {
+            "type": "list",
+            "items": [
+              "职级已经相当高，在这个层面上，主导一个工作的成功与加入通义成熟团队（虽然是不成熟方向）作为一个核心贡献者仍有差别，我早晚需要一个主导项目成功的经历。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2cfa59b4-bb47-8001-a5c2-ed414d5dcc0b"
+          },
+          {
+            "type": "list",
+            "items": [
+              "混元内部环境向好，3D的视频方向开始聚焦，与wangheng的合作&分工逐渐明确。在技术积累和基模角度讲也是除了通义干世界模型最有优势的团队了。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2cfa59b4-bb47-80be-80a5-ef4f8e23e176"
+          },
+          {
+            "type": "list",
+            "items": [
+              "风险上最大的其实是万相世界模型由于基模优势会比混元快/成功，因此可能更需要聚焦游戏场景与部分特性的充分开发，打出特点比攒出一个全面超越genie3的工作性价比/影响力高，且开源等部分目前看混元稍微更明确/话语权大。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2cfa59b4-bb47-803b-a281-c6ea617204b3"
+          },
+          {
+            "type": "paragraph",
+            "text": "综上，配合多层级的拆解：干什么事情（工作方向）-能不能干成（可用资源：人力/算力/优先级）与什么时候干成-干成后收益/干不成的风险与兜底，导出方向相同、第二层级接近、第三层级混元占优的结论，最终决定留下了。看看之后的发展和变化，感觉正式入职之前就能大概有区分了哈哈。",
+            "sourceBlockId": "2cfa59b4-bb47-8012-88ab-efb5090aca14"
+          },
+          {
+            "type": "paragraph",
+            "text": "这跟半夜淘宝激情下单没啥区别，群发拒信清空桌面后脑子里好像就一个念想了：",
+            "sourceBlockId": "2cfa59b4-bb47-808d-aecf-e80a70fc80c4"
+          },
+          {
+            "type": "quote",
+            "text": "向两年后射一支箭，希望厚道和善良能像以往一样拉自己一把",
+            "sourceBlockId": "2cfa59b4-bb47-8022-a0ff-dc38888184b1"
+          },
+          {
+            "type": "paragraph",
+            "text": "但其实最后决赛圈选哪个其实都问题不大，就像绝大多数以往的人生重大选择一样，更为关键的往往是被忽视的更high-level的部分，一如高考选定搞ai专业而不是纠结几个在排名上不分上下的学校，一如保研时去一个信得过的好老师而不是在意自己的学历升值问题。若干年后的复盘应该是：如果成了，那会发现去哪个企业不重要；如果没成，那大概率是赛道选错了，最优解可能是具身智能/agent(?)，也可能是一个还没炒起来的其他专业，e.g. 核聚变/航天哈哈哈。如果再往下推一步，其实也应该知足，在工作的黄金期能赶上一个行业的兴起已经足够确保个人和家庭的高质量生活，如果能蹭上两个那只能说成功了。",
+            "sourceBlockId": "2cfa59b4-bb47-806c-961d-ce0a2b567f10"
+          },
+          {
+            "type": "paragraph",
+            "text": "现在是1月11日了，不出意外年度总结就是在年内敲不完的，但是只敲完一个部分确实足以见得文字模态表达欲和表达能力的断崖式下跌。",
+            "sourceBlockId": "2e5a59b4-bb47-8080-85d1-c1a4615b7698"
+          },
+          {
+            "type": "paragraph",
+            "text": "不能再这样下去了，定个ddl这两天写完。",
+            "sourceBlockId": "2e5a59b4-bb47-80c0-8451-d9b280056115"
+          },
+          {
+            "type": "subheading",
+            "text": "旅行",
+            "sourceBlockId": "2e5a59b4-bb47-800a-97be-dde69a6fd220"
+          },
+          {
+            "type": "paragraph",
+            "text": "除了最后的一场秋招，这两年剩下的大头应该就是去了不少地方，无论是实习在上海呆了大半年，还是跟着NeurIPS 2024、CVPR 2025、ICCV 2025以及即将到来的AAAI 2026去了很多地方。世界盛大灿烂，不看看属实可惜：",
+            "sourceBlockId": "2e5a59b4-bb47-80b7-90fb-d66385cf1963"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/0b86616bc065d4ce1ec1.jpg",
+            "alt": "温哥华峡湾的蓝调时刻",
+            "sourceBlockId": "2e5a59b4-bb47-8093-b550-ddd81ec52042"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/91f037c268010be6949e.jpg",
+            "alt": "乡村音乐之都纳什维尔随处可见的蹦迪bus",
+            "sourceBlockId": "2e5a59b4-bb47-80f9-ac27-cc31058e98b8"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f869e1795aa2f089f138.jpg",
+            "alt": "来自直升机500m海拔的夏威夷欧胡岛风光",
+            "sourceBlockId": "2e5a59b4-bb47-801a-b010-dd494a9d4bb9"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ea09dab8d4ec05095084.jpg",
+            "alt": "浦东奥赛美术展的莫奈干草堆真迹",
+            "sourceBlockId": "2e5a59b4-bb47-800d-afaa-c6c8bd7c4ee3"
+          },
+          {
+            "type": "paragraph",
+            "text": "也通过人才计划openday白嫖了不少出去玩的机会：",
+            "sourceBlockId": "2e5a59b4-bb47-8008-96cf-f9cdddc87c55"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/75f7f7f93d7e8c2c2a03.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-8096-8f1c-df96dadeb769"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b97ffbb504b1ae628c68.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-80c4-81e4-eb33b15e4029"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ac309e4d794e8f36d9b3.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-804b-933a-d16339cdc5ea"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/15cfe42c0eff6108c9be.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-8064-91b3-eb14934032d1"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/16935b781604f1c4fd48.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-80d8-9674-ffdf905a66fb"
+          },
+          {
+            "type": "paragraph",
+            "text": "当然生活不止旅行，可能是有独自在外实习的经历，这两年从自处的新体验/提升中获得了越来越多的情绪价值：",
+            "sourceBlockId": "2e5a59b4-bb47-8057-869e-ed1a98a66646"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/d0ad65fa300b1d450cba.jpg",
+            "alt": "Captain George",
+            "sourceBlockId": "2e5a59b4-bb47-8031-b4fd-e1bb95b670ee"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b6a6b87c595ea3176b76.jpg",
+            "alt": "Captain George",
+            "sourceBlockId": "2e5a59b4-bb47-807f-8c35-df880681ebb7"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/09130ea1387bff48fd48.jpg",
+            "alt": "三又二分之一的咖酒",
+            "sourceBlockId": "2e5a59b4-bb47-803f-a300-c92ff5b5c8f2"
+          },
+          {
+            "type": "paragraph",
+            "text": "行万里路、玩乐人生已经成为了我拿到个人满足感credit的最重要来源之一，似乎目前的人生价值飞轮已经成型。主回路：干活开卷→干成有意义有影响力的事情→工作credit正反馈；副回路：工作收益→旅游/试试新东西→情绪价值。朋友锐评我是高精力人，个人感觉似乎也不是，我好像在年级相对大的时候才明确意识到自己能从新鲜事物和体验中获得超额情绪价值，也因此，情绪价值的来源比较多，想干的事情自然多｜工作干好了才有钱整活哈哈",
+            "sourceBlockId": "2e5a59b4-bb47-804c-bf48-d1c3ebf49982"
+          },
+          {
+            "type": "subheading",
+            "text": "技能",
+            "sourceBlockId": "2e5a59b4-bb47-80a5-9201-eccb08ff6e17"
+          },
+          {
+            "type": "paragraph",
+            "text": "除了工作上的积累和旅行见识，今年可能还有两处收获，一是入门了网球，二是入门了港美股(?。",
+            "sourceBlockId": "2e5a59b4-bb47-8003-9a56-e0c0a7d182b7"
+          },
+          {
+            "type": "paragraph",
+            "text": "翻了一下第一个网球拍是4月买的，也就是实习俩月之后发现自己体能下降太厉害，也想周末找点事情而不是纯粹窝在家里回血，经过精挑细选，网球从一众运动中脱颖而出。其兼具了有氧、挥拍释放压力、急停少心率相对平稳、养生球也有中等难度与观赏性、只用找一个搭子等优点，除了可能对手腕手肘有压力之外就是完美运动了。",
+            "sourceBlockId": "2e5a59b4-bb47-804f-be07-dcdeed60bd3e"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/134d682887fc419a2dfc.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-803c-bf97-dfaea880a616"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/edf189902e39d53048be.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "2e5a59b4-bb47-808e-a985-e1f16ab67c6a"
+          },
+          {
+            "type": "paragraph",
+            "text": "好玩爱玩，20个小时的课已经到2.5+了，希望在学校的这段时间天气好一点还能多打打，稳固稳固发球和底线争取上3。",
+            "sourceBlockId": "2e5a59b4-bb47-80cb-b581-c022884530a7"
+          },
+          {
+            "type": "paragraph",
+            "text": "下半年还开始多投一点进港美股做价值投资，主要也都是比较熟悉的互联网/AI企业吧，之后接触点更高端的期权手段积累一点新知识哈哈。Notion里也开了个不可见的笔记页来做投资复盘，希望之后能多写写（",
+            "sourceBlockId": "2e5a59b4-bb47-8047-b4d3-c754178ff448"
+          },
+          {
+            "type": "subheading",
+            "text": "身体&朋友",
+            "sourceBlockId": "2e5a59b4-bb47-8092-85e1-e043b8dbde8f"
+          },
+          {
+            "type": "paragraph",
+            "text": "终于到最后一趴了，仍在努力维系工作状态下的身体平衡，网球、健身、作息都是其中的一环，所幸都还可以，自律的底线目前看还没垮完hh。可能最头疼的就是体重了，离预期的目标还有很大的差距，即使是在学校躺平猛猛运动+自己做饭的情况下仍然如此，可能还是体质如此吧难顶 -_-",
+            "sourceBlockId": "2e5a59b4-bb47-807e-aba9-df4d187c416e"
+          },
+          {
+            "type": "paragraph",
+            "text": "朋友与交际这块不知不觉已经变成最无关紧要的部分，对从外部获取情绪价值的需求不断降低（虽然不知道是好是坏），虽然偶有波澜，但大体上还是保持稳定，也似乎已经触及我能分出来的精力上限了orz",
+            "sourceBlockId": "2e6a59b4-bb47-806e-a2c4-de1920f47930"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "2e6a59b4-bb47-8065-8f73-e4e4120aff8b"
+          },
+          {
+            "type": "paragraph",
+            "text": "告别昨天的一场大雨",
+            "sourceBlockId": "2e6a59b4-bb47-8046-ab60-fc5a5fbb817e"
+          },
+          {
+            "type": "paragraph",
+            "text": "一切都未到庆祝之时",
+            "sourceBlockId": "2e6a59b4-bb47-8023-8ba8-cc77659acd45"
+          },
+          {
+            "type": "quote",
+            "text": "per aspera ad astra",
+            "sourceBlockId": "2e6a59b4-bb47-8038-87d0-f41f8f5ad247"
+          }
+        ]
+      },
+      {
+        "id": "f38899eecb01402a951e725834b4d6a8",
+        "category": "life",
+        "title": "我想我会记得",
+        "date": "2023-06-26",
+        "summary": "此去相见虽难再，同看晴空万里星",
+        "source": "https://familiar-koi-5e4.notion.site/f38899eecb01402a951e725834b4d6a8",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "时钟转过12点，我的年龄属性即将++，每次过生日的时候想到这一点，总还是会觉得有点奇妙。",
+            "sourceBlockId": "2d77355a-fd93-4589-a6fe-ce46ef3d104c"
+          },
+          {
+            "type": "paragraph",
+            "text": "我的blog已经半年未更新了，趁着过生日的时间节点，似乎有必要再冒个泡，虽然也不知道正在打出来的这段气泡最终会不会对其他人可见",
+            "sourceBlockId": "2005a535-2e90-4f9f-8318-65364e72912e"
+          },
+          {
+            "type": "paragraph",
+            "text": "也一直觉得生日放在年中会比较方便（这不受我控制），我可以在年终总结之外另找一个时间节点来写点东西。今年的这个时间点较往年更为特殊，除了旅游和一些有意思的事情，还可以写点毕业感想，虽然想的不多就是了。",
+            "sourceBlockId": "ca564430-fcf4-40b3-883e-854d34d6bde6"
+          },
+          {
+            "type": "paragraph",
+            "text": "上半年生活上最重要的事情就是旅游了，赶着大学的尾巴去了成都、青城山、都江堰、长沙、襄阳、青岛、长春、延吉，一列下来感触颇深，确实去了不少地方，看了不少风景",
+            "sourceBlockId": "5f278bc9-5827-4257-baf3-4142032ff26f"
+          },
+          {
+            "type": "paragraph",
+            "text": "也花了不少钱噢（",
+            "sourceBlockId": "cf35fabd-9255-47ef-a3e8-8e3d69e02e39"
+          },
+          {
+            "type": "paragraph",
+            "text": "旅游的部分之后应该单开一篇，事实上它已经存在于我的草稿箱里了。我在长白山上意气风发开了个头，然后直到现在也杳无音讯，只能期待下次再出去的时候把他补完。",
+            "sourceBlockId": "b86cbc41-c7d0-433c-b87e-eec0c971cf77"
+          },
+          {
+            "type": "paragraph",
+            "text": "工作中最重要的部分就是送走了一尊大佛，我实在不想再回过头看他了，再过几天就要出分，但是已经不想做任何唯物上的努力和尝试，只想去老板推荐的归元寺拜一拜，然后听从学长的建议把朋友圈的背景换成“好运莲莲”（",
+            "sourceBlockId": "1d3c1e9f-9e1c-43f4-9945-5b335367cf62"
+          },
+          {
+            "type": "paragraph",
+            "text": "但是相比起来，人际上的问题更令人头痛了，平心而论大部分情况下责任应该都在于我。我始终认为情绪稳定是一个人最难能可贵的品质，在这里也希望自己不虚长一岁，平衡好各类人际关系，维系好难得的深交，尽快拥有和年龄匹配的成年人的定力和平和，细节上有温暖，大事上靠得住。",
+            "sourceBlockId": "d369ed97-d5cd-4bc2-b0e1-af33e43618e9"
+          },
+          {
+            "type": "paragraph",
+            "text": "越想越觉得真是受不了自己一点（感谢朋友",
+            "sourceBlockId": "56e4d766-8aea-4a60-968d-b67566aa37e3"
+          },
+          {
+            "type": "paragraph",
+            "text": "在中国，毕业是一个很宏大的命题，也是确切的时间节点。无数琐碎的事情，或主导或参与，已经磨灭了不少情绪，但我对于这个抽象的印象仍然如此感慨，可能伤时，可能感别，实在无法说清了。",
+            "sourceBlockId": "a9736372-9853-4cab-abc3-992ada4b471e"
+          },
+          {
+            "type": "paragraph",
+            "text": "lr在最后的班长饭局上说自己对于这个班简直毫无感情，毕业照、聚餐之类都不想组织，语气有点恨不得一走了之。",
+            "sourceBlockId": "0e85b889-8e9b-4e62-88aa-052290836975"
+          },
+          {
+            "type": "paragraph",
+            "text": "我当时吹了三瓶左右，说话已然不太过脑子，但是可能较平时格外真诚，问了lr一句",
+            "sourceBlockId": "7e464bac-16a4-49ab-b10f-4457f0796926"
+          },
+          {
+            "type": "paragraph",
+            "text": "那你对自实1901这个抽象概念有感情吗",
+            "sourceBlockId": "ba27cd76-089c-4248-b0b6-73bad06ff7e8"
+          },
+          {
+            "type": "paragraph",
+            "text": "他和王导同时点头，回道，那肯定有啊",
+            "sourceBlockId": "654d09e9-c23b-44f7-a920-b505516ffbb9"
+          },
+          {
+            "type": "paragraph",
+            "text": "确实，抽象的人如此可爱，但具体的人却如此麻烦。",
+            "sourceBlockId": "8ae92d47-c9f6-42c8-9ef1-9c3038f579fc"
+          },
+          {
+            "type": "paragraph",
+            "text": "但总归是要拥抱具体的人的。幸好身边可爱的具体的人仍然很多，班长局当晚在爱广等ytb，看着路灯情绪裹挟回忆就不自觉地翻涌起来，到了烧烤店化雨和远鹏在那里翻大一大二聚餐的照片，属于是差点没绷住（",
+            "sourceBlockId": "f4b60126-6d7f-4aa6-95b6-e1fc9e759988"
+          },
+          {
+            "type": "paragraph",
+            "text": "我想我会记得这段经历的，直到山水相逢。",
+            "sourceBlockId": "a20eb29c-be2b-410c-ab0f-af1e50a96c4b"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/788df209ced937b95cfc.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "9da83e83-479f-4fc1-8f39-1dc0ace31924"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "2c1f5796-6cef-4bea-bb1c-78545b1a4fdb"
+          },
+          {
+            "type": "paragraph",
+            "text": "notion很久之前做了一个ai的tool，当时就报名加入了waitinglist，现在发现可以用了。敲个空格就可以很方便的联系上下文进行续写，我尝试了一下：",
+            "sourceBlockId": "146e3acc-80c0-4a7a-8b28-ed540ad46ddf"
+          },
+          {
+            "type": "paragraph",
+            "text": "“在下半年，我希望能够更加专注于工作和学习。这个月，我将开始新的一份工作，希望能够在新的岗位上有所成长。同时，我也打算开始着手准备研究生入学考试，希望能够取得一个好成绩。",
+            "sourceBlockId": "4b4be66f-1c2b-4014-8f9a-d61b772cdd50"
+          },
+          {
+            "type": "paragraph",
+            "text": "除此之外，我还希望能够把自己的生活安排得更有规律一些，多参加一些有意义的活动，多和朋友聚会。生活总是会有起伏，但我相信只要我们努力，就能让它变得更美好。”",
+            "sourceBlockId": "48b8d7a6-b7fd-4658-98b9-a9b18fc9e72a"
+          },
+          {
+            "type": "paragraph",
+            "text": "看来notion调出来的ai是个阳光开朗的现充大男孩，真好（",
+            "sourceBlockId": "b07e9d9d-2f19-4b3e-b0ae-3fcc8f475a59"
+          },
+          {
+            "type": "paragraph",
+            "text": "看了一眼2022的年终总结是2k字，半年的内容写了1.2k，已经够了，那就到这里。",
+            "sourceBlockId": "b856a472-ff1e-4dc7-a586-706b64939b65"
+          },
+          {
+            "type": "quote",
+            "text": "此去相见虽难再，同看晴空万里星",
+            "sourceBlockId": "2823a996-edbe-4aad-a978-6cba5a62aac3"
+          }
+        ]
+      },
+      {
+        "id": "ca34487821e84401b9e38d7807e612c8",
+        "category": "tech",
+        "title": "MM2023",
+        "date": "2023-07-26",
+        "summary": "\"Time for experimentation, evaluation and a wee cuppa tea.\"",
+        "source": "https://familiar-koi-5e4.notion.site/ca34487821e84401b9e38d7807e612c8",
+        "sourceCategory": "碎片杂文",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "今天早上MM终于放出了Accept List。熬到快3点等邮件只睡了4个小时的我正打算放弃等待上床睡觉就收到了王博的消息，他甩了我一个链接，顺便帮我把结果check了——我的论文id490在这个列表里。",
+            "sourceBlockId": "5656e4d6-c20e-4a5d-bf18-bdb91ce876f1"
+          },
+          {
+            "type": "paragraph",
+            "text": "这倒是好事一桩，免去了我翻墙去查结果过程的所有焦虑，现在我只用平复心情，趁这个补完觉到睡晚觉的空隙总结一下这个工作上的时间节点。",
+            "sourceBlockId": "35fa2cc1-4bfd-4c03-a76b-2fdecd434413"
+          },
+          {
+            "type": "paragraph",
+            "text": "工作的细节就不介绍了，大体是一个将扩散模型引入受限场景深度估计的早期尝试，文章前期的动机和实验部分埋坑巨大，导致后期论文写作和补充的立住动机的实验都相当痛苦，在这里尤其感谢我的通作王博全程的帮助与指导，整篇论文包括rebuttal几乎是重写一遍，挽救了我岌岌可危的英文写作。感谢曹老师、鲜可师兄和张老师丰富的经验上的指导，每次讨论他们都能让我意识到，姜还是老的辣（。感谢我的合著者黄老师和配老师，在具体实现上的讨论提供了许多有用的意见。另外还有实验室的彭珏文、叶昕毅、骆贤瑞等等同门，这工作确实受到了大伙数不清的帮助，在此郑重感谢了 ​",
+            "sourceBlockId": "991ff3ac-e256-4f85-b948-ee9c94abb45a"
+          },
+          {
+            "type": "paragraph",
+            "text": "我回去翻了一下我的朋友圈，在2022年的4月18号我发布了一条尝试disco diffusion的简短感想，到现在已经一年有余了，期间我经历了DALL·E 2，StableDiffusion（1.0/1.5/2.0），Midjourney，StableDiffusion XL等等，我似乎较为完整的经历过了这一波AIGC从小圈子里colab的新玩具到真实社会创业浪潮的发展。类似的，chatgpt 3.5发布后经历的较为平淡的1个月到媒体狂欢，身在行业内的我们似乎能相对大众更早的接触到这些日后成为引爆点的信息，却也因为行业内每天无数dream work的发布而忽视他们的前景。",
+            "sourceBlockId": "eca7408f-7d7e-48de-8cdf-47cd23c433b1"
+          },
+          {
+            "type": "paragraph",
+            "text": "总归，或主动或被动，或旁观或参与，我们都成为了这次革命默默无闻的一份子。历史的车轮似乎在我们眼前以无数细节事件的呈现转动起来，我唯一能做的就是祈祷未来能好起来，有口饭吃（",
+            "sourceBlockId": "cb24c614-3d33-41d8-af2b-5d60fe7db2d2"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "ba727d96-3f2f-4335-9062-e211eb24e0ed"
+          },
+          {
+            "type": "paragraph",
+            "text": "同样，让乐观的AI同志帮我续写一段话，顺便水点字数：",
+            "sourceBlockId": "c2278606-84d5-4302-a6e1-4c99cb19db61"
+          },
+          {
+            "type": "paragraph",
+            "text": "“在这个充满机遇和挑战的时代，AI的发展也让我们不断思考人类的未来。作为AI领域的从业者，我们需要不断学习和探索，才能跟上这个快速变化的时代。同时，我们也需要保持谦虚和冷静，认真思考AI技术的发展方向以及对人类社会的影响，为人类的未来贡献自己的力量。”",
+            "sourceBlockId": "e3d2e689-fac8-4a81-bf8a-9ac9200c8efe"
+          },
+          {
+            "type": "paragraph",
+            "text": "PO几张图上来备忘：",
+            "sourceBlockId": "713318a9-cc5c-4dcc-9e6f-5c46631bae91"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/c010ca3d221aa0488539.png",
+            "alt": "文章配图",
+            "sourceBlockId": "6edf4167-35aa-454f-a44d-e5face3f0f69"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/37a77fcaeefedc3dcd07.png",
+            "alt": "文章配图",
+            "sourceBlockId": "a758f4d4-f11c-4199-9ed8-418f05b04b8a"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "43b1da8e-d3cc-4081-aa36-bc3c7457eee5"
+          },
+          {
+            "type": "paragraph",
+            "text": "地平线的人设、配音和配乐真好听，游戏还是算了（",
+            "sourceBlockId": "c113ea38-b20b-40d8-ac1d-58e58ebdf0ae"
+          },
+          {
+            "type": "quote",
+            "text": "“I've seen the future. Now I just need to get there.”",
+            "sourceBlockId": "cca0157c-fded-4a2d-8386-ac904c21e30b"
+          }
+        ]
+      },
+      {
+        "id": "e7ed304d16eb42fbbcc7c6a9bcac1288",
+        "category": "life",
+        "title": "2022",
+        "date": "2023-01-11",
+        "summary": "正直，善良，最后永不相忘",
+        "source": "https://familiar-koi-5e4.notion.site/e7ed304d16eb42fbbcc7c6a9bcac1288",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "今天是1月11号，apex服务器炸了，中午刚开完今年最后一次会也不知道干啥，在电脑前呆坐了半刻打算给我的年终总结开个头",
+            "sourceBlockId": "ef4c86a1-a43e-413c-a274-5a581e098ffd"
+          },
+          {
+            "type": "paragraph",
+            "text": "当我敲下这段话，翻开回忆真的打算要去总结2022这个回归年时，海马体以null回应我的select申请。新冠还在，互联网寒冬还在，菜得一批的我自己还在，好像什么都没变——但我清楚的知道有些细节已经不复从前，至少谷爱凌和我股市里亏的钱再也不会回来了（",
+            "sourceBlockId": "a159e318-5a15-40b2-8feb-1fa870e3d52a"
+          },
+          {
+            "type": "paragraph",
+            "text": "我一向有点健忘，喜新厌旧的性格让自己很难留下能唤起回忆的任何形式的资料，幸好互联网时代了，大脑不记得的，大数据可以代劳。很难说这些软件推出年度总结的目的到底是为了记录美好生活还是想让用户红红脸。b站365天257个小时的全勤、游戏区占比率独领风骚、健身视频总计观看时长不到2小时拿到了“持之以恒”成就、卡比同学互动234次、浏览观网视频720个和因为没关电脑记录下来的凌晨四点还在看diffusion代码讲解，综合在一起可以轻松分析出本人的互联网成分，应当是一个又菜又爱玩、极度不自律、深度冲浪的鉴证乐子ai人。",
+            "sourceBlockId": "60781ff5-333b-4c30-93b8-c6cd8846c1e1"
+          },
+          {
+            "type": "paragraph",
+            "text": "就像庞博在段子里说的，我只能庆幸微信读书没有推我年度总结，不然软件打开次数和平均阅读时长足以让我羞愤难当，微信读书，谜底就在谜面上，微微相信自己在读书即可（",
+            "sourceBlockId": "f2153402-3768-498e-9eb2-088eb0862a04"
+          },
+          {
+            "type": "paragraph",
+            "text": "2022自己身上的大事还是挺多的。多了仨大学朋友，当时写了篇blog记录了一番，刚去回顾瞅了一眼还算看得过去，应该还能公开存活一阵子。我的教育经历跟身边很多人一样，求学中每过一个阶段，会跟原有的人际关系进行物理空间上的切断。 Double personality的外向部分又要求我通过他人和外界的反馈来获得自我满足，因此，往往在每个教育阶段会锚定一个相对稳定的人际关系从而维护自己心态的稳定，也总是会在行至歧路分别时痛苦难过。“当陪你的人要下车时，即使不舍，也要心存感激，然后挥手道别。”人际的常态就是痛并快乐罢。大二的时候国奖答辩，谢老师在自己ppt的最后做了一页acknowledge名单，感谢了所有大学时候帮助过自己的家人朋友，当时很受触动，想着之后挑个时间节点自己也整一个，一直在规划，一直在拖延，永远踌躇满志，永远懒不自惜。这就是我了，毕业之前做完就算成功。",
+            "sourceBlockId": "ce6852e4-7c47-46b8-af05-8f7e6f54537b"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/af63d1d239f6e28d1e8d.jpg",
+            "alt": "找了好久才翻到这张照片",
+            "sourceBlockId": "88b05b59-6da6-4d71-9593-c6c5de6d4a88"
+          },
+          {
+            "type": "paragraph",
+            "text": "2022多了两段可以期待相对long-term的关系。现世总是变化的苦难，这个年纪下悲观主义的底色常常让人无处排解，许多破防时候的聊天约饭甚至有点心态上的求助意味。有时他们自顾不暇还耐着性子听我伤春悲秋，实属难得。踽踽独行的路上，大家都在渐行渐远，我会格外珍惜每一段这样的感情，希望翻过高山，有朋自远方来，也希望我Double personality的内向部分能早点担起大任，学会从独处中获得力量。",
+            "sourceBlockId": "724714db-3549-4bdf-977c-eabe6a1a5f18"
+          },
+          {
+            "type": "paragraph",
+            "text": "2022还有挺多事情，恢复健身；当了；自己打了一波mai的比赛，第一次知道tcl也在欧洲有做cv的研发部门；跟上潮流尝试玩了一波diffusion；实现了在武汉给毅宝尽地主之谊的flag（没想过这个年纪能说出多年未见这种话；跟学长肝出来一个数据集的项目；抽象乐子人跟维维豆奶见面合影了（乐；试着进了几次清吧和足浴店，早日部署中年娱乐项目；尝试把自己的一点学术想法做出来了，虽然效果不提也罢；研究体验了半个月加密货币和nft，见过的骗子比我20年来加起来都多，也意识到一个真理——人不能赚到自己认知以外的钱。可能还有很多事情没想起来没有记录，也囿于新冠，想去的很多地方都没有成行，想干的很多事情条件所限被迫放弃。时间永远分岔，通向无数的将来，今年的遗憾就让他们过去吧，2023自有2023的遗憾。",
+            "sourceBlockId": "7c83646a-ddb8-4323-b885-113b6feb51a4"
+          },
+          {
+            "type": "paragraph",
+            "text": "2021年末，我给自己立了一个flag，想从所有的宏大叙事的氛围和情节中抽身，摆脱所谓民族主义和民粹的枷锁，放弃掉很多自己认为固有的立场，站在2023的路标往回看，我也不确定有没有做到，可能也不重要了。对政治愈来愈冷漠和解构，但上海封城时还是会对同学朋友所遭遇的荒诞而愤懑。人是社会性动物，这就是人性罢。我就像是一个没收敛的失败ai模型，越来越不在乎global的长程依赖，身边local的人和事很多时候也解决不好，优化算法用的是纯贪心，总是会被一点点输入的bias所影响，预测未来时永远输出nan（，幸而身边还有朋友长辈，teachernet知识蒸馏一下还算能用。",
+            "sourceBlockId": "0f236d21-10d5-490a-a2db-dab34e3da248"
+          },
+          {
+            "type": "paragraph",
+            "text": "接着往下回归吧，但愿能收敛hhh。",
+            "sourceBlockId": "bb50b76d-99bd-48c1-abbc-458601d886c8"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天得知我很喜欢的一个影评社区K星停更了，华科影协的放映活动和电影沙龙也无限期停办，新冠还在“开始的结束”，就业形势仍然扑朔迷离，这个世界还会好起来吗？我不知道。罗翔老师说这个问题其实已经在逻辑上预设了答案，因为如果没有潜在的对‘好’这个概念的预设，也就无所谓不好，问题本身就失去了意义。提出了这个问题，即表明人相信这个问题是意义存在的，对好的向往便呼之欲出。我认同这个思考，即便悲观，我也仍然期待世界和大家能在23年的夏天活起来，看漫天云，赴一片海。",
+            "sourceBlockId": "77f95150-cb5e-4447-bbd7-9251a24fd2a7"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/d262e90264c53af85e64.png",
+            "alt": "文章配图",
+            "sourceBlockId": "f9c5eefd-8b01-4917-b485-cf9745dffbf2"
+          },
+          {
+            "type": "paragraph",
+            "text": "帕斯卡尔有过一个论断，“人性并不是永远前进，它是有进有退的”。就像停更通知里说的那样，我努力做到",
+            "sourceBlockId": "b563db5f-65ba-4643-9db0-3a517bddda91"
+          },
+          {
+            "type": "paragraph",
+            "text": "永远保持对生活的热爱，对电影的喜欢，以及，像猫一样的好奇心。",
+            "sourceBlockId": "212f7925-ac67-4c4e-bb5d-6756c4b3f139"
+          },
+          {
+            "type": "paragraph",
+            "text": "人类总是喜欢赋予一些时间节点以特殊的意义，但似乎除了意义再无他物，就像在这个时间节点，我对2022的回忆已然所剩无多，对2023的憧憬仍是虚无缥缈。如果年终总结写到这里的仪式感非要让我对2023说点什么的话，除却老套的平安喜乐，想了半晌，可能就剩下来一个词了，“真诚”。",
+            "sourceBlockId": "ea66584d-e12d-4151-a5db-5fa792cdf7c7"
+          },
+          {
+            "type": "paragraph",
+            "text": "“死亡是凉爽的夜晚”，那么现在敲下来的这些应当记录了一个傍晚乘凉的小镇青年的无病呻吟。",
+            "sourceBlockId": "0be2df96-bc73-404c-a278-0f7724ef2175"
+          },
+          {
+            "type": "paragraph",
+            "text": "最后还是照例留一句话吧",
+            "sourceBlockId": "c509d721-c6b0-48e9-9c87-dbae58b90ec8"
+          },
+          {
+            "type": "quote",
+            "text": "正直，善良，最后永不相忘",
+            "sourceBlockId": "e7fcc08f-c186-4c25-a206-c4d6e8e390b1"
+          }
+        ]
+      },
+      {
+        "id": "45819d47b433462184bc92e0aaed063c",
+        "category": "life",
+        "title": "October",
+        "date": "2022-10-13",
+        "summary": "春风不语，即随本心。",
+        "source": "https://familiar-koi-5e4.notion.site/45819d47b433462184bc92e0aaed063c",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "春风不语，即随本心。",
+            "sourceBlockId": "ac706a6d-fd34-4652-bffc-42a242b99faf"
+          },
+          {
+            "type": "heading",
+            "text": "S1",
+            "sourceBlockId": "848d6c51-6006-4292-8970-4e13a83e91b3"
+          },
+          {
+            "type": "paragraph",
+            "text": "看着这一波的日常从稀疏的日记变成周记再到半月谈笑死，不过至少还在写，不像@czh已经开摆了，对比之下仍显不易（（",
+            "runs": [
+              {
+                "text": "看着这一波的日常从稀疏的日记变成周记再到半月谈笑死，不过至少还在写，不像"
+              },
+              {
+                "text": "@czh",
+                "url": "https://www.vast3c.cc/"
+              },
+              {
+                "text": "已经开摆了，对比之下仍显不易（（"
+              }
+            ],
+            "sourceBlockId": "7e23531f-f8e6-4b90-bcfb-652564f727a8"
+          },
+          {
+            "type": "paragraph",
+            "text": "上周摆了整整一周，撸铁群里被反复鞭尸，今晚终于得(不)空(摆)去了一趟健身房，小办一个小时之后准备走人回去了。",
+            "sourceBlockId": "13d27c45-4b84-4f51-8a17-1687f1a22ce6"
+          },
+          {
+            "type": "paragraph",
+            "text": "这时想起来哥还是大老师倾情推荐的隔壁水果店的柚子（“富含VC和水分，糖分较少，纤维含量极高易饱腹，而且好吃，而且隔壁水果店活动两个柚子9.9”）",
+            "sourceBlockId": "c8b15c50-d408-4fcb-a6fd-258e02f73963"
+          },
+          {
+            "type": "paragraph",
+            "text": "所以就停下去隔壁挑柚子，",
+            "sourceBlockId": "8fac526d-ca7b-4393-b2ad-e0641129dd64"
+          },
+          {
+            "type": "paragraph",
+            "text": "这时一个女生结账排在我前面，可能是常客的好处，年轻的男老板帮她切了柚子之后用盒子装好递给她，",
+            "sourceBlockId": "7fd11281-6c72-410d-ab2c-1aa5558c847e"
+          },
+          {
+            "type": "paragraph",
+            "text": "然后一脸神秘的在收银台下面摸索了一下",
+            "sourceBlockId": "692a2de1-bd37-47dd-bc78-fa1fa0eb8970"
+          },
+          {
+            "type": "paragraph",
+            "text": "掏出一瓶ad钙奶，说送给她，",
+            "sourceBlockId": "7967065a-1227-494f-bd08-320d7e5b7bcf"
+          },
+          {
+            "type": "paragraph",
+            "text": "一边递一边用眼神瞟向外面的老板娘笑死（（",
+            "sourceBlockId": "22dc197d-35b3-4f14-abdd-243bc4d0bdbf"
+          },
+          {
+            "type": "paragraph",
+            "text": "我寻思装盒还挺好的，顺手qq问了下配老师要不要柚子，他罕见的很快就回了好，",
+            "sourceBlockId": "7ea378c9-130c-4286-8817-0598917695f6"
+          },
+          {
+            "type": "paragraph",
+            "text": "然后就到我了，",
+            "sourceBlockId": "2f66562a-2795-4861-a055-eaa83c772c14"
+          },
+          {
+            "type": "paragraph",
+            "text": "我问他能不能切好掰出来装盒，",
+            "sourceBlockId": "ee01c757-0cee-48b3-ba9d-b8496e48ad4a"
+          },
+          {
+            "type": "paragraph",
+            "text": "他说不行，我们不熟，而且男孩子剥柚子很轻松，叫年轻人多锻炼锻炼",
+            "sourceBlockId": "5c369de9-2569-4f18-939c-2974a0942eda"
+          },
+          {
+            "type": "paragraph",
+            "text": "目睹一切的我不太死心，又问了一句能不能切个口",
+            "sourceBlockId": "0b6b3578-dab1-4c9f-9964-54f31e6c318e"
+          },
+          {
+            "type": "paragraph",
+            "text": "他说好，同时表示已经没有ad钙奶了",
+            "sourceBlockId": "48acd185-681f-40e9-9409-bfa9f1f411e4"
+          },
+          {
+            "type": "paragraph",
+            "text": "我说行，拿着两个柚子回去了，然后在超市花了两块五买了一瓶ad钙奶",
+            "sourceBlockId": "9f93355b-fb3b-4003-8432-6fc21259845b"
+          },
+          {
+            "type": "paragraph",
+            "text": "好喝，但好像又没那么好喝（",
+            "sourceBlockId": "782eb623-74be-41a6-ab55-38be54335925"
+          }
+        ]
+      },
+      {
+        "id": "45c179ff95254bfb8f9f56fd518ff340",
+        "category": "life",
+        "title": "September",
+        "date": "2022-09-07",
+        "summary": "With malice toward none, with charity for all, with firmness in the right.",
+        "source": "https://familiar-koi-5e4.notion.site/45c179ff95254bfb8f9f56fd518ff340",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "With malice toward none, with charity for all, with firmness in the right.",
+            "sourceBlockId": "5b7d3399-a1ad-4738-bc3e-06533623e28c"
+          },
+          {
+            "type": "heading",
+            "text": "WEEK1",
+            "sourceBlockId": "124f455e-59d3-4eee-94d4-270a2c9f1cd1"
+          },
+          {
+            "type": "paragraph",
+            "text": "感冒+腰疼，在床上躺了半晌还是打算起来干干活，顺便把这周的weekly写了",
+            "sourceBlockId": "ac335c83-45ed-467b-8d82-34fa067ea671"
+          },
+          {
+            "type": "paragraph",
+            "text": "总而言之这周一切还都比较顺利，无论是人际还是工作都在朝着期待的极值做gradient decent\n直接点吧，分享一些生活的确幸（",
+            "sourceBlockId": "e3a48ad0-744d-495c-8294-9bb91434399e"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/48a16f05059b4d746bac.jpg",
+            "alt": "集贸的甜品店还在，只是感觉这种把原材料混一块就output的产品有点智商税",
+            "sourceBlockId": "945f6b19-b754-41d5-aa61-614cd640f04c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/002d8ff7f881e4cbbc5e.jpg",
+            "alt": "在申老师的推荐和带领下去尝试了一家面馆，这个碳水的量对我而言还是过于多了",
+            "sourceBlockId": "d2b439a4-e593-45f9-86e0-fd33aa759cdd"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/59e27d80bbad0acfe9f6.jpg",
+            "alt": "收货地址填的科技楼，在居民巷子里找快递点兜兜转转发现了风亭渡，远处的大爷大妈在搓麻将，真是岁月静好",
+            "sourceBlockId": "ab420aaa-5d76-4b14-b291-8efea5895e68"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/23c8bb8fa63548e793ff.jpg",
+            "alt": "给一个节目当了半天背景板，没靠背腰疼死了，军训了属于是。虽然导演说10月之前不要公开，但鉴于破站的访问量我觉得无需担心，吧（（",
+            "sourceBlockId": "ad4c9242-c685-4712-a617-02501f5fe392"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/8a5445207c44791341bb.jpg",
+            "alt": "东操散步遇到诚宝，谢谢，全实验室都来听了（（bushi",
+            "sourceBlockId": "a5700a65-edaf-48bb-b446-e54a70f3ecc7"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a0352c248474911bb3f2.png",
+            "alt": "拿nft换了个头，鉴于其对应的一般等价物，短时间内应该不会再换了（",
+            "sourceBlockId": "d0bda1eb-1f6d-4567-9e61-e3ae74642e14"
+          },
+          {
+            "type": "paragraph",
+            "text": "个人感觉实验室的老师和学长学姐们都很nice，今天听了哥的传说之后过于励志，之前组会各位哥和姐也照顾咱讲了transformer基础知识和自己的理解等等（虽然各自的理解有一定的inconsistency笑死），以至于对学术圈产生了不符实际的过高期待，特别是今天听闻了某实验室的故事（\nanyway，实验室的同僚、朋友们和homie依旧能让我感受到人间值得，这几天正能量溢出竟然能说出这种话",
+            "sourceBlockId": "17f9c886-7eb2-4d40-adc3-e9d0a96e5f22"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/3f0263d63c9dc11ea660.png",
+            "alt": "文章配图",
+            "sourceBlockId": "d475413f-a812-4c8b-a53a-3e19883dc33f"
+          },
+          {
+            "type": "paragraph",
+            "text": "真是难得，希望之后也能有这份从容的心境（",
+            "sourceBlockId": "492e8933-618e-47d6-aab5-99a4ae0ec9e1"
+          },
+          {
+            "type": "paragraph",
+            "text": "当然，人间值得，但小丑不值（",
+            "sourceBlockId": "75ace320-ecc3-4494-86b9-53cf7f1f6fa3"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/7e7e5db1365523ee6ca6.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "9f14ac97-8bf2-4516-ae3b-6d25a3f93548"
+          },
+          {
+            "type": "paragraph",
+            "text": "昨晚清相册看到自己大二时候的照片，真是感触良多，所以又立了减肥flag，希望这次能在watch的加持下活得长一点（（",
+            "sourceBlockId": "2713feee-ef43-4caf-857a-ee098d3c7091"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/65048d911cad3fc507ee.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "41a7b2d4-41be-4681-bf4e-2da45a6b47a1"
+          },
+          {
+            "type": "paragraph",
+            "text": "ok，回顾得差不多了，工作上进度也还算正常，之后尽量不要让筛数据集占据过多的时间，毕竟还有模型和论文，临近保研的时间节点，希望大伙都不出啥幺蛾子。\n就到这里了",
+            "sourceBlockId": "4bd348d8-5f77-444b-b08e-6318d86b8f3d"
+          },
+          {
+            "type": "paragraph",
+            "text": "凛冬散尽，星河长明。",
+            "sourceBlockId": "03470d1a-887f-42a9-8276-800ac2535d24"
+          },
+          {
+            "type": "paragraph",
+            "text": "下周见",
+            "sourceBlockId": "a270bb61-cbcf-467a-acbe-58debf5d1726"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "1ec6fc43-f98b-4fce-bad1-02c543d1b213"
+          },
+          {
+            "type": "subheading",
+            "text": "0908",
+            "sourceBlockId": "e3eb11dd-79e0-4d5c-abd5-7935b1e9c23e"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天是wkw小朋友的生日，这波忙忘了华为全责（（\n之后有时间约个饭叭",
+            "sourceBlockId": "6d4d0d68-ae58-417e-8beb-93a7275bd2ea"
+          },
+          {
+            "type": "paragraph",
+            "text": "单方面宣布Hugo.Cabret获得本周的BEST movie奖",
+            "sourceBlockId": "533ecc29-4a68-4b76-ac63-eb0aa6c35e36"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/1b60bfb106db6817764f.png",
+            "alt": "文章配图",
+            "sourceBlockId": "00e99267-ebc4-4aa0-a499-c20e46346b85"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/4a780ca155e309988cf8.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "4f894ddc-4399-4419-82d8-a43aa076c8c2"
+          },
+          {
+            "type": "paragraph",
+            "text": "橙子哥我的超人！",
+            "sourceBlockId": "14571b66-0f1d-4afd-bf27-c61bfb5e0a67"
+          },
+          {
+            "type": "heading",
+            "text": "WEEK2",
+            "sourceBlockId": "709536f6-89eb-46b6-9f1b-cddcfd859482"
+          },
+          {
+            "type": "quote",
+            "text": "谁都可以浪漫，浪漫这个东西是没有门槛的，就像垃圾袋这么实用的东西有时也装满了风",
+            "sourceBlockId": "d34f752e-e30f-4442-b46c-e23951a9af1c"
+          },
+          {
+            "type": "subheading",
+            "text": "0910",
+            "sourceBlockId": "8ed3b94d-3c89-4f46-98bf-24f009530513"
+          },
+          {
+            "type": "paragraph",
+            "text": "天气阴",
+            "sourceBlockId": "637b6f14-d351-440a-9133-32bf828f149f"
+          },
+          {
+            "type": "link",
+            "text": "Another Day Of Sun\n歌曲：Another Day Of Sun，歌手：La La Land Cast。Another Day Of Sun在线免费试听，更多La La Land Cast相关歌曲，尽在QQ音乐！QQ音乐是腾讯公司推出的一款网络音乐服务产品，海量音乐在线试听、新歌热歌在线首发、歌词翻译、手机铃声下载、高品质无损音乐试听、海量无损曲库、正版音乐下载、空间背景音乐设置、MV观看等，是互联网音乐播放和下载的优选。\nhttps://c.y.qq.com/base/fcgi-bin/u?__=TAaiOp",
+            "url": "https://c.y.qq.com/base/fcgi-bin/u?__=TAaiOp",
+            "sourceBlockId": "d979d32d-8884-45e3-ab13-c0ed1b9694ec"
+          },
+          {
+            "type": "paragraph",
+            "text": "审了30份加分材料，整个年级拢共就7、80份，感觉是位置挑得不太行过于靠近门口了\n中午嫖了一顿饭，不过我咋记得小城故事均消没那么便宜来着",
+            "sourceBlockId": "c7be4623-d849-4e3b-8523-37956fa0dd44"
+          },
+          {
+            "type": "paragraph",
+            "text": "出走半生的俩小人和四级证书今晚干完活回来的时候发信息跟我说到了，hhhh\n俩小玩意还是挺可爱的",
+            "sourceBlockId": "14f0aa3c-9af7-4dda-8520-71dac70f5417"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/9953d72006ae7ed5fae5.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "3a0316bb-8ebc-449c-b511-42299be87391"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/e1be3d72f8eb6e15a9cb.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "9b70107e-2bf2-4ea0-acdd-8bdaa9c8506f"
+          },
+          {
+            "type": "paragraph",
+            "text": "已经到郑州的冰同时从四处得知自己综排第8哈哈，他的不用复核应问题不大（，这样就算出问题了小肖只用潜水去捞一只，置信度up（（笑死",
+            "sourceBlockId": "9508e862-7d25-4ba6-bd82-d0dee8e70c5a"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/47871b90f085d209520e.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "48075118-4a80-4fd0-921f-71dfc8fbaa6b"
+          },
+          {
+            "type": "paragraph",
+            "text": "拍月亮还是一如既往拉",
+            "sourceBlockId": "872efa64-2437-4d9f-951b-a8eab1effd95"
+          },
+          {
+            "type": "paragraph",
+            "text": "ok糊特优生报告去了",
+            "sourceBlockId": "fc8163eb-6cb6-4395-ba67-afd7f412ea2a"
+          },
+          {
+            "type": "subheading",
+            "text": "0912",
+            "sourceBlockId": "afe6967c-3f50-418b-9f39-cf0dc4c054d4"
+          },
+          {
+            "type": "paragraph",
+            "text": "油饼包烧卖还凑活，主要真的过于碳水导致今天有点想yue",
+            "sourceBlockId": "08404c1e-17e8-49c0-92ed-83e697d11364"
+          },
+          {
+            "type": "paragraph",
+            "text": "上午收到周三的会议邮件，晴天霹雳555（",
+            "sourceBlockId": "6a225321-f8b7-413d-83c2-92ac0f35dbeb"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/305d7fa8725264a2b5bc.png",
+            "alt": "dataset破2w段纪念（",
+            "sourceBlockId": "0f5a7f4c-189e-4cc8-8e60-d8c943c38a89"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f46eca0ffe0f15dae52e.jpg",
+            "alt": "油饼包烧卖搭配咖啡有讲究的（",
+            "sourceBlockId": "02f519f9-f4af-464a-9118-139dd3d08e0b"
+          },
+          {
+            "type": "paragraph",
+            "text": "笑死也不知道玩了个啥，之后挑个时候做做规划再搞吧",
+            "sourceBlockId": "e573b5ba-1e30-44de-9d20-70313626dccd"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "819f62a9-39d9-4811-ac4c-4a238284cf9a"
+          },
+          {
+            "type": "subheading",
+            "text": "WEEKLY",
+            "sourceBlockId": "a693ead5-44aa-45eb-8c08-78d7cacf1261"
+          },
+          {
+            "type": "paragraph",
+            "text": "9号喝了点酒，可能是下午在机房吹了半晌风，多少是脑子里水平仪出了点问题\nljq能四肢俱全到寝室只能说在这里给大伙磕一个了",
+            "sourceBlockId": "18e87e6d-2b96-4866-9168-04d28a72e7b5"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/1f130cbaac7b145ac84e.png",
+            "alt": "哥自己家手打的五仁月饼是我吃过最好吃的五仁！",
+            "sourceBlockId": "7b3a5155-ce74-415c-993e-d9779f130985"
+          },
+          {
+            "type": "paragraph",
+            "text": "55感觉确实有被世界温暖以待\n​",
+            "sourceBlockId": "f1588856-0fbb-48aa-995c-90ccb54911e2"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "76936ef5-c49c-4fe6-b190-7cb9d7278051"
+          },
+          {
+            "type": "paragraph",
+            "text": "这几天心里颇不宁静，之前去二麻浪了一波，酒饮料真好喝，趁着假期的尾巴到处转了转",
+            "sourceBlockId": "b0affba5-0385-4525-998b-196808bd457c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/36fe144709d9bb7dfb8b.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "503b2c51-7b0b-42dc-8b81-3ae9189ac26a"
+          },
+          {
+            "type": "paragraph",
+            "text": "假期过完工作stack起来之后整个人都比较emo",
+            "sourceBlockId": "ccb7e410-a99b-4e53-a6a5-1addc69c9672"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ac8f26a47d1b86edae64.png",
+            "alt": "文章配图",
+            "sourceBlockId": "250931b6-015d-4684-a7da-e444d1e48a21"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/53d7d511f67014dfac58.png",
+            "alt": "文章配图",
+            "sourceBlockId": "d94fce9f-c5ac-4198-9d09-70c5b83279b5"
+          },
+          {
+            "type": "paragraph",
+            "text": "然后趁着写weekly的今晚出去转转，节目效果属实是出乎意料。",
+            "sourceBlockId": "a62543c7-7d65-44c4-9385-7b06dbd8e5ac"
+          },
+          {
+            "type": "paragraph",
+            "text": "坚定了自己的愿望是switch之后去小吃区四处寻找价格洼地（（，然后吃到了不输和府捞面的豌杂面，而且便宜，打算明天中午活下来之后继续去（",
+            "sourceBlockId": "995d5dde-52a8-49ae-b8d9-9e8fc0c91875"
+          },
+          {
+            "type": "paragraph",
+            "text": "本来干活耽误了一会去的比较晚了，正吃面的时候听到旁边面包店买二送一，等吃完之后就已经是买一送一了，跟着旁边寿司店的买一送一一唱一和打擂台，属于是完全竞争买方市场的好处了（",
+            "sourceBlockId": "154daf98-a589-4713-9161-e9fcb02550e8"
+          },
+          {
+            "type": "paragraph",
+            "text": "我从未见过让我如此鲜活的感受到“人”的属性的服务员，笑到回去又买了一个烙饼（bushi），",
+            "sourceBlockId": "395a0c8d-3d0c-41c5-ad53-d952c0b86ac2"
+          },
+          {
+            "type": "paragraph",
+            "text": "某人手贱去撕了一下二手店立牌上的刘海胶带，然后就像是打开了阿拉丁神灯的盖一样召来了店员，说因为此举可以送一个手机壳。然后找半天没找到13mini的手机壳，孤儿实锤，笑死",
+            "sourceBlockId": "24379988-c077-480a-be95-aedc96bb7211"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/6fa7cd6ab730943f6804.png",
+            "alt": "文章配图",
+            "sourceBlockId": "1f6379e2-7af9-4ef2-8287-376d659af621"
+          },
+          {
+            "type": "paragraph",
+            "text": "今晚红色的月亮也很漂亮，回去终于打通了日落黄昏时的第一章\n所有的图就先鸽了，我没拍（（，看图可以去https://deepz.cc/",
+            "runs": [
+              {
+                "text": "今晚红色的月亮也很漂亮，回去终于打通了日落黄昏时的第一章\n所有的图就先鸽了，我没拍（（，看图可以去"
+              },
+              {
+                "text": "https://deepz.cc/",
+                "url": "https://deepz.cc/"
+              }
+            ],
+            "sourceBlockId": "3c5d5d90-4dfc-4ff8-bc27-c082f1d13603"
+          },
+          {
+            "type": "paragraph",
+            "text": "心情好多嘞，虽然疾苦犹在，但生活从来如此罢",
+            "sourceBlockId": "053984c0-945f-45d6-ba7b-c1fe2229a22d"
+          },
+          {
+            "type": "quote",
+            "text": "“世界先爱了我，我不能不爱他”",
+            "sourceBlockId": "d5ac07d5-ed7d-44f0-ab19-741f0155e9fc"
+          },
+          {
+            "type": "paragraph",
+            "text": "写到这里，突然想念初中时结识的一个叫汪曾祺的极温柔的灵魂\n我想可以之后多读读书，陪陪家人朋友",
+            "sourceBlockId": "9d8883ea-9d1b-4707-bf59-7e8eddf86a79"
+          },
+          {
+            "type": "heading",
+            "text": "Sept.",
+            "sourceBlockId": "af4ca384-880b-47b6-971d-13238f1de687"
+          },
+          {
+            "type": "paragraph",
+            "text": "已经是10月6号凌晨十二点多了，刚跟lzsgo了两把，队友在语音里互撩鸡脚笑飞了（",
+            "sourceBlockId": "660d844e-a4d7-4d78-b038-2ce1f77b070c"
+          },
+          {
+            "type": "paragraph",
+            "text": "czh难得催更我，看来是考研的强度没上够（（bushi",
+            "sourceBlockId": "d10488f2-4c46-4ded-b5e8-bcf8d2d83d1d"
+          },
+          {
+            "type": "paragraph",
+            "text": "faze又艰难的赢下一局，但总归是开心的，换个研究生网给九月的日子续个尾巴算了",
+            "sourceBlockId": "08c1dc91-048b-47a8-abdb-0966def511c6"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b1321f2dccf388f3600c.png",
+            "alt": "文章配图",
+            "sourceBlockId": "36d1532d-19ae-465f-8813-cfeaa11427d5"
+          },
+          {
+            "type": "paragraph",
+            "text": "悲（，看来是要我换流量长话短说了（",
+            "sourceBlockId": "a1f82375-6296-461d-a31f-7048ea148099"
+          },
+          {
+            "type": "paragraph",
+            "text": "屈指西风几时来，武汉的天气跟坐了跳楼机一样，天气冷了后经常有点生理性的怠惰，希望早早写完上床。\n审视过去的一个月，可能唯一的感慨就是比较倒霉，具体的事情数不胜数了，我也不太想回忆。事物总在发展，身边还有朋友，偶尔破防，偶尔借力，总能过去的（",
+            "sourceBlockId": "372836cd-ba1a-44d2-a0e6-36bf412ddc03"
+          },
+          {
+            "type": "paragraph",
+            "text": "过了一阵子大学生活，希望以后也能多出去转转，人间一遭，美食美景不可辜负。",
+            "sourceBlockId": "0adcce32-a1eb-4c17-8cca-dc3bc83fb9da"
+          },
+          {
+            "type": "paragraph",
+            "text": "在研招网上报了志愿，那天也是凌晨了，当时困得不行，心中古井无波，申老师骑车在我们前边，边骑边放着温蒂公主的侍卫，声音依稀忽左忽右，悠扬婉转\n可惜后来再听就感觉没有当时那么好听了",
+            "sourceBlockId": "8e1ca2d8-7e05-4426-b16e-00833719cdcd"
+          },
+          {
+            "type": "paragraph",
+            "text": "身边的朋友，或打工或考研，这个月应都步入正轨了，大约重复个百天等待放假，希望到时能约着出去玩",
+            "sourceBlockId": "7d6950ca-d684-4bd9-a860-c4ddc1c2bba6"
+          },
+          {
+            "type": "paragraph",
+            "text": "寒暑不常，希望看到这里的你保重身体 ​",
+            "sourceBlockId": "8202fb29-e467-4e7f-982b-a6c7f8c5cf6c"
+          },
+          {
+            "type": "paragraph",
+            "text": "We always choose to move forward, right?",
+            "sourceBlockId": "f59712a7-fc16-4770-bffe-2805f4dcaa2c"
+          }
+        ]
+      },
+      {
+        "id": "e36f4aac13fa4f108248cc32624c1494",
+        "category": "life",
+        "title": "August",
+        "date": "2022-08-07",
+        "summary": "“准备药检”（",
+        "source": "https://familiar-koi-5e4.notion.site/e36f4aac13fa4f108248cc32624c1494",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "“准备药检”（",
+            "sourceBlockId": "c0123962-46d9-4b8c-b6a9-ab9ef2fcc4e2"
+          },
+          {
+            "type": "heading",
+            "text": "0807",
+            "sourceBlockId": "04101c07-86f4-44dc-be9d-ad31a0592e51"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天网飞看剧的时候，突然发现开端上网飞了，可以可以，确实好剧。\n然后我花了上午和大半个下午又刷了一遍开端，应该庆幸他只有12集。\n笑死，活又一点没干哈哈，摆（",
+            "sourceBlockId": "fd0fb1b9-af06-46c1-92e5-8f0fcc492894"
+          },
+          {
+            "type": "paragraph",
+            "text": "看到卢迪这段实在蚌埠住了",
+            "sourceBlockId": "2026c25e-62f2-40a1-b67a-8cc00fcd6fdd"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ba0b35ff0ef8a4f4b459.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "6711beda-0fc6-40eb-8639-4d31f0a96a47"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/1844d3f27e3ba6eb30fd.png",
+            "alt": "文章配图",
+            "sourceBlockId": "0e61737f-946d-456a-966b-d59f920e8e49"
+          },
+          {
+            "type": "paragraph",
+            "text": "反正属于是国产剧中少有的编剧导演演员配乐都在线的情况了，甚至看完让我燃起了一丝对国产剧的希望，然后去看了少年派，然后现在在洗眼睛（\n剧情评价就不说了，写起来的话会比较长，我也比较懒，谁也别难为谁吧（\n男女主演技还是比较在线的，印象更深刻的是几个配角人物形象都很丰满，锅姨我这辈子是忘不了了，后来知道她是国话的演员，牛的；行李箱男老焦的支线也很感动，这两天看了网友催泪小作文，写得真好呜呜呜。",
+            "sourceBlockId": "4e157c4b-027f-4bdf-80dc-4005524e7b7e"
+          },
+          {
+            "type": "paragraph",
+            "text": "噢才发现好多配角都是正午阳光的老熟人了，那就正午牛逼\n配乐也可圈可点，事实上我就是b站冲浪听到这个bgm才入的坑，韩国人在歌舞这一块还是有民族天赋的hhh",
+            "sourceBlockId": "b7f7b826-020a-45ad-997b-ce5c5f798296"
+          },
+          {
+            "type": "link",
+            "text": "KD_Searching\n歌曲：KD_Searching，歌手：金炫道。KD_Searching在线免费试听，更多金炫道相关歌曲，尽在QQ音乐！QQ音乐是腾讯公司推出的一款网络音乐服务产品，海量音乐在线试听、新歌热歌在线首发、歌词翻译、手机铃声下载、高品质无损音乐试听、海量无损曲库、正版音乐下载、空间背景音乐设置、MV观看等，是互联网音乐播放和下载的优选。\nhttps://c.y.qq.com/base/fcgi-bin/u?__=iOgdtRX64neB",
+            "url": "https://c.y.qq.com/base/fcgi-bin/u?__=iOgdtRX64neB",
+            "sourceBlockId": "3098450e-0a15-4d40-9c81-2feacc786818"
+          },
+          {
+            "type": "link",
+            "text": "网易云音乐\n网易云音乐是一款专注于发现与分享的音乐产品，依托专业音乐人、DJ、好友推荐及社交功能，为用户打造全新的音乐生活。\nhttps://music.163.com/#/song?id=1916115526",
+            "url": "https://music.163.com/#/song?id=1916115526",
+            "sourceBlockId": "55f184bb-1739-4fdd-9595-2777ccbb088f"
+          },
+          {
+            "type": "paragraph",
+            "text": "换了一个notion到blog的部署项目，倒腾了一下，看着就很完善了，之后就all in notion了，躺（\n（点一下那个live2d的狗狗还可以切换主题",
+            "sourceBlockId": "83a799ed-d6d8-4991-b524-759f26709be1"
+          },
+          {
+            "type": "paragraph",
+            "text": "下学期事情少了挺多，可以花更多时间去生活吧（大概，",
+            "sourceBlockId": "d3c0dfaf-052d-4b22-8b12-7a7a42f274ae"
+          },
+          {
+            "type": "paragraph",
+            "text": "之后争取多更点周记啥的。",
+            "sourceBlockId": "bb1f7ef4-1a7f-4389-98cd-b84aa2ed0ee5"
+          },
+          {
+            "type": "heading",
+            "text": "0816",
+            "sourceBlockId": "44386ca1-f782-49f5-8fca-a9bef77ba174"
+          },
+          {
+            "type": "paragraph",
+            "text": "返校第一天晚上\n收拾东西就已经精疲力尽了orz，还没收拾完，开摆（",
+            "sourceBlockId": "78bb54b1-9276-49a3-95b6-c9839814ecc4"
+          },
+          {
+            "type": "paragraph",
+            "text": "玩了两天欢乐谷，是真的热\n武汉天地的店质量还是nb，贵是我的缺点吧（\n年纪大了，做了几个项目现在脑壳还是晕的",
+            "sourceBlockId": "1599874c-718f-4050-9edb-be2238d4e967"
+          },
+          {
+            "type": "paragraph",
+            "text": "过山车半空的时候满脑子想着民用电如此紧张以至于很多地方都限电了，居然欢乐谷还在这弹射起飞，哈哈哈\n玩了之前去一次检修一次的木翼双龙，也就那样；喝了一直想白嫖的茶颜柠檬茶，也就那样；",
+            "sourceBlockId": "37ebe175-a890-4121-9f01-f650ead5731c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/0db1c70b2d344e1817c6.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "a4b3cf14-6775-4ba7-8d2c-0c5ff47a6df1"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b62550b704339238c334.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "609d475e-2659-4681-8e93-d56a12af4ac3"
+          },
+          {
+            "type": "paragraph",
+            "text": "放假之前想找机会尝试一下的红鼎豆捞不告而别，此情未语泪先溶（",
+            "sourceBlockId": "f89cb9a8-2082-4106-98a0-67a3c962d8d6"
+          },
+          {
+            "type": "paragraph",
+            "text": "之后就慢慢步入正轨吧，\n写这段之前还好，越写心情莫名的越down。鉴定为困了，躺（，玩手机去，剩下的再说吧。",
+            "sourceBlockId": "77af31be-9714-441f-aa96-72b4bb65c992"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/574664d6e6f49d968ef4.png",
+            "alt": "文章配图",
+            "sourceBlockId": "34896e3f-0917-4671-b29c-7b357067a7ab"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/daa84773446392703116.png",
+            "alt": "文章配图",
+            "sourceBlockId": "0a225a69-4bfe-4c32-811d-1b5f8d024420"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/2cade3f667124fac2fcd.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9b5da4f3-0875-426f-9c16-a3ff16b525de"
+          },
+          {
+            "type": "paragraph",
+            "text": "不行，已经是笑到要起来再补一段的程度了，大老师也是人间有趣哈哈哈哈",
+            "sourceBlockId": "4d47d54a-19f4-4274-bfac-55b641e45833"
+          },
+          {
+            "type": "heading",
+            "text": "0823",
+            "sourceBlockId": "4403b298-1e02-48d5-b40e-44b36c387b9e"
+          },
+          {
+            "type": "paragraph",
+            "text": "——学长干活干到破防，微信里直接说摆大烂，我也有点蚌埠住了，瞥了眼时间发现应该更周记了，算了不干了写点东西。这个年纪记忆力已经捉襟见肘，就不按时间顺序记，所以下面你应该会看到一系列“前两天”，可能就是这两天发生了这么多事吧（（",
+            "sourceBlockId": "7fab43d3-9242-447c-9a0d-2e400cd49962"
+          },
+          {
+            "type": "paragraph",
+            "text": "前两天老曹突然开门进房间转了一圈，投送了一台保温热水壶，解释了下学校不让报工学椅，并慰问了两位群众工作环境怎么样，两位群众表示感谢领导的关心，自己一切都好；\n肖老师凭借自己的一句“我希望在我这里的学生都是开心的”拿下offer（bushi；\n今天下午休息的时候看见陆老师有一篇二作名字是沈春华，惊，打听一番之后原来陆老师有段时间在阿德莱德师从沈老师，牛逼，想起来当时开互联网+会的时候昊哥的段子哈哈，希望有一天能听到昊哥唱周董的歌",
+            "sourceBlockId": "2b0bbc95-cb56-4ddd-a780-ab621b526bf3"
+          },
+          {
+            "type": "paragraph",
+            "text": "吃完晚饭之后在科技楼下边看见hcy学姐似乎在逗猫还是喂猫，突然觉得到目前为止实验室碰见的老师、学长学姐都相当nice，真是人间值得",
+            "sourceBlockId": "1352ae20-d483-4f9d-b291-d021a6fe0cde"
+          },
+          {
+            "type": "paragraph",
+            "text": "不过人总是因为别人文字或语言上的描述而对该对象产生不符合实际的过高期待，所以对配老师应该少说好话（（",
+            "sourceBlockId": "91ac2fbc-846b-402f-9794-64976e82323a"
+          },
+          {
+            "type": "paragraph",
+            "text": "这几天休息活动的时候经常看挂在我工位后面的论文墙，看到一堆熟悉的名字，想起来之前大组会上他们讲论文我在摸鱼，脑子里蹦出来四个字，何德何能（",
+            "sourceBlockId": "6292f751-bb3c-424c-8638-d4cb0878ab01"
+          },
+          {
+            "type": "paragraph",
+            "text": "实验室新装的电脑没有扬声器，所以在没声音情况下筛了好几天的电影bbzl，淘宝买了个蓝牙适配器，前两天才到，今天筛寂静岭2的时候刚好派上用场（（谢谢数据集让我看了一部原来应该跟我的人生没有交集的电影。",
+            "sourceBlockId": "3d3169e7-1073-4f86-ac07-223937f62d8d"
+          },
+          {
+            "type": "paragraph",
+            "text": "学长干活之前跟我们说这工作有点dirty work，只是妹想到这玩意有这么dirty，上周筛完了了不起的盖茨比，感觉这辈子都不会觉得小李子的颜好看了",
+            "sourceBlockId": "1436250d-c1b7-4986-bccd-4f49eeb0189a"
+          },
+          {
+            "type": "paragraph",
+            "text": "不过应该还是有收获的",
+            "sourceBlockId": "e7cfb9e3-8e44-41c2-af8f-2a4e3bc5fc7a"
+          },
+          {
+            "type": "paragraph",
+            "text": "只是实验室新手期就上高压局还得适应，本来还想工作完晚上回去有时间打打游戏来着，很多时候直接累到只想在床上躺着发呆等待被黑暗淹没",
+            "sourceBlockId": "366d52af-9546-4bb1-b3a7-d14a62dbaf10"
+          },
+          {
+            "type": "paragraph",
+            "text": "原定的健身计划也搁浅一周，之后看要么好好搞工作计划提高效率按时下班，要么把时间挪到晚饭那个时间段搞完洗澡再干大活\n手表到了，加油工作，加油生活（",
+            "sourceBlockId": "465bc57b-611e-4e4c-841e-cbcf18a4418f"
+          },
+          {
+            "type": "paragraph",
+            "text": "周四还有个活，鉴于欠了秋菊一个人情，还是去了算了x.x",
+            "sourceBlockId": "19b3cdc5-08a6-4ecf-b5f3-e672cf3c8116"
+          },
+          {
+            "type": "paragraph",
+            "text": "上周母上大人直接勒令我去报考驾照，在表姐的监督和黄老师的协助下（hls也要考），早上打的电话中午就开始刷科目一的题了，牛的",
+            "sourceBlockId": "80bfe821-b186-4129-be95-44e52065d783"
+          },
+          {
+            "type": "paragraph",
+            "text": "数据集的工作量仍然遥遥无期，明天中午开会之前还要尽量把两篇论文看完，真不知道某人怎么溜出来这么多字的x.x",
+            "sourceBlockId": "86399cf5-7245-47d0-abd6-24142ddc7980"
+          },
+          {
+            "type": "paragraph",
+            "text": "就先到这里",
+            "sourceBlockId": "2702260a-6187-47fc-8a70-0fda9efe3407"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/943291115ff0e5e1e63b.png",
+            "alt": "文章配图",
+            "sourceBlockId": "89afc63d-8546-436c-8e2f-4d9edb40a515"
+          },
+          {
+            "type": "quote",
+            "text": "Life is hard,and l have my guitar.",
+            "sourceBlockId": "b117912d-7a67-45a8-a9c6-19d4db397e91"
+          },
+          {
+            "type": "paragraph",
+            "text": "最后单方面宣布coco（寻梦环游记）获得本周ICDHES(International Conference on Database and Human Eye Screening)会议的best movie奖（（",
+            "sourceBlockId": "d3aa029d-d6ea-4443-9d23-09fb8d772baa"
+          },
+          {
+            "type": "paragraph",
+            "text": "催更@Vast3C",
+            "runs": [
+              {
+                "text": "催更"
+              },
+              {
+                "text": "@Vast3C",
+                "url": "http://vast3c.cc/"
+              }
+            ],
+            "sourceBlockId": "54a4ff40-4fba-449c-9759-13a29b428f95"
+          },
+          {
+            "type": "heading",
+            "text": "0827",
+            "sourceBlockId": "76b73f7e-17e9-4327-b768-1fada303b488"
+          },
+          {
+            "type": "paragraph",
+            "text": "不出意外是这个月的最后一篇周记了",
+            "sourceBlockId": "a6e65d7e-ed6b-4856-99ef-311d324ae53d"
+          },
+          {
+            "type": "paragraph",
+            "text": "就是这周属于是意外不断，感觉自己要透支了",
+            "sourceBlockId": "ef52a07c-c415-4ecd-8384-14c5a56c50a6"
+          },
+          {
+            "type": "paragraph",
+            "text": "真是欲语泪先流（（bushi，不过感觉自己能hold住，就不对外输出负能量了（（",
+            "sourceBlockId": "a1bc03a0-903b-4c26-b2cc-50432ae6f296"
+          },
+          {
+            "type": "paragraph",
+            "text": "k，算了不说了，搞个数据集丹炉要炸了，救火去（（",
+            "sourceBlockId": "07398a49-328c-4c41-b357-41123beabf82"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/68ae9fff7c8c2c12fe4b.png",
+            "alt": "文章配图",
+            "sourceBlockId": "af6fbb37-5ce5-4dc5-89cf-05a6faf0d615"
+          },
+          {
+            "type": "heading",
+            "text": "0829",
+            "sourceBlockId": "5c06166f-c634-4059-9760-417bad64abf7"
+          },
+          {
+            "type": "paragraph",
+            "text": "活终于干得差不多嘞，我看着桌子上的冻干咖啡粉感觉有补货的必要了哈哈哈\n第一版模型train通了，数据量也接近1w段视频了，折合成帧数应该在80w-100w张图左右（",
+            "sourceBlockId": "8f550a0a-80b6-4902-9a3c-8d51296c7d8f"
+          },
+          {
+            "type": "paragraph",
+            "text": "昨晚挑视频的时候看到有一部叫clown，正好鄙人还没看过小丑，大喜，直接揽下这部片子，\n结果是恐怖片，警惕新型诈骗（（",
+            "sourceBlockId": "497ae5c9-15b9-48f8-a592-705ab71cdfbc"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/9ad1ed2e767ba56bd410.png",
+            "alt": "文章配图",
+            "sourceBlockId": "7914fa40-f0d6-42c2-b46b-df51b7387424"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b470ee00f6ecdddfdc42.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "deea31db-cca8-499f-b7bb-911e9319874d"
+          },
+          {
+            "type": "paragraph",
+            "text": "谢谢，已经在梦里看寂静岭2蜘蛛怪三角人大战小丑怪了焯",
+            "sourceBlockId": "d8cd9f9a-c424-4a22-a3d8-54f4b9badbf2"
+          },
+          {
+            "type": "paragraph",
+            "text": "下午开始对接的学弟就陆陆续续要来了，之后要上卡的数据也准备了一部分，等今天肝完跟学长吱一声顺便也给自己30号放个假吧，害（（\n剩下的就在宿舍remote肝吧",
+            "sourceBlockId": "d27a6bcd-d7df-4426-844f-958fdbe0e5e9"
+          },
+          {
+            "type": "paragraph",
+            "text": "坚决抵制恐怖片进数据集（（\n突然想起来之前筛蜘蛛侠看着梅姨被死了，这种用脚写的剧本也要抵制（（bushi",
+            "sourceBlockId": "b1ba48b0-da42-464b-8560-edb7cc7093be"
+          },
+          {
+            "type": "paragraph",
+            "text": "悲，做个数据集才发现我好久都没看电影了",
+            "sourceBlockId": "f173069b-554e-4570-922d-839f9715245c"
+          },
+          {
+            "type": "paragraph",
+            "text": "vercel不知道是dns污染还是单纯被墙了，总之我的blog现在也被墙了bbzl\n跟大老师转战wb算了（（bushi",
+            "sourceBlockId": "b1949ee4-e03f-415f-9a13-15cbb663de87"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ee777773b97928c9fc38.jpg",
+            "alt": "《大生我想》",
+            "sourceBlockId": "5b2f340a-a3e1-47e9-b37a-f5cb2cee55f3"
+          },
+          {
+            "type": "paragraph",
+            "text": "下午接了一波新生，觊觎了旁边新闻系发的柠檬水很久了，明下午去看看能不能拿自动化的脉动过去换",
+            "sourceBlockId": "510c47d0-8654-4c53-b69b-223b67f05042"
+          },
+          {
+            "type": "paragraph",
+            "text": "晚上刷到这个了丁真mod无学院科技胜利_文明六(bilibili.com)，笑死，之后抽空去跟毅宝打文明去呜呜呜",
+            "runs": [
+              {
+                "text": "晚上刷到这个了"
+              },
+              {
+                "text": "丁真mod无学院科技胜利_文明六(bilibili.com)",
+                "url": "https://www.bilibili.com/video/BV15B4y1z7m3?is_story_h5=false&p=1&share_from=ugc&share_medium=iphone&share_plat=ios&share_session_id=66B3B2CF-2504-4C8A-AAC9-5FEACCDAADC4&share_source=QQ&share_tag=s_i&timestamp=1661775789&unique_k=Z3v9AIQ"
+              },
+              {
+                "text": "，笑死，之后抽空去跟毅宝打文明去呜呜呜"
+              }
+            ],
+            "sourceBlockId": "284619a7-ca43-4359-83b0-c1212f697721"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "a5305d75-12cf-43a3-9924-5349f601c2a7"
+          },
+          {
+            "type": "paragraph",
+            "text": "单方面宣布Gravity（地心引力）获得本周ICDHES(International Conference on Database and Human Eye Screening)会议的BEST movie奖，clown获得Disqualified奖",
+            "sourceBlockId": "2c324465-d92f-48da-8d28-2798592f8fee"
+          }
+        ]
+      },
+      {
+        "id": "2204dea3bd93471eb8344a711bdad0d6",
+        "category": "life",
+        "title": "无题",
+        "date": "2022-04-04",
+        "summary": "“Welcome to the real world. It sucks. You’re gonna love it.”",
+        "source": "https://familiar-koi-5e4.notion.site/2204dea3bd93471eb8344a711bdad0d6",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "Welcome to the real world. It sucks. You’re gonna love it.",
+            "sourceBlockId": "b52f235f-8e37-4062-8fc2-eb65d8ce0dfa"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f63b3db1177a5d50eadc.png",
+            "alt": "文章配图",
+            "sourceBlockId": "4bc32a3f-15fe-4e0c-b819-13538b98d54f"
+          },
+          {
+            "type": "paragraph",
+            "text": "凭记忆随手取的图，略夸张，用它主要是没水印。",
+            "sourceBlockId": "879e4ef3-a581-447c-b923-54eae36d53c9"
+          },
+          {
+            "type": "paragraph",
+            "text": "我想起来现在还欠着mfc的笔记、论文复现的笔记一屁股债，但这篇还是先写吧。",
+            "sourceBlockId": "3640db04-e3b3-4ec2-b8c3-e88cab32c8a5"
+          },
+          {
+            "type": "paragraph",
+            "text": "大概就是小配同学犯水逆出租车上落了手机最后被讹",
+            "sourceBlockId": "5d80caf3-c508-477c-b1fc-9d175aa5faf5"
+          },
+          {
+            "type": "paragraph",
+            "text": "想了很多，具体的东西要写下来还是算了",
+            "sourceBlockId": "fcb8dcc0-03da-4127-88d8-222df013f7c0"
+          },
+          {
+            "type": "paragraph",
+            "text": "听到了两首很好的歌：",
+            "sourceBlockId": "1be1c385-19a0-44c6-8377-eb3c00d8cef3"
+          },
+          {
+            "type": "paragraph",
+            "text": "寂寞留白 - 告五人 - QQ音乐",
+            "runs": [
+              {
+                "text": "寂寞留白 - 告五人 - QQ音乐",
+                "url": "https://y.qq.com/n/ryqq/songDetail/001u7rYu1Vc661"
+              }
+            ],
+            "sourceBlockId": "a2ca4df6-38b0-4d6d-8648-7045a5dcf989"
+          },
+          {
+            "type": "paragraph",
+            "text": "Bling Bling Bling - 阿梓从小就很可爱的溜溜笛 - 网易云音乐",
+            "runs": [
+              {
+                "text": "Bling Bling Bling - 阿梓从小就很可爱的溜溜笛 - 网易云音乐",
+                "url": "https://music.163.com/#/program?id=2499228290"
+              }
+            ],
+            "sourceBlockId": "4162d2e8-7364-47aa-9969-e4997582ad35"
+          },
+          {
+            "type": "paragraph",
+            "text": "了解到一个很棒的乐队和一个很好的VTuber",
+            "sourceBlockId": "cb114e83-07d0-445d-8fb4-bbfdcd1f8953"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "99f4f826-766c-45d2-8172-8cf040cff44d"
+          },
+          {
+            "type": "paragraph",
+            "text": "写到这里脑海里又浮现起那个出租车司机市侩的嘴脸，想批判，又想了想觉得算了",
+            "sourceBlockId": "754cc883-8807-4ce1-abf5-954758b5a3fb"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天下午呆在维修点等着清灰的时候看着人来人往，看着来自不同行业、不同年龄、不同阶级的人的苦恼。因为工作的需要，有大叔拿着好几年前的电脑来修；女生听了师傅维修报价之后说了句“没钱，算了吧”……",
+            "sourceBlockId": "5b55ee86-8d35-40a2-aab6-f890957cc418"
+          },
+          {
+            "type": "paragraph",
+            "text": "疫情之下，大家都略艰难的活着。挺emo的。",
+            "sourceBlockId": "a9255ea4-08d9-45a0-971f-74158d9cbf7f"
+          },
+          {
+            "type": "paragraph",
+            "text": "阶级无处不在吧，也可能是在大学这个象牙塔里呆久了",
+            "sourceBlockId": "364a7007-499d-4f98-86c6-60ac76af8827"
+          },
+          {
+            "type": "paragraph",
+            "text": "百无一用是书生。",
+            "sourceBlockId": "25ba437f-fd28-4a96-ac9d-24c5561b24b9"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "70befd53-8946-4668-92f7-64ac290be84d"
+          },
+          {
+            "type": "paragraph",
+            "text": "还是听听歌吧，我试试能不能直接嵌入notion",
+            "sourceBlockId": "dad1df40-df77-4825-a0b0-1243f40befc2"
+          },
+          {
+            "type": "paragraph",
+            "text": "寂寞留白 - 告五人",
+            "sourceBlockId": "b7afc483-6eb3-454e-850f-987c04e53d0c"
+          },
+          {
+            "type": "paragraph",
+            "text": "bling bling bling - 阿梓",
+            "sourceBlockId": "ee538d41-61ef-488f-818c-8f66d3bfc14c"
+          },
+          {
+            "type": "paragraph",
+            "text": "有5M限制，只能传标准音质了。",
+            "sourceBlockId": "dfdf8bb9-b507-4ef3-85e4-ea7c2ff4cf16"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天就到这",
+            "sourceBlockId": "684afe07-4f7e-46b2-947e-62f8e895425a"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "bda057ac-79f7-49dc-82bc-6a211ea5cfea"
+          },
+          {
+            "type": "quote",
+            "text": "2022年4月5日",
+            "sourceBlockId": "d951616c-b356-484c-b308-f5d6540f35a0"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天又折腾了大半天blog，中午吃饭的时候czh给了一个好建议，顺利倒腾出来一个伪留言板，希望以后不用折腾了。",
+            "sourceBlockId": "0675cb6d-fc4f-460c-9edd-11b8e702bb13"
+          },
+          {
+            "type": "paragraph",
+            "text": "傍晚出门去森林公园走路，走了好久，累死。",
+            "sourceBlockId": "897b5c0f-fab3-4959-ae3e-e62de3842f9a"
+          },
+          {
+            "type": "paragraph",
+            "text": "对了，把他们写昨天一事的blog贴出来，真有意思",
+            "sourceBlockId": "91b1f360-3bde-42b9-8cbe-6307319299ce"
+          },
+          {
+            "type": "paragraph",
+            "text": "小配的第一视角版",
+            "sourceBlockId": "548f34a1-9163-4f41-9e1c-f9efca569961"
+          },
+          {
+            "type": "paragraph",
+            "text": "浩哥的剧本杀推理本",
+            "sourceBlockId": "351eb21b-95dc-4945-b158-cbc980873afc"
+          },
+          {
+            "type": "paragraph",
+            "text": "贴出来的时候发现因为昨晚心血来潮倒腾了域名，czh文章里我的blog链接失效了",
+            "sourceBlockId": "652123f0-fc1d-4403-a3e7-e35505a5cafc"
+          },
+          {
+            "type": "paragraph",
+            "text": "笑死，我对自己喜新厌旧的认知得到了强化，希望这种正反馈早日结束。",
+            "sourceBlockId": "d6b0ae45-40ae-45f4-97c2-4c0787afce75"
+          },
+          {
+            "type": "paragraph",
+            "text": "不过现在仨人域名就是vast3c.cc 、deepz.cc 、rochel.cc 哈哈。",
+            "runs": [
+              {
+                "text": "不过现在仨人域名就是"
+              },
+              {
+                "text": "vast3c.cc",
+                "url": "https://www.vast3c.cc/"
+              },
+              {
+                "text": " 、"
+              },
+              {
+                "text": "deepz.cc",
+                "url": "https://deepz.cc/"
+              },
+              {
+                "text": " 、"
+              },
+              {
+                "text": "rochel.cc",
+                "url": "https://www.rochel.cc/"
+              },
+              {
+                "text": " 哈哈。"
+              }
+            ],
+            "sourceBlockId": "f5e9c616-0cfe-4ca1-8e3f-15e4d8bbff24"
+          },
+          {
+            "type": "paragraph",
+            "text": "晚上视频时二老说感觉开学以来自己心态跟以前比从容了许多，确实，挺好的。",
+            "sourceBlockId": "3d3fee9d-6fe6-4e46-b29b-5f692666417b"
+          }
+        ]
+      },
+      {
+        "id": "e5e8e7fee14b4abba84b23173a9429f8",
+        "category": "life",
+        "title": "The First",
+        "date": "2022-03-30",
+        "summary": "",
+        "source": "https://familiar-koi-5e4.notion.site/e5e8e7fee14b4abba84b23173a9429f8",
+        "sourceCategory": "LIFE",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "现在是北京时间3月28日晚上11点20分",
+            "sourceBlockId": "6152fd70-7fb9-4612-ad5a-daf1160f53b5"
+          },
+          {
+            "type": "paragraph",
+            "text": "我也早觉得有写一点东西的必要了",
+            "sourceBlockId": "c7f01096-59fe-4bca-b2cc-e62ac992f411"
+          },
+          {
+            "type": "paragraph",
+            "text": "事情的起因应该是今天学校解封，晚饭时小酌了一点，刚才趁断电之前洗了个澡冲散了醉意。突然没来由的觉得有写点什么东西的必要了，加之单纯的不太想睡，于是在我用notion作为博客开始记笔记和写周报的半个多月以后，敲下了本应该作为第一篇的乔迁博文",
+            "sourceBlockId": "ef909593-0005-40f5-b314-56f5374424f9"
+          },
+          {
+            "type": "paragraph",
+            "text": "我应该从哪说起呢，洗澡的时候想着应该回顾回顾大学的这几年，写篇荡气回肠、让人印象深刻——至少让我印象深刻的文章，踌躇满志半天，坐到桌前开始敲字的时候气已经卸了大半。毕竟想法这种东西永远就像一个装满水的底下破洞的塑料袋，越挣扎就漏得越快。",
+            "sourceBlockId": "67796d78-a04c-4a43-b922-6143484b25cc"
+          },
+          {
+            "type": "paragraph",
+            "text": "可能过段时间挑个断电的时候再写吧，今晚就脚踩西瓜皮，想到哪写哪。",
+            "sourceBlockId": "a5108a03-b597-4a95-aa59-813af5bc4941"
+          },
+          {
+            "type": "paragraph",
+            "text": "前段时间换了手机耳机，全都换成了，真香。在舍友的启发下，把壁纸换成了华为，我终于实际感受到了他当初向我展示如下画面时心中那隐秘而不可描述的快乐。",
+            "sourceBlockId": "8c3be15b-eb12-423d-a9e9-2a1adc9e0696"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/c07de76a9f067eee5fd7.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "1b4c4e32-f587-491c-9bed-aebc62db4b52"
+          },
+          {
+            "type": "paragraph",
+            "text": "壁纸",
+            "sourceBlockId": "0bb06cfe-0c0a-4d6e-8575-ac51119b5237"
+          },
+          {
+            "type": "paragraph",
+            "text": "同时，我把桌面也重新规划了一下，走线全部用理线盒子收纳好，显得干净整洁，并颇为自得。",
+            "sourceBlockId": "5c6fc1ed-4ca9-43ea-8f68-44a4aa52caf8"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/2e3ad65b59ddef459c58.jpg",
+            "alt": "文章配图",
+            "sourceBlockId": "912c6519-4cfe-4145-8147-f44a198549ef"
+          },
+          {
+            "type": "paragraph",
+            "text": "以上情况不能说是寿终正寝，也可以说是中道崩殂了，现在的桌面乱成一团，我从杂物的缝隙中抽出了我的机械键盘，敲下了这段话。",
+            "sourceBlockId": "4de03b22-8a1a-4f29-8828-51ca22e4dc8a"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "6e7f790c-8849-419c-9474-943e45414324"
+          },
+          {
+            "type": "quote",
+            "text": "现在是北京时间3月28日晚上11点55分",
+            "sourceBlockId": "22112551-be9c-43df-9476-c21407ed93f6"
+          },
+          {
+            "type": "paragraph",
+            "text": "我争取用不太长的时间把我剩下来想说的话说完。",
+            "sourceBlockId": "ae7130b9-4c98-41ef-ab72-039f72256896"
+          },
+          {
+            "type": "paragraph",
+            "text": "今天发生的事情不能说风平浪静，也可以说是波谲云诡了（可能最近看可汗的视频看多了）。鉴于最近我愈发严重的健忘，我想聊聊我的朋友，以期天各一方时，我能通过翻看这篇博文，唤起我对他们的记忆。时间也不早了，我换成罗技的小键盘，有始有终，把这篇敲完。",
+            "sourceBlockId": "2e159a6c-9251-4686-9ed6-fd38af548f9a"
+          },
+          {
+            "type": "paragraph",
+            "text": "在上大学之后，我其实一直跟周围的同班/同级的同学、团队的队友、学生组织的朋友保持正常的交际往来。得益于我高中三年没有换过班，同学也都很nice，我主要的、真正要好的人际关系也都保持在高中这一阶段。教室食堂寝室三点一线，偶尔大活，偶尔出校，不时跟高中同学聊聊天，组队打打游戏，这大概就是我大一至大二的全部生活了。",
+            "sourceBlockId": "0b81064a-7f43-4292-85c8-83a38da5f1be"
+          },
+          {
+            "type": "paragraph",
+            "text": "故事的转折发生在大三上开学。",
+            "sourceBlockId": "2fc2167d-d0ea-4ef4-ad2f-8a3c7fa480be"
+          },
+          {
+            "type": "paragraph",
+            "text": "我按照之前的规划打完智能车比赛，打完一堆杂七杂八的比赛，准备收拾收拾进入大学生活的下半场。有一说一，暑假换了个舍友，我并没有太在意。",
+            "sourceBlockId": "9e22128d-be37-4662-b705-a8c15954fd0c"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "dd9803d1-bf66-4e7d-8974-ec29422a62b5"
+          },
+          {
+            "type": "paragraph",
+            "text": "所以新舍友一号人物T登场了（这里代号随手取的，不用真名就行），作为我脚对脚的真实生活下三路对线者，我能比较敏感的察觉到他的作息规律。之前对他有印象，标签是成绩很猛，会打球。",
+            "sourceBlockId": "10601c5e-2db1-4318-88e9-eb2cedd77ce7"
+          },
+          {
+            "type": "paragraph",
+            "text": "中间的事情就不写了，记不起来，算了。今天中午，T联系导师G一事以无法想象的角度发生了转折，由于之前二人的交谈作为第三方的我并不可考。但大致理解为“我在等你，你以为我不理你”的糟心剧段也出入不大。T性格直爽，恨不得手刃了之。中午1：30的宿舍是低气压气旋的中心，我捧着中午顺手买的水果瑟瑟发抖，处于不想发出声音吃它和花钱买心疼的叠加态。",
+            "sourceBlockId": "46d08509-16b0-46f3-bcec-4c0445d1cff7"
+          },
+          {
+            "type": "paragraph",
+            "text": "T一通广撒网的操作让他在2点多时得到了M的答复，M希望他下午去科技楼面试，我刚跟另一个朋友Z聊完天准备睡觉（这里运用插叙效果更佳，但我超频都理不出来头绪，作罢），得知消息后觉得觉可以再睡，遂陪之于科技楼。4点多时他面试完毕，在三个多小时内经历人生大起大落的他赢得了比赛。T拿到M的offer后心情不错，晚上比我喝得多多了，面色红润，真心希望他能在池子里的剩下几场会晤中再创佳绩，这样，最近口腔溃疡的我也能安心多吃点水果补补维生素了。",
+            "sourceBlockId": "73153a04-a18e-4683-bb9e-ce67af54bec5"
+          },
+          {
+            "type": "paragraph",
+            "text": "好了，现在是北京时间3月29日0点35，耳边传来T均匀的呼吸声，他的作息一向张弛有度。鉴于电脑只剩10%的电了，T也讲完了，再说吧x.x",
+            "sourceBlockId": "e386e58b-b912-4bb3-baa0-58870ea8f72a"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "84d4285e-36c4-40f5-a4a5-7af3e2862efd"
+          },
+          {
+            "type": "quote",
+            "text": "现在是北京时间3月29日晚上11点12分",
+            "sourceBlockId": "c042a36b-465e-481d-a3ef-415855cb1631"
+          },
+          {
+            "type": "paragraph",
+            "text": "本来已经不打算再写鸽了算了，今早醒来感觉自己的文思兴致一夜消散。",
+            "sourceBlockId": "7cbc6bd1-d787-4c8c-aecc-66164cfce481"
+          },
+          {
+            "type": "paragraph",
+            "text": "多少还是狗尾续貂算了吧。",
+            "sourceBlockId": "d573340b-c35f-430a-a061-2576936e6c98"
+          },
+          {
+            "type": "paragraph",
+            "text": "接下来是二号男嘉宾Z，胡建人，口音在我以前见过的福建人中算一等一的好了，长得比较南方，一副球打得好、不怎么会唱歌的样子（这条今日求证时已被本人严正否决）。我对他第一感觉很好，确切来说，我对与我呼吸同一海拔高度空气的人都会有好感buff加成。因此，在他竞选班助想恰钱时，我毫不犹豫地把票投给了他。",
+            "sourceBlockId": "50f60886-a47d-400a-ab7d-0cca7f0ef977"
+          },
+          {
+            "type": "paragraph",
+            "text": "Z名JH，字小配，号长江。这是因为Z昨天面试另一个长江学者Z直接拿了口头offer，大家一致认可授予其“长江七号”的美称，简称长江，又因为相谈甚欢，面试时长25分钟传为美谈，后人便将25分钟记作一配。Z也有自己的博客，文思隽永如XX柠檬茶，看了还想看，是我学习的榜样。看到这里的看官也可以跳转郑璟泓 (deepz.cc) 帮我评论一下催更，感激不尽。",
+            "runs": [
+              {
+                "text": "Z名JH，字小配，号长江。这是因为Z昨天面试另一个长江学者Z直接拿了口头offer，大家一致认可授予其“长江七号”的美称，简称长江，又因为相谈甚欢，面试时长25分钟传为美谈，后人便将25分钟记作一配。Z也有自己的博客，文思隽永如XX柠檬茶，看了还想看，是我学习的榜样。看到这里的看官也可以跳转"
+              },
+              {
+                "text": "郑璟泓 (deepz.cc)",
+                "url": "https://deepz.cc/"
+              },
+              {
+                "text": " 帮我评论一下催更，感激不尽。"
+              }
+            ],
+            "sourceBlockId": "f34b393b-690b-49a6-8393-bc04d23957f3"
+          },
+          {
+            "type": "paragraph",
+            "text": "Z是一个很有想法的自由灵魂，性格随和玉树临风，兼具外在与内心（Z看到这里记得打钱）。各位看官也可以去h\n关于 扫二维码打赏，之后联系我可以获赠他的联系方式。",
+            "runs": [
+              {
+                "text": "Z是一个很有想法的自由灵魂，性格随和玉树临风，兼具外在与内心"
+              },
+              {
+                "text": "（Z看到这里记得打钱）"
+              },
+              {
+                "text": "。各位看官也可以去"
+              },
+              {
+                "text": "h",
+                "url": "https://www.notion.so/The-First-e5e8e7fee14b4abba84b23173a9429f8"
+              },
+              {
+                "text": "关于",
+                "url": "https://familiar-koi-5e4.notion.site/p/aaf5edd8fdb648ddb7aef38f2ad477b0?pvs=24"
+              },
+              {
+                "text": " 扫二维码打赏，之后联系我可以获赠他的联系方式。"
+              }
+            ],
+            "sourceBlockId": "6ee6e80e-48bc-4146-820f-49d7c59f8165"
+          },
+          {
+            "type": "paragraph",
+            "text": "写到这里其实已经可以结束，但瞄了一眼篇幅，发现比之T的部分还少一段，本着不能厚此薄彼的想法，我补了这一段，正好够了，真是端水大师。",
+            "sourceBlockId": "48716ea0-099a-48df-bb65-e6661daa700c"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "29092dc6-90ea-4f31-a199-44ef7160e720"
+          },
+          {
+            "type": "quote",
+            "text": "现在是北京时间3月29日晚上11点29分",
+            "sourceBlockId": "8cb19bd0-7a0a-42f2-8e4b-86a1339b8551"
+          },
+          {
+            "type": "paragraph",
+            "text": "考虑到我还要在T的帮助下完成明天要交的功率电子作业，留给三号男嘉宾C的时间已经不多了",
+            "sourceBlockId": "201207e7-41ca-4b14-933b-dd2c627ff167"
+          },
+          {
+            "type": "paragraph",
+            "text": "我是班长，C是团支书，我跟C算是之前相对比较熟了，但主要局限于工作上的交流。开第一次班会时C竞选团支书说的话已不可考，但其凭借风流倜傥的长相竞选成功（真是难为我大半夜绞尽脑汁想夸别人长相的四字成语）。C是个十成十的乐天派，可惜没有自己的博客，难以体察其日常所思所想，不过据说已经在挑选自己喜欢的博客主题了，想必进度不错，应该很快就能见到了罢（",
+            "sourceBlockId": "92949aba-4169-4598-9daf-d43a4bec480c"
+          },
+          {
+            "type": "paragraph",
+            "text": "斟酌了一会，觉得还是说吧。C有一次复习某一门专选考试时熬夜复习至早上五点，因为太困睡去而错过了上午的考试。在我看来，这已经不是人生的波澜，而是现实的海啸了，幸而其心态很好，成功活到了现在。人类的悲欢并不相通，感同身受始终也是一个伪命题，直到现在我也无法体会其间他的痛苦（），以后可能也不会，但我想之后有人如遇这种状况，应该尽力给予帮助。我现在能做的也就是在力所能及范围内帮他复习备考，以及push他。",
+            "sourceBlockId": "afebda95-9f96-4478-856a-939235728f7c"
+          },
+          {
+            "type": "paragraph",
+            "text": "三人的去向都已逐渐清晰，希望他能早日扼住命运的咽喉，也私心希望命运能在这一回合放点水。",
+            "sourceBlockId": "4b4762fd-74f1-4215-8c17-e7bb5189fda3"
+          },
+          {
+            "type": "paragraph",
+            "text": "另外，我一直觉得外表看起来大大咧咧的人内心往往敏感脆弱，C算是给我幼稚的归纳法上了一课，czhnb。",
+            "sourceBlockId": "d42cae6c-33d7-4982-bfc5-c7d7a10886ee"
+          },
+          {
+            "type": "paragraph",
+            "text": "最后，贴一张图（已征得拍摄者同意）",
+            "sourceBlockId": "a8d8c636-0380-4d0d-bf3b-a0fbbd0490ca"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "c19d40a5-b41a-4eda-b444-eb28a6d5ca1f"
+          },
+          {
+            "type": "paragraph",
+            "text": "最后的最后，贴一首诗，高中时候挺喜欢的，现在再看感觉略显矫情。",
+            "sourceBlockId": "bf341a74-7df1-4e7c-bbd1-e2d3cfde50f5"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "0f1ec0fe-fa01-403a-ab4b-105c7c38198a"
+          },
+          {
+            "type": "paragraph",
+            "text": "现在是北京时间3月30日0点整，完美。\n我去写作业了，或许不写。",
+            "sourceBlockId": "ba6b397d-0441-4c87-97b8-51b0cb9d9bf0"
+          }
+        ]
+      },
+      {
+        "id": "3b5ad8eeb6f84e33953ca624f017515a",
+        "category": "tech",
+        "title": "Transformer系列",
+        "date": "2022-08-01",
+        "summary": "从注意力到MAE",
+        "source": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a",
+        "sourceCategory": "学习思考",
+        "sourceStatus": "Published",
+        "blocks": [
+          {
+            "type": "quote",
+            "text": "从注意力到MAE，学习教程笔记",
+            "sourceBlockId": "f3168bfa-b5e8-493e-b124-c974215008a0"
+          },
+          {
+            "type": "heading",
+            "text": "注意力",
+            "sourceBlockId": "57ec68f8-b399-4914-85a1-ea950b3720b6"
+          },
+          {
+            "type": "paragraph",
+            "text": "视觉认知工程中提过，由于中心凹等生理结构的存在使得真正处于观察范围内的视角比较小，人眼视觉的认知本质是高速扫描关键点，注意力机制也与此对应。\n还需要知道的是，人眼视觉线索可以分为随意线索（top-down）和非随意（down-top）线索，随意线索例如我想要喝咖啡去找咖啡杯，是自顶向下的。非随意线索例如纯白背景的房间放置一个红色咖啡杯，由于其视觉上的独特性构成自底向上的非随意线索。",
+            "sourceBlockId": "18f875ef-28c3-4606-ad58-d67ca80b4205"
+          },
+          {
+            "type": "subheading",
+            "text": "注意力机制",
+            "sourceBlockId": "7b6815bf-3d73-4458-8747-214fd14bf775"
+          },
+          {
+            "type": "paragraph",
+            "text": "我们此前的卷积和池化层等等操作主要考虑的是非随意线索，注意力机制希望引入对随意线索的实现。",
+            "sourceBlockId": "6eb13e60-3ff4-48e5-bc5b-98ec1cf5848a"
+          },
+          {
+            "type": "list",
+            "items": [
+              "随意线索称为查询（query）"
+            ],
+            "ordered": false,
+            "sourceBlockId": "f59acb9e-e21c-43e3-b57c-10aac5457dee"
+          },
+          {
+            "type": "list",
+            "items": [
+              "输入（已知）是值（value）和非随意线索（key）的对（pair）"
+            ],
+            "ordered": false,
+            "sourceBlockId": "3b504611-5aab-4c8a-be43-48035dda3d3c"
+          },
+          {
+            "type": "list",
+            "items": [
+              "注意力机制即希望通过需要的随意线索，寻找与之接近的非随意线索的加权值"
+            ],
+            "ordered": false,
+            "sourceBlockId": "8dd756ad-31e5-4239-9893-57a174d632b9"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ade145ee19f8e1f22282.png",
+            "alt": "文章配图",
+            "sourceBlockId": "5ffd66bd-2395-4aa9-958b-b880b6865023"
+          },
+          {
+            "type": "paragraph",
+            "text": "以上就是一个非参的注意力机制实现，其中x是query，xi和xj是key，yi是value，K是核函数，度量相似性，如果使用高斯核就会变成",
+            "sourceBlockId": "e717f404-20cc-43f3-841e-2ec54e773860"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/3f2f9c960cf06c32f81a.png",
+            "alt": "文章配图",
+            "sourceBlockId": "f21e892b-c67a-425a-b38c-24433acc8ad4"
+          },
+          {
+            "type": "subheading",
+            "text": "注意力分数",
+            "sourceBlockId": "cfe4280b-9787-4c44-be90-761e5e8bc7e1"
+          },
+          {
+            "type": "link",
+            "text": "65 注意力分数【动手学深度学习v2】\n注意力分数 [图片] α（x,xi） ：注意力权重（权重一般是一组大于等于零，相加和为 1 的数） 注意力分数 ：高斯核的指数部分（相当于是注意...\nhttps://www.bilibili.com/read/cv15934199?from=note",
+            "url": "https://www.bilibili.com/read/cv15934199?from=note",
+            "sourceBlockId": "a157934d-8bb5-4bbb-b87a-698201759ab4"
+          },
+          {
+            "type": "link",
+            "text": "65 注意力分数【动手学深度学习v2】_哔哩哔哩_bilibili\n65 注意力分数【动手学深度学习v2】共计3条视频，包括：注意力分数、代码、QA等，UP主更多精彩视频，请关注UP账号。\nhttps://www.bilibili.com/video/BV1Tb4y167rb?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV1Tb4y167rb?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "2fce5dbb-82ec-4221-84f4-94c4cdb73822"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a3bc143b8e9ccd73bb7e.png",
+            "alt": "文章配图",
+            "sourceBlockId": "8a1c253e-afbf-467a-ace2-0c748faa712e"
+          },
+          {
+            "type": "paragraph",
+            "text": "可以知道，输出注意力权重由计算得到的注意力分数经过归一化得到。图很形象，假设已知一些 key-value 对和一个 query，首先将 query 和每一个 key 通过注意力分数函数 a 和 softmax 运算得到注意力权重（与 key 对应的值的概率分布），将这些注意力权重再与已知的 value 进行加权求和，最终就得到了输出。\n高维情况下，即q个查询，m个键值对，可以得到",
+            "sourceBlockId": "95ac1ca6-f0a9-4884-a161-faed024a7de0"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/c1b8d2d3548fea4d4201.png",
+            "alt": "文章配图",
+            "sourceBlockId": "f26f9d0c-a602-4320-87e3-d2efc09d0fa5"
+          },
+          {
+            "type": "paragraph",
+            "text": "softmax作用",
+            "sourceBlockId": "6a2dfb03-c229-4b1e-be76-84b67c4bf883"
+          },
+          {
+            "type": "subheading",
+            "text": "加性注意力（Additive attention）",
+            "sourceBlockId": "b3b001c5-3b1b-4d70-bb06-3fe741a20814"
+          },
+          {
+            "type": "paragraph",
+            "text": "当 query 和 key 是不同长度的矢量时，可以使用加性注意力作为注意力分数\n​",
+            "sourceBlockId": "68bade5a-4c1c-406b-80bb-ba09295ec880"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ad2e2f25c407db98cd0d.png",
+            "alt": "文章配图",
+            "sourceBlockId": "73937a7f-dac1-46fb-8f26-02f85dd1e1eb"
+          },
+          {
+            "type": "paragraph",
+            "text": "h：超参数\nWk：key 从 k map 到 h（将 key 向量的长度从 k 转化为 h）\nWq：query 从q map 到 h（将 query 向量的长度从 q 转化为 h）\nWk、Wq 都是矩阵，v 是向量\ntanh：激活函数\n上式中，k 是长为 k 的向量，q 是长为 q 的向量\n等价于将 query 和 key 合并起来变成一个长度为 k+q 的向量，然后将其输入到一个隐藏层大小为 h （ h 是一个超参数），输出大小为 1 的但隐藏层的 MLP（没有偏置项），最终得到输出\n优点是 key、value 向量可以是任意的长度，可以不同",
+            "sourceBlockId": "29b9f5f6-48c3-487f-9d50-31dd4b621349"
+          },
+          {
+            "type": "subheading",
+            "text": "缩放点积注意力（Scaled Dot-Product Attention）",
+            "sourceBlockId": "a0b5fc57-e96a-4746-91c2-4c0da045d947"
+          },
+          {
+            "type": "paragraph",
+            "text": "使用点积可以得到计算效率更高i的评分函数，但是点积操作要求 query 和 key 具有相同的长度",
+            "sourceBlockId": "a84ae96b-0379-4856-b4cf-05ff839e9df6"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/e06957573fa3dfb17797.png",
+            "alt": "文章配图",
+            "sourceBlockId": "02140fc7-e2ea-45c1-8e66-9f7419ef540b"
+          },
+          {
+            "type": "paragraph",
+            "text": "假设 query 和 key 的所有元素都是独立的随机变量，并且都满足零均值和单位方差，那么两个向量的点积的均值为 0 ，方差为 d\n这里不需要学习任何东西，直接利用 <q,ki> 将 q 和 ki 做内积然后除以根号 d （除以根号 d 的目的是为了降低对 ki 的长度的敏感度，使得无论向量的长度如何，点积的方差在不考虑向量长度的情况下仍然是 1 ）",
+            "sourceBlockId": "9eaf7e91-dea9-4953-9265-35a30658465a"
+          },
+          {
+            "type": "subheading",
+            "text": "举例：seq2seq中的注意力",
+            "sourceBlockId": "6723551d-a56f-4e6d-9175-e935d1d5f19c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/85a393db1e95d7ea8175.png",
+            "alt": "文章配图",
+            "sourceBlockId": "f94046aa-8b6e-4927-8972-ecd8f644c6de"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/147f1250abcf9ab017b3.png",
+            "alt": "文章配图",
+            "sourceBlockId": "f40e5f0a-b86a-4f72-bf3c-5212412d3be0"
+          },
+          {
+            "type": "paragraph",
+            "text": "未采用注意力时，RNN（encoder）的输出采用最后一个单词对应的隐藏状态h_last。也称为分心模型，即注意力是平均的。\n引入注意力后，翻译的单词更加注重对应的、更重要的单词。（2.从Encoder-Decoder框架来理解注意力机制_哔哩哔哩_bilibili）",
+            "runs": [
+              {
+                "text": "未采用注意力时，RNN（encoder）的输出采用最后一个单词对应的隐藏状态h_last。也称为分心模型，即注意力是平均的。\n引入注意力后，翻译的单词更加注重对应的、更重要的单词。（"
+              },
+              {
+                "text": "2.从Encoder-Decoder框架来理解注意力机制_哔哩哔哩_bilibili",
+                "url": "https://www.bilibili.com/video/BV1Ff4y187nr?p=2&vd_source=2389bab1e2b5df1e6b43b657a0e92199"
+              },
+              {
+                "text": "）"
+              }
+            ],
+            "sourceBlockId": "a61731ad-a676-444b-a55a-aae7d67e66af"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/834bfe7141f2b0844c42.png",
+            "alt": "文章配图",
+            "sourceBlockId": "29c71d8f-eff4-4812-bf29-aeef472c6342"
+          },
+          {
+            "type": "subheading",
+            "text": "自注意力",
+            "sourceBlockId": "a08b22ed-248a-458a-b87b-c4a206893455"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/36ba43d161bd992a2c62.png",
+            "alt": "文章配图",
+            "sourceBlockId": "4da7b23a-712d-4028-bc26-01ccd284688f"
+          },
+          {
+            "type": "paragraph",
+            "text": "自注意力即对于序列数据中的每个x，其qkv三个部分都是他自身，操作同上述注意力一致。\n比较了三者的复杂度，序列越长，自注意力时间复杂度越高（\n𝑛\n2\n×\n𝑑\nn\n2\n×d），因为每个x都对整个序列计算注意力，其他两个都是n的一次方。",
+            "sourceBlockId": "9bc3fdb8-8441-45f2-98af-684a13d165aa"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/53df3f1a4eca86a53341.png",
+            "alt": "文章配图",
+            "sourceBlockId": "b3553523-d45b-4d03-8c2f-4ab55b35c634"
+          },
+          {
+            "type": "subheading",
+            "text": "位置编码",
+            "sourceBlockId": "c4e095c4-2f2e-4b39-8716-ed1c01cc98e6"
+          },
+          {
+            "type": "paragraph",
+            "text": "加入了位置信息（加入位置是直接跟输入序列中的元素相加），主要特性是其可以实现相对位置关系的转化，具体信息可以看后续transformer等等是怎么用的",
+            "sourceBlockId": "f1036ad3-5d12-4b30-ad59-0478bd7d3598"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/c30d4cc700383a1a4b74.png",
+            "alt": "文章配图",
+            "sourceBlockId": "ca5f31b1-3612-4f86-ba85-bea392cfb365"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a976c6c9c9e8d6e3ca6a.png",
+            "alt": "文章配图",
+            "sourceBlockId": "42c01f97-087a-496d-998d-5e46663d027c"
+          },
+          {
+            "type": "paragraph",
+            "text": "即，如下图所示，对每个序列中的元素\n𝑎\n𝑖\na\ni\n都会有带有位置信息的\n𝑒\n𝑖\ne\ni\n与之想加，\n𝑒\n𝑖\ne\ni\n热度图在右侧，其通过上述的sin cos生成。sin cos规则是attention is all you need提出来的，目前位置编码的选择仍比较多，也尚待研究，甚至也可以交给反向传播自己去学。",
+            "sourceBlockId": "4e063a76-65f2-4b34-9287-c138daeebe6d"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b3921992ffc99a9037d6.png",
+            "alt": "文章配图",
+            "sourceBlockId": "2fb72b8a-3faa-403a-b8fb-dd06dd97be74"
+          },
+          {
+            "type": "subheading",
+            "text": "Multi-head Self-attention",
+            "sourceBlockId": "cf589c3f-cfde-465b-ae59-6fe22fe6b713"
+          },
+          {
+            "type": "paragraph",
+            "text": "“相关有多种表现形式，提现为注意力的多头”\n如上右图，对序列中的每个元素，得到\n𝑞\n,\n𝑘\n,\n𝑣\nq,k,v之后再分别乘两个矩阵（两个head）共6个矩阵得到多头注意力所需要的\n𝑞\n,\n𝑘\n,\n𝑣\nq,k,v。\n每个head是相互独立的，所以计算的时候分开计算如下，多头结果concat之后再过矩阵得到最终一样的注意力分数结果",
+            "sourceBlockId": "896b5687-2f94-4055-ad69-9e8e7038abcb"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/96467480f483b9907bdd.png",
+            "alt": "文章配图",
+            "sourceBlockId": "25ddd732-90c5-4625-87ea-02e7902cfdcb"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/86036aa77127ef3856cd.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9f4056ad-0916-4991-a4c0-171e32c5bd0a"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/916fd6087ed171e8d9c4.png",
+            "alt": "文章配图",
+            "sourceBlockId": "e7b1b132-38f0-4dd1-8811-2f4b8bac56e2"
+          },
+          {
+            "type": "heading",
+            "text": "李宏毅&笔记",
+            "sourceBlockId": "85df00d4-a53c-4926-8eae-217a77e0d36a"
+          },
+          {
+            "type": "paragraph",
+            "text": "李宏毅的版本对此有详细介绍。",
+            "sourceBlockId": "2211d3db-c84a-413f-bbed-02f48a3c6b23"
+          },
+          {
+            "type": "link",
+            "text": "第四节 2021 - 自注意力机制(Self-attention)(上)_哔哩哔哩_bilibili\n第四节 2021 - 自注意力机制(Self-attention)(上)是(强推)李宏毅2021/2022春机器学习课程的第38集视频，该合集共计155集，视频收藏或关注UP主，及时了解更多相关视频内容。\nhttps://www.bilibili.com/video/BV1Wv411h7kN?p=38&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV1Wv411h7kN?p=38&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "ff575bd4-3dbf-440f-8c1e-56e93d25a660"
+          },
+          {
+            "type": "paragraph",
+            "text": "DeepLearning_LHY21_Notes​",
+            "runs": [
+              {
+                "text": "DeepLearning_LHY21_Notes",
+                "url": "https://github.com/unclestrong/DeepLearning_LHY21_Notes"
+              },
+              {
+                "text": "​"
+              }
+            ],
+            "sourceBlockId": "6440ea90-2b71-4964-b1e1-3a9106a33e66"
+          },
+          {
+            "type": "link",
+            "text": "10_Self-attention_P1.pdf 2177.8KB",
+            "url": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a#3d022acb82bc419b98bb8b6463517e93",
+            "sourceBlockId": "3d022acb-82bc-419b-98bb-8b6463517e93"
+          },
+          {
+            "type": "link",
+            "text": "11_Self-attention_P2.pdf 2751.6KB",
+            "url": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a#e23b46f4ed364a5ab9423dbb3b1a5233",
+            "sourceBlockId": "e23b46f4-ed36-4a5a-b942-3dbb3b1a5233"
+          },
+          {
+            "type": "paragraph",
+            "text": "b站用户uncle-强在github和gitee上开源了笔记，挺全面了，我在下面放个pdf自己备忘。",
+            "runs": [
+              {
+                "text": "b站用户"
+              },
+              {
+                "text": "uncle-强"
+              },
+              {
+                "text": "在"
+              },
+              {
+                "text": "github",
+                "url": "https://github.com/unclestrong/DeepLearning_LHY21_Notes"
+              },
+              {
+                "text": "和gitee上开源了笔记，挺全面了，我在下面放个pdf自己备忘。"
+              }
+            ],
+            "sourceBlockId": "0e992ab6-0f45-466f-b0a0-33190bb75e50"
+          },
+          {
+            "type": "paragraph",
+            "text": "我们的目的是获取序列中的相邻语义信息，所以一开始考虑用window+fc（全连接层）（左图），但许多任务其实需要全局的语义信息，self-attention由此诞生，框架如右图，self-attention输出的特征即包含全局语义信息",
+            "sourceBlockId": "310ed9f9-6df4-4627-b5c1-9aac7c4ac4f3"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/512a2daa2e1097f7db8d.png",
+            "alt": "文章配图",
+            "sourceBlockId": "8c772241-aff2-4ef6-8e2f-79bc0cd2e66e"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/52934001f1a17458b7a2.png",
+            "alt": "文章配图",
+            "sourceBlockId": "871fb139-d0e7-4a1e-868f-32f7c9ec0e2e"
+          },
+          {
+            "type": "paragraph",
+            "text": "最简单的dot product self-attention，可学参数就是\n𝑊\n𝑞\n,\n𝑊\n𝑘\n,\n𝑊\n𝑣\nW\nq\n,W\nk\n,W\nv\n三个矩阵（pdf里详细讲了）",
+            "sourceBlockId": "20f10e1d-914e-485a-aa57-06f68fad4943"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/88dbb6df72c0028a77a5.png",
+            "alt": "文章配图",
+            "sourceBlockId": "acab7106-3ae0-4bb5-9a57-a793f65c08e3"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/87beda2bb1df5d84e3cd.png",
+            "alt": "文章配图",
+            "sourceBlockId": "a954ec50-bbb4-4c6c-8a80-2865ce334c37"
+          },
+          {
+            "type": "heading",
+            "text": "Transformer",
+            "sourceBlockId": "2b804999-d0f5-4fbc-b1fb-5d9e57953201"
+          },
+          {
+            "type": "paragraph",
+            "text": "《Attention Is All You Need》已经是2017年的工作了，BERT是18年的工作",
+            "sourceBlockId": "7a358630-1835-47fc-bb85-2b54550206bd"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/9662e626acab028037e6.png",
+            "alt": "文章配图",
+            "sourceBlockId": "2cae7def-3e9c-4583-8fe2-451f1159f38d"
+          },
+          {
+            "type": "subheading",
+            "text": "李宏毅",
+            "sourceBlockId": "f22365b4-6ead-477a-b6ce-18dd5f6efe39"
+          },
+          {
+            "type": "link",
+            "text": "2021 - Transformer (上)_哔哩哔哩_bilibili\n2021 - Transformer (上)是(强推)李宏毅2021/2022春机器学习课程的第49集视频，该合集共计155集，视频收藏或关注UP主，及时了解更多相关视频内容。\nhttps://www.bilibili.com/video/BV1Wv411h7kN?p=49&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV1Wv411h7kN?p=49&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "58926806-fd72-4afe-9c7d-abfb6de0cee7"
+          },
+          {
+            "type": "paragraph",
+            "text": "DeepLearning_LHY21_Notes​",
+            "runs": [
+              {
+                "text": "DeepLearning_LHY21_Notes",
+                "url": "https://github.com/unclestrong/DeepLearning_LHY21_Notes"
+              },
+              {
+                "text": "​"
+              }
+            ],
+            "sourceBlockId": "7ad82a84-1b42-404c-8643-8c54126a5021"
+          },
+          {
+            "type": "link",
+            "text": "12_Transformer_P1.pdf 2640.1KB",
+            "url": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a#4f338fc37ed74466b32148fbce4e3752",
+            "sourceBlockId": "4f338fc3-7ed7-4466-b321-48fbce4e3752"
+          },
+          {
+            "type": "link",
+            "text": "13_Transformer_P2_1.pdf 4367.0KB",
+            "url": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a#63eb9dbb59e241fcb51eb009ccdbfa0b",
+            "sourceBlockId": "63eb9dbb-59e2-41fc-b51e-b009ccdbfa0b"
+          },
+          {
+            "type": "link",
+            "text": "13_Transformer_P2_2.pdf 1707.0KB",
+            "url": "https://familiar-koi-5e4.notion.site/3b5ad8eeb6f84e33953ca624f017515a#844fc1859d6541279c3d837c5c854709",
+            "sourceBlockId": "844fc185-9d65-4127-9c3d-837c5c854709"
+          },
+          {
+            "type": "paragraph",
+            "text": "其中P1主要讲的是seq2seq模型能用的任务以及encoder结构，P2是剩余的技术细节\nP2超大小了，拆了一部分\nPS:笑死，行话是这样的",
+            "sourceBlockId": "0d88d7ff-27d7-4236-89e8-2217fe7f8869"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/268e2b010aaf55903ad0.png",
+            "alt": "文章配图",
+            "sourceBlockId": "5bf54bcc-68a0-486a-a214-2753ff464ea0"
+          },
+          {
+            "type": "subheading",
+            "text": "网络结构",
+            "sourceBlockId": "9c334bb4-1f98-4f07-98c0-e1f69cda4e22"
+          },
+          {
+            "type": "paragraph",
+            "text": "首先transformer是一个nlp的seq2seq的model，其中output seq不定长，eg语音识别。",
+            "sourceBlockId": "e1208f94-78d0-4e9a-abff-c879f7b6d3e9"
+          },
+          {
+            "type": "subheading",
+            "text": "Encoder编码器",
+            "sourceBlockId": "fa85c087-2c76-4439-a957-d307629b5a34"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/d963a23dfd5d97df607f.png",
+            "alt": "文章配图",
+            "sourceBlockId": "5e5b9202-13d4-498d-bac1-ab19829a2473"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/326a50e04ff2c3c6ec22.png",
+            "alt": "文章配图",
+            "sourceBlockId": "8d30eb51-ed19-4d9f-b030-b60d1297d9fe"
+          },
+          {
+            "type": "paragraph",
+            "text": "transformer的Encoder,用的就是self-attention，其中含有多个block，<简化版>如右图具体是：",
+            "sourceBlockId": "7dd3fd2d-33cb-4212-a48a-d4588dbbdd55"
+          },
+          {
+            "type": "list",
+            "items": [
+              "先做一个self-attention,input一排vector以后,做self-attention,考虑整个sequence的全局语义特征，Output另外一排vector"
+            ],
+            "ordered": false,
+            "sourceBlockId": "63c1941c-6eda-4378-b0d4-3900ba31e7d2"
+          },
+          {
+            "type": "list",
+            "items": [
+              "接下来这一排vector,会再丢到fully connected的feed forward network裡面,再output另外一排vector,这一排vector就是block的输出"
+            ],
+            "ordered": false,
+            "sourceBlockId": "998efbca-6f4f-4c17-9025-06546c01fa7b"
+          },
+          {
+            "type": "paragraph",
+            "text": "对比一下左图和右图，可以发现，transformer实际上多了两处residual connection，分别在多头注意力前后和FC（Feed Forward就是全连接）前后，另外，不同于一般的batch normalization，其采用的是可以应对可变长输入的layer normalization。因此，encoder实际运行如下：",
+            "sourceBlockId": "d6f66a30-5ab5-4238-93ca-4276a54b3028"
+          },
+          {
+            "type": "list",
+            "items": [
+              "首先 你有self-attention,其实在input的地方,还有加上positional encoding,我们之前已经有讲过（\n位置编码 ），如果你只光用self-attention,你没有未知的位置前后关系，所以需要加上positional的information,然后在这个图上,有特别画出positional的information"
+            ],
+            "ordered": false,
+            "sourceBlockId": "b35e7dd4-0694-4eb6-971f-ab4df344c220"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Multi-Head Attention,这个就是self-attention的block,这边有特别强调说,它是Multi-Head的selfattention"
+            ],
+            "ordered": false,
+            "sourceBlockId": "88462193-3b7f-440c-9dea-4ee2719fa8fc"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add&norm,就是residual加layer normalization,我们刚才有说self-attention,有加上residual的connection,加下来还要过layer normalization,这边这个图上的Add&norm,就是residual加layer norm的意思"
+            ],
+            "ordered": false,
+            "sourceBlockId": "57dbd06a-65b4-4bb8-b29f-01e121c1df92"
+          },
+          {
+            "type": "list",
+            "items": [
+              "接下来,要过feed forward network。fc的feed forward network以后再做一次Add&norm,再做一次residual加layer norm,才是一个block的输出。然后这个block会重复n次。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2fcd9a97-d6cb-4a0f-ad9b-cd763596c449"
+          },
+          {
+            "type": "paragraph",
+            "text": "后续BERT的encoder与transformer保持一致\ntransformer结构选择：On Layer Normalization in the Transformer Architecture作者对各层位置和residual connection调整后的效果做了探讨，发现layer normalization放在attention和FC之前效果更好。\nPowerNorm: Rethinking Batch Normalization in Transformers作者对layer normalization做了探讨，提出了power normalization",
+            "runs": [
+              {
+                "text": "后续"
+              },
+              {
+                "text": "BERT"
+              },
+              {
+                "text": "的encoder与transformer保持一致\ntransformer结构选择："
+              },
+              {
+                "text": "On Layer Normalization in the Transformer Architecture",
+                "url": "https://arxiv.org/abs/2002.04745"
+              },
+              {
+                "text": "作者对各层位置和residual connection调整后的效果做了探讨，发现layer normalization放在attention和FC之前效果更好。\n"
+              },
+              {
+                "text": "PowerNorm: Rethinking Batch Normalization in Transformers",
+                "url": "https://arxiv.org/abs/2003.07845"
+              },
+              {
+                "text": "作者对layer normalization做了探讨，提出了power normalization"
+              }
+            ],
+            "sourceBlockId": "9d7fd8ae-64d9-4c57-a834-baba70706f6a"
+          },
+          {
+            "type": "subheading",
+            "text": "layer normalization",
+            "sourceBlockId": "6076aa40-1d94-4ef7-80a8-bb4f15c34c8d"
+          },
+          {
+            "type": "paragraph",
+            "text": "b是batch，从左到右是第1个序列到第n个序列，len是序列长度，第一个序列从下到上是第1个元素到第n个元素，d是每个元素的特征维度，如图，layer normalization不对每个特征维度做归一化，而对序列中每个example的所有特征做归一化，因此其可以对变长输入序列进行归一化。",
+            "sourceBlockId": "ac7e3885-12a6-472d-b1e6-5549e57a44b4"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/bae5ee9468fbdbbe5acc.png",
+            "alt": "文章配图",
+            "sourceBlockId": "139a43b6-cde3-4319-9e7e-71e023f885d0"
+          },
+          {
+            "type": "subheading",
+            "text": "Decoder解码器",
+            "sourceBlockId": "1249f248-7584-43aa-a262-a7d23a6df373"
+          },
+          {
+            "type": "subheading",
+            "text": "预测阶段操作流程",
+            "sourceBlockId": "47104663-aed9-486a-8ee0-a3bed93e0180"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/2337f74b6d6e2d0e4718.png",
+            "alt": "文章配图",
+            "sourceBlockId": "4ad9a914-bda2-4af4-b0e0-f3770166669d"
+          },
+          {
+            "type": "paragraph",
+            "text": "从输入输出来看decoder需要完成什么。首先，在nlp任务中，我们将上图中的所有单字化为Vocabulary中的One-Hot（当然one-hot是最简单的，Word Embedding等等方法也都可行），也即建立一个几千字的常用汉字库，每个字都是一个几千维的仅一位为1的Vector（nlp中称为Token），另外句子开头和结尾这两个字符也包含在Vocabulary中，是两个特殊的Token。我们首先传入BOS(Begin of Sentence)这个Vector，decoder会生成“机”（实际上是输出结果通过softmax之后选取最大值是“机”，然后输出“机”对应的One-Hot编码），然后“机”这个输出会返回来作为decoder的输入，decoder根据BOS和“机”生成“器”，再根据BOS、机、器生成学…直到最后“习”字输入，decoder输出END表示识别完成（可变长输出，END标识结束）。",
+            "sourceBlockId": "6be02805-f773-4612-a06e-4439a12b78e6"
+          },
+          {
+            "type": "subheading",
+            "text": "结构：Masked Multi-Head Attention",
+            "sourceBlockId": "cbb688c5-afdf-4173-bddd-fc1f0d3822b9"
+          },
+          {
+            "type": "paragraph",
+            "text": "decoder结构具体如下，与encoder相比，主要增加的是块中下方的Masked Multi-Head Attention。掩码的添加是符合直觉的，即我串行推理的时候，只能看到已有的信息，而无法预知未来的输入。具体来说，计算\n𝑏\n2\nb\n2\n时，只把\n𝑞\n2\nq\n2\n和\n𝑘\n1\n,\n𝑘\n2\nk\n1\n,k\n2\n的运算结果concat输出，与\n𝑎\n3\n,\n𝑎\n4\na\n3\n,a\n4\n无关。",
+            "sourceBlockId": "27f07ef7-c838-4625-b833-ff5652fca1f2"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/efb8c5d575b648d6e2a2.png",
+            "alt": "文章配图",
+            "sourceBlockId": "1596a08a-a1bb-42f9-a37c-304535d86018"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/68736bb5a9ede3d7f629.png",
+            "alt": "文章配图",
+            "sourceBlockId": "e1458ade-6920-4817-8dae-edbb833396a0"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a589e1131dae019f8b63.png",
+            "alt": "文章配图",
+            "sourceBlockId": "33efde0f-960f-4ad2-ad71-c09c5ee6e035"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a2276c75babf5e91ef8a.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9e05cdd8-a352-495c-be01-8a6bc8132e0b"
+          },
+          {
+            "type": "subheading",
+            "text": "Autoregressive(AT) & Non-Autoregressive(NAT)",
+            "sourceBlockId": "538c4b94-154c-45a1-a5c1-39ac50a043b9"
+          },
+          {
+            "type": "paragraph",
+            "text": "以上我们介绍的都是AT的内容，NAT相比于AT，主要是一次全部输入START(类似BOS)，一次运行输出全部的结果，而AT需要串行输出。由于我们的输入和输出是可变长的序列，因此对NAT而言，最大的困难在于确定给入START的数量，通常的简单方法有两种：",
+            "sourceBlockId": "2b16bf50-2cea-4a83-a1a2-5ac84fe01c24"
+          },
+          {
+            "type": "list",
+            "items": [
+              "另外learn一个 Classifier,这个 Classifier ,它吃 Encoder 的 Input,然后输出是一个数字,这个数字代表 Decoder 应该要输出的长度,这是一种可能的做法"
+            ],
+            "ordered": false,
+            "sourceBlockId": "e9097ddf-2de4-4e1c-9610-3290304c99ee"
+          },
+          {
+            "type": "list",
+            "items": [
+              "不管三七二十一,给它一堆 BEGIN 的 Token,你就假设说,你现在输出的句子的长度,绝对不会超过 300 个字,你就假设一个句子长度的上限,然后 BEGIN ,你就给它 300 个BEGIN,然后就会输出 300 个字嘛,然后,你再看看什麼地方输出 END,输出 END 右边的,就当做它没有输出,就结束了,这是另外一种处理 NAT 的 Decoder应该输出的长度的方法"
+            ],
+            "ordered": false,
+            "sourceBlockId": "280f6caf-5115-4d80-b890-ee28ad17fa3e"
+          },
+          {
+            "type": "paragraph",
+            "text": "NAT的好处是并行度高速度快，但精度performance不行且难训，由于自己不搞NLP，所以就简单记一下到这里了，深入讲解在youtu有。",
+            "runs": [
+              {
+                "text": "NAT的好处是并行度高速度快，但精度performance不行且难训，由于自己不搞NLP，所以就简单记一下到这里了，深入讲解在"
+              },
+              {
+                "text": "youtu",
+                "url": "https://youtu.be/jvyKmU4OM3c"
+              },
+              {
+                "text": "有。"
+              }
+            ],
+            "sourceBlockId": "4182f580-475c-447d-bfbb-b330a3bcd18c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ece5bef72faa944be3d1.png",
+            "alt": "文章配图",
+            "sourceBlockId": "d1f095af-9aff-41f9-bdaa-95234a1c40fc"
+          },
+          {
+            "type": "subheading",
+            "text": "Encoder-Decoder信息传递",
+            "sourceBlockId": "3f4d29ca-6283-41dd-9957-0eae942a5462"
+          },
+          {
+            "type": "paragraph",
+            "text": "主要就是Cross Attention，cross attention相比于self-attention出现的更早，实际上来说他就是我们开始讲的\n注意力分数 ，只不过\n𝑘\nk和\n𝑣\nv相同罢了。\n流程如下方右图，对于mask self-attention的输出，乘一个矩阵变成\n𝑞\nq，同时encoder的输出全部与矩阵相乘生成\n𝑘\nk和\n𝑣\nv，然后用得到的\n𝑞\nq与\n𝑘\nk计算注意力分数（原文是缩放点积注意力，前面有讲），归一化得到注意力权重，与\n𝑣\nv相乘想加得到输出\n𝑣\nv，通过FC就是一个块，反复n个decoder块再线性层、softmax得到decoder输出。decoder的第一个输出作为decoder的第二个输入（第一个输入是BOS）反复上述操作直至全部输出。",
+            "runs": [
+              {
+                "text": "主要就是"
+              },
+              {
+                "text": "Cross Attention"
+              },
+              {
+                "text": "，cross attention相比于self-attention出现的更早，实际上来说他就是我们开始讲的"
+              },
+              {
+                "text": "注意力分数",
+                "url": "https://familiar-koi-5e4.notion.site/p/3b5ad8eeb6f84e33953ca624f017515a?pvs=24#cfe4280b97874c44be90761e5e8bc7e1"
+              },
+              {
+                "text": " ，只不过"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "和"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "相同罢了。\n流程如下方右图，对于mask self-attention的输出，乘一个矩阵变成"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "，同时encoder的输出全部与矩阵相乘生成"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "和"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "，然后用得到的"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "q"
+              },
+              {
+                "text": "与"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "k"
+              },
+              {
+                "text": "计算注意力分数（原文是缩放点积注意力，前面有讲），归一化得到注意力权重，与"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "相乘想加得到输出"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "v"
+              },
+              {
+                "text": "，通过FC就是一个块，反复n个decoder块再线性层、softmax得到decoder输出。decoder的第一个输出作为decoder的第二个输入（第一个输入是BOS）反复上述操作直至全部输出。"
+              }
+            ],
+            "sourceBlockId": "1615758c-a21d-4c72-b676-7a58a8fdcb2a"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/eadcdc89755a55fc90e1.png",
+            "alt": "文章配图",
+            "sourceBlockId": "21b67216-fbeb-49ae-aa64-dc102b63b99c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/af282d84a62901beabd4.png",
+            "alt": "文章配图",
+            "sourceBlockId": "062ee771-7d25-48a5-a03c-c92341c599e5"
+          },
+          {
+            "type": "paragraph",
+            "text": "也可以不用encoder最后一个块和decoder第一个块做数据传递，各种各样方法都试过了，论文已水（bushi。",
+            "sourceBlockId": "ef06249c-4b17-45cf-b176-417b983724fd"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/844ae03bab8418a6eeef.png",
+            "alt": "文章配图",
+            "sourceBlockId": "b15882f2-3a3f-4b8c-918d-84017afe478b"
+          },
+          {
+            "type": "subheading",
+            "text": "训练策略train strategy",
+            "sourceBlockId": "0d09b8f3-f19d-445f-974f-2e576a553740"
+          },
+          {
+            "type": "paragraph",
+            "text": "采用交叉熵损失Cross Entropy，decoder的训练比较特殊如右图所示，把 Ground Truth 即正确答案给它,希望 Decoder 的输出跟正确答案越接近越好。即在训练的时候我们会给 Decoder 看正确答案,也就是我们会告诉它说：在已经有 \"BEGIN\",在有\"机\"的情况下你就要输出\"器”；有 \"BEGIN\" 有\"机\" 有\"器\"的情况下输出\"学”…\n在 Decoder 训练的时候,我们会在输入的时候给它正确的答案,这叫做 Teacher Forcing\n在梳理这个之前我一直想问训练的时候decoder根据正确答案有交叉熵，那encoder的梯度根据什么更新？写到这里一想就比较清楚了，encoder根据两者之间交叉注意力的信息传递对比自己的输出结果更新权重。",
+            "sourceBlockId": "cb850d0a-96fa-45d0-8ec5-a8adf138cad6"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/52ac8231e162ddc545a2.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9d8c9aa4-f481-4b31-b120-5e2d0ede83ca"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/fc5892bf3019737a107c.png",
+            "alt": "文章配图",
+            "sourceBlockId": "fe1088b6-f4e8-4210-9e50-9e71414d6da1"
+          },
+          {
+            "type": "subheading",
+            "text": "Transformer的trick&tips",
+            "sourceBlockId": "669ad72c-35a2-4cf8-b6e5-e2b9bdde42a8"
+          },
+          {
+            "type": "paragraph",
+            "text": "13_Transformer_P2_2.pdf",
+            "runs": [
+              {
+                "text": "13_Transformer_P2_2.pdf",
+                "url": "https://familiar-koi-5e4.notion.site/p/13_Transformer_P2_2-pdf-3b5ad8eeb6f84e33953ca624f017515a?pvs=24#844fc1859d6541279c3d837c5c854709"
+              },
+              {
+                "text": " "
+              }
+            ],
+            "sourceBlockId": "469df093-5761-44ce-808e-0d7490b17efa"
+          },
+          {
+            "type": "list",
+            "items": [
+              "nlp领域通常需要有复制能力Copy Mechanism，即把输入的部分直接搬到输出，例如问答和写摘要。从Pointer Network、Copy Network可以看出seq2seq model可以具有这种能力。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "d22ca837-f75a-4767-bc61-ca7aef4069ca"
+          },
+          {
+            "type": "list",
+            "items": [
+              "在语音合成任务中，我们往往需要网络的attention集中部分从最左端移到最右端，这需要借助Guiding Attention"
+            ],
+            "ordered": false,
+            "sourceBlockId": "fb58a595-5a8b-4d06-9c7d-a40f372201de"
+          },
+          {
+            "type": "list",
+            "items": [
+              "transformer在softmax挑选的时候使用了束搜索Beam Search（此前我们在softmax直接挑选最大值输出实际上是贪心算法），这在\nAI&IS部分知识点 - 63 束搜索【动手学深度学习v2】 有讲解"
+            ],
+            "ordered": false,
+            "sourceBlockId": "30394eb7-1464-48c7-96c2-98b7be826168"
+          },
+          {
+            "type": "list",
+            "items": [
+              "nlp领域常用的评价标准是BLUE score（越大越好），但我们训练用的交叉熵，但是BLUE不能微分实操难度较大。实际上是可以做的，P2_2.pdf有介绍文献"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2ae5167a-5d77-4d9f-a9d5-525b10f14b78"
+          },
+          {
+            "type": "list",
+            "items": [
+              "我们decoder的训练跟测试是不一致的，这叫做Exposure Bias。假设 Decoder 在训练的时候,永远只看过正确的东西,那在测试的时候,只要有一个错,那很可能就会一步错，步步错,因為对 Decoder 来说,它从来没有看过错的东西,它看到错的东西会“非常的惊奇”,然后接下来它產生的结果可能都会错掉，即error propagation。因此，通常训练时我们会给 Decoder 的输入加一些错误的东西,（很直觉）,不要给 Decoder 都是正确的答案,偶尔给它一些错的东西,它反而会学得更好,这叫做Scheduled Sampling。这个trick很早就有了可以看上面的文献。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "b58bbf61-808a-4a35-9627-b233f863830b"
+          },
+          {
+            "type": "heading",
+            "text": "BERT",
+            "sourceBlockId": "a9568979-bbea-4c0d-a408-dbb895f8c6ea"
+          },
+          {
+            "type": "paragraph",
+            "text": "BERT（Bidirectional Encoder Representation from Transformers）是NAACL-HLT的2019年最佳论文。毕竟是NLP领域的论文，网络结构其实也比较简单，我们侧重原理简要介绍即可。BERT的目的是：计算机视觉领域常用大的数据集预训练一个CNN模型去finetune完成各种视觉任务，而BERT以前，在NLP领域缺乏一个预训练好的深度网络模型去完成各种NLP任务。 而基于深度学习的 NLP 模型只有对数亿甚至十亿级的带注释的数据进行训练，才能达到很好的效果。因此，BERT提出了无监督学习的技术途径，解决了训练数据问题，从模型结构和训练数据策略两方面提供了一个NLP领域可用的预训练模型。",
+            "sourceBlockId": "96a0d0ba-d404-460f-a53e-b9dc2e97d8ee"
+          },
+          {
+            "type": "paragraph",
+            "text": "网络结构其实很简单，就是transformer的编码器。输入上增加了几个特殊的token，包括句与句的分隔符[SEP]，判断上下句关系的分类头[CLS]，用于完形填空的掩码[Mask]等，基于大规模无标注的数据集预训练两个任务：预测被屏蔽的单词和判断两句的上下文关系是否成立：",
+            "sourceBlockId": "3da1b21d-d0c8-44f4-825e-5513a7a619a8"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ef8a4e6d74884bfdefda.png",
+            "alt": "文章配图",
+            "sourceBlockId": "8379d625-b103-4f8d-9eda-8f378866dd46"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/b2b44340443a6951434a.png",
+            "alt": "文章配图",
+            "sourceBlockId": "135e73a5-bd8f-45b7-a425-2e890b84ee60"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/254d6f4996d02ae25f84.png",
+            "alt": "文章配图",
+            "sourceBlockId": "fbc15abc-2197-45aa-b4b4-de11e48a2cfb"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/64abfc886a4ab8b756f2.png",
+            "alt": "文章配图",
+            "sourceBlockId": "12925df6-ead5-45f5-a98e-01c2d5138ee3"
+          },
+          {
+            "type": "paragraph",
+            "text": "当然也可以两个无监督任务混合去训练，既判断上下文又同时预测掩码，按照15%的概率随机遮蔽单词以及50%的下一句是真实的进行训练。生成两个模型版本，Base版本含有12个transformer块，FC全连接层神经元个数也即所有特征向量维数为768，多头注意力的head个数为12，参数总量为1.1亿，不调参的情况下训练一次需要16块TPU,4天；Large版本含24个transformer块，特征向量维数为1024，多头注意力的head个数为16，参数总量为3.4亿，需要64块TPU训4天。数据集为English Wikipedia，＞30亿个词。取得了当时nlp领域sota的性能。",
+            "sourceBlockId": "8618507f-e2ee-4970-b119-1984b5af4bcd"
+          },
+          {
+            "type": "heading",
+            "text": "VIT",
+            "sourceBlockId": "d60b0522-d3ef-42b1-b043-1e16d1edc465"
+          },
+          {
+            "type": "paragraph",
+            "text": "VIT(An Image Is Worth 16*16 Words:Transformers For Image Recognition at scale)，2021年发表于ICLR",
+            "sourceBlockId": "72057680-d926-415b-9d9a-e4d067cc364e"
+          },
+          {
+            "type": "link",
+            "text": "ViT论文及代码解读-ICLR2021：Transformer用于视觉分类也有很好的性能\n论文：An Image Is Worth 16*16 Words:Transformers For Image Recognition at scale 时间：2021年 发表于：ICLR 本人大量注释的代码： https:// github.com/zlove-summer /Vision-Transformer-pytorch 论文链接： An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale transformer于2017年的Attention is all your need提出，一般用于自然语言处理任务（序列任务），因为其相较于循环神经网络RNN能够并行化处理而广泛使用。本文最大的创新点就是将transformer应用于图像分类的cv任务，证明在cv领域使用Transformer依然可以获得很好的性能，启发了后面基于transformer的目标检测和语义分割等网络。 图像是三维矩阵结构，如何将其变为序列是一个问题。 在本文中，将图像使用卷积进行分块（14*14=196），再每一块进行展平处理变成序列，然后将这196个序列添加位置编码和cls token，再输入多层Transformer结构中。最后将cls tooken取出来通过一个MLP（多层感知机）用于分类。 图一是ViT的整体模型结构。 图二[1]是ViT模型的基本结构。可以看出整体模型还是非常简洁的，我将其分为预处理、Transformer模块和分类模块。 和很多论文一样，ViT也按照模型的深度分为了多种版本，如图3所示。其中Layers是Transformer模块的个数，Hidden size是分块时卷积升维后的通道数量，也是每一个块的序列长度。 本节将按照一张图片输入ViT模型后，经过的变换，详解ViT的代码。 预处理模块的结构如图4所示。处理流程如下： 一张224*224*3的图片，通过一个卷积核大小为16*16、步长为16、输出通道为768的卷积，得到14*14*768的输出。 14*14*768的输出，将其按照宽高进行Flatten，其shape变成196*768，表示为196个序列，每个序列长度为768。 在196*768的数据上，cat一个1*768的分类token在最前面。则shape变成197*768。我们设这个197*768的矩阵为 A 。 设置一个1*197*768的Position Embedding，对应值相加至 A 。分类token和Position Embedding都需要nn.init.trunc_normal_进行初始化。 PatchEmbed模型（图4的Patch Embedding，用于得到196*768的序列） 将预处理得到的输出，经过多层Transformer模块，用于特征的提取，如图2所示。多层Transformer模块，顾名思义就是多次叠加Transformer模块。因此本节主要讲解Transformer，模块结构如图5[1]。 Transformer模块主要有两个部分，一个是Muti-head Attention，另一个是MLP。 Transformer与CNN最大的不同就是这个自注意力结构，它能够使得网络看到全局的信息，而不是CNN的局部感受野。self-attention的计算方式如图6。 关于Self-attention的详细计算可以看我的文章 Vision Transfromer：解读self-attention 。其实就是，序列a，经过三个不同的矩阵，得到 q,k,v ，q与k点乘得到相关系数 \\alpha ，对所有 \\alpha 缩放并softmax归一化，再分别乘以v进行加权，得到输出序列b。 在代码实现时，矩阵相乘可以用一个线性层得到( nn.Linear)，代码实现时，将线性层的输出通道为原来3倍，可以一次性得到 q,k,v ...\nhttps://zhuanlan.zhihu.com/p/510218124",
+            "url": "https://zhuanlan.zhihu.com/p/510218124",
+            "sourceBlockId": "45cc11bb-db40-4b5b-a9b1-6e171ec7e707"
+          },
+          {
+            "type": "link",
+            "text": "Vision Transformer详解_太阳花的小绿豆的博客-CSDN博客_vit详解\n论文名称： An Image Is Worth 16x16 Words: Transformers For Image Recognition At Scale 论文下载链接： https://arxiv.org/abs/2010.11929 原论文对应源码： https://github.com/google-research/vision_transformer Pytorch实现代码： pytorch_classification/vision_transformer Tensorflow2实现代码： tensorflow_classification/vision_transformer 在bilibili上的视频讲解： https://www.bilibili.com/video/BV1Jh411Y7WQ Transformer最初提出是针对NLP领域的，并且在NLP领域大获成功。这篇论文也是受到其启发，尝试将Transformer应用到CV领域。关于Transformer的部分理论之前的博文中有讲， 链接 ，这里不在赘述。通过这篇文章的实验，给出的最佳模型在ImageNet1K上能够达到88.55%的准确率（先在Google自家的JFT数据集上进行了预训练），说明Transformer在CV领域确实是有效的，而且效果还挺惊人。 在这篇文章中，作者主要拿ResNet、ViT（纯Transformer模型）以及Hybrid（卷积和Transformer混合模型）三个模型进行比较，所以本博文除了讲ViT模型外还会简单聊聊Hybrid模型。 下图是原论文中给出的关于Vision Transformer(ViT)的模型框架。简单而言，模型由三个模块组成： Linear Projection of Flattened Patches(Embedding层) Transformer Encoder(图右侧有给出更加详细的结构) MLP Head（最终用于分类的层结构） 对于标准的Transformer模块，要求输入的是token（向量）序列，即二维矩阵[num_token, token_dim]，如下图，token0-9对应的都是向量，以ViT-B/16为例，每个token向量长度为768。 对于图像数据而言，其数据格式为[H, W, C]是三维矩阵明显不是Transformer想要的。所以需要先通过一个Embedding层来对数据做个变换。如下图所示，首先将一张图片按给定大小分成一堆Patches。以ViT-B/16为例，将输入图片(224x224)按照16x16大小的Patch进行划分，划分后会得到 ( 224 / 16 ) 2 =\nhttps://blog.csdn.net/qq_37541097/article/details/118242600",
+            "url": "https://blog.csdn.net/qq_37541097/article/details/118242600",
+            "sourceBlockId": "d327c6aa-37ad-4403-9354-db64573324a9"
+          },
+          {
+            "type": "paragraph",
+            "text": "这篇笔记配合读论文的视频效果拔群。更多详细的关于论文的笔记就直接做到readpaper上了，这里主要介绍自己对他们工作的认识。",
+            "runs": [
+              {
+                "text": "这篇笔记配合读论文的视频效果拔群。更多详细的关于论文的笔记就直接做到"
+              },
+              {
+                "text": "readpaper",
+                "url": "https://readpaper.com/pdf-annotate/note?pdfId=4519539115665547265&noteId=715210116141719552"
+              },
+              {
+                "text": "上了，这里主要介绍自己对他们工作的认识。"
+              }
+            ],
+            "sourceBlockId": "53ccd0d0-af8f-4d2b-b16f-c491d5345e43"
+          },
+          {
+            "type": "link",
+            "text": "ViT论文逐段精读【论文精读】\nViT：过去一年，CV 最有影响力的工作 推翻了 2012 Alexnet 提出的 CNN 在 CV 的统治地位 有足够多的预训练数据，NLP 的...\nhttps://www.bilibili.com/read/cv14221668?from=note",
+            "url": "https://www.bilibili.com/read/cv14221668?from=note",
+            "sourceBlockId": "1a81075d-66ee-4717-9890-da4760e43e97"
+          },
+          {
+            "type": "link",
+            "text": "ViT论文逐段精读【论文精读】_哔哩哔哩_bilibili\n更多论文：https://github.com/mli/paper-reading, 视频播放量 148039、弹幕量 1215、点赞数 5223、投硬币枚数 5220、收藏人数 3524、转发人数 778, 视频作者 跟李沐学AI, 作者简介 ，相关视频：Swin Transformer论文精读【论文精读】，偷偷发两篇sci，被导师发现了，我该怎么办？，Vision Transformer（ViT)论文讲解（一），BERT 论文逐段精读【论文精读】，GAN论文逐段精读【论文精读】，MAE 论文逐段精读【论文精读】，BERT代码(源码)从零解读【Pytorch-手把手教你从零实现一个BERT源码模型】，ResNet论文逐段精读【论文精读】，Mask R-CNN作者何凯明大神自述论文，【李沐】动手学深度学习\nhttps://www.bilibili.com/video/BV15P4y137jb?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV15P4y137jb?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "be184723-a688-4ed1-8374-c1470bea6698"
+          },
+          {
+            "type": "paragraph",
+            "text": "视频1个小时，一口气看完挺上头的，讲得很好。VIT的本质目的是证明BERT在nlp领域的高performance也能迁移到cv领域去取代cnn做大规模的预训练模型（最好还是用类似bert的无监督去训练）。结果证明其是可行的，用”较少”的训练代价（TPUv3+2500 天，笑）取得了imagenet的SOTA。idea是很自然的。\n我们知道，BERT对NLP而言，输入是word sequence，硬件可接受的序列长度也就几百，但是如果把图像的每个pixel都当成一个token展开成序列后，即使是一个224*224的图片也能变成50176长度的序列，这是迁移的最大困难。之前的工作提出了两种解决方法，一种是用cnn或者其他编码生成的小size的特征图去做序列输入；一种是改自注意力机制，即从全局的\n𝑂\n(\n𝑛\n2\n)\nO(n\n2\n)变成只关注局部的自注意力。前者不够纯粹，后者特殊的自注意力机制当时硬件加速不了，导致训练一个大模型很困难。之前也有工作是跟vit一样打成patch做的，但是小块patch的size大小是2*2，而且数据集不大效果不行。\n我们介绍vit的前向操作：",
+            "sourceBlockId": "7724e2ae-a4f5-430d-bc67-075b95bf2536"
+          },
+          {
+            "type": "list",
+            "items": [
+              "PATCH Embedding：我们以224*224*3的图片任务为例，定义打散后小块的大小即patch size是16*16的，因此我们会生成 \n224\n2\n/\n16\n2\n=\n196\n224\n2\n/16\n2\n=196个patch，每个patch是 \n16\n×\n16\n×\n3\n16×16×3，每个patch经过linear projection of flattened patches即线性投影层（\n768\n∗\n768\n768∗768权重矩阵也即768个神经元），会展开成长为 \n16\n∗\n16\n∗\n3\n=\n1\n∗\n768\n16∗16∗3=1∗768的一行向量（正好和bert-base的维度d对应哈哈），所以过了线性投影层可以得到序列长196（patch个数），序列中每个元素768维，此时已经与nlp对应。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "f3a3574a-e456-4fbe-ab35-4b7756e515b7"
+          },
+          {
+            "type": "list",
+            "items": [
+              "位置编码Position Embedding：原文进行了实验，用了三种位置编码，结果都差不多（但比不用位置编码好），最终采用跟bert一样的1d的可学的位置编码，生成197*768位置编码矩阵跟输入相加（sum）就行。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "2260c45a-669f-48b9-968b-5d806a3d86e0"
+          },
+          {
+            "type": "list",
+            "items": [
+              "分类头[cls]：同bert一样，增加一个特殊的token[cls]，（196+1）*168的序列输入encoder"
+            ],
+            "ordered": false,
+            "sourceBlockId": "88c9597f-273a-4ded-9797-1952be2a864b"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Encoder：对197*768输入做layer norm，然后进多头注意力，12个头，那么每个头中q，k，v的维度如右图所示 \n768\n/\n12\n=\n64\n768/12=64然后是residual connection，再过一个layer norm，接下来进MLP，中间层会将维度扩大四倍到197*3072，然后再接全连接到197*768输出，重复多次"
+            ],
+            "ordered": false,
+            "sourceBlockId": "053013e2-268e-44f1-ab28-a8531e346921"
+          },
+          {
+            "type": "list",
+            "items": [
+              "我们认为添加的[cls]可以通过注意力得到全局的语义信息，因此对[cls]token对应的输出过MLP，softmax之后最终得到分类。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "788125ab-de07-47aa-a088-e94c767243c9"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/a3341218e9f4afcecf0c.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9448f279-c64f-44ee-ba4f-4b06d33abd77"
+          },
+          {
+            "type": "subheading",
+            "text": "TIPS",
+            "sourceBlockId": "06925fdb-98bc-4046-8016-213e19d6e731"
+          },
+          {
+            "type": "list",
+            "items": [
+              "不对[cls]对应输出继续操作，而是像cv一样，对encoder的所有输出concat之后做GAP(Global Average Pooling)怎样？可以，效果差不多，但是需要调参"
+            ],
+            "ordered": false,
+            "sourceBlockId": "313cf281-fa69-43a7-bd55-96b693586752"
+          },
+          {
+            "type": "list",
+            "items": [
+              "分为数个版本，VIT-L/16的意思是网络结构是Large，然后patch size是16。patch size越小，patch数量越多，序列长度越长，训练代价越贵。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "80e5aeb4-bfe1-42e5-b02b-961fea65d84d"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f4ad7c1263335645595d.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9f6e9729-7c26-4028-8768-6cf1b6b6d014"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/bae04736da604b4ce0ea.png",
+            "alt": "文章配图",
+            "sourceBlockId": "608a1e46-7b56-420b-bd79-bb2ffc02439e"
+          },
+          {
+            "type": "list",
+            "items": [
+              "实验结果是，在imagenet-21k数据集（14million张图）以及更大的数据集上，在相同TPU训练代价下，VIT胜过Resnet。自注意力可视化如上"
+            ],
+            "ordered": false,
+            "sourceBlockId": "8f532cb9-2bba-48e9-95df-0b5f291f6fd0"
+          },
+          {
+            "type": "list",
+            "items": [
+              "概念，归纳偏置inductive biases：即我们的操作会带有我们认为的一些先验知识，例如CNN的卷积操作，我们对此其实有两个针对于图像的先验，一是locality局部性，即相邻区域相似，卷积操作也是对局部操作；二是平移不变性translation equivariance，即一个物体所在位置不影响自身属性（ \n𝑓\n(\n𝑔\n(\n𝑥\n)\n)\n=\n𝑔\n(\n𝑓\n(\n𝑥\n)\n)\nf(g(x))=g(f(x))，\n𝑓\nf是卷积\n𝑔\ng是平移）。CNN的操作其实就带有这两个归纳偏置，作者认为这是CNN能在较小规模的数据集上胜过VIT的原因（imagenet-1k 1.2million张图算小规模了笑死）"
+            ],
+            "ordered": false,
+            "sourceBlockId": "5693e626-c66e-4483-93a4-58d63905ade2"
+          },
+          {
+            "type": "list",
+            "items": [
+              "训练的时候VIT还是使用CV传统的监督学习，给了分类标签等等，也试着做了无监督，掉点比较多。作者认为能做到无监督更具前景，MAE应运而生哈哈"
+            ],
+            "ordered": false,
+            "sourceBlockId": "b03637e6-08fd-4463-9a74-3ebbd01864b5"
+          },
+          {
+            "type": "list",
+            "items": [
+              "做finetune的时候改变了图像的尺寸，怎么办？保持patch size不变，反正Transformer本身就可以处理可变长序列，但是patch数量变化了导致序列长度变化，位置编码对不上了，作者使用插值，效果还行。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "70e7998d-21ab-4aa5-b95d-06d76183b7f0"
+          },
+          {
+            "type": "list",
+            "items": [
+              "提出了先过CNN再过VIT的混合模型Hybrid architecture，等待发扬光大"
+            ],
+            "ordered": false,
+            "sourceBlockId": "42dd42cc-cf02-4aec-b34d-60c5258de868"
+          },
+          {
+            "type": "list",
+            "items": [
+              "1d，2d，relative位置编码都做了消融实验，可以看原文了解，后续工作有对网络结构，位置编码，监督训练、对比学习等等做改进。该片文章的相关工作介绍的很全面，别人做的笔记也很好，值得一读。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "6ea29273-db19-431e-8dea-b183a2ee4676"
+          },
+          {
+            "type": "list",
+            "items": [
+              "提到了模型性能和参数量关系，认为其还没有出现性能饱和。"
+            ],
+            "ordered": false,
+            "sourceBlockId": "56b2b4fc-e808-495d-9461-18419e820e15"
+          },
+          {
+            "type": "list",
+            "items": [
+              "“money is all you need”"
+            ],
+            "ordered": false,
+            "sourceBlockId": "44a8f71f-036b-4411-a82d-be1d173f749c"
+          },
+          {
+            "type": "heading",
+            "text": "Swin Transformer",
+            "sourceBlockId": "0602ce61-4274-4caa-aedc-adf274c3f761"
+          },
+          {
+            "type": "paragraph",
+            "text": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，2021年ICCV最佳论文。去年下半年一直在屠榜，让大家认识到transformer让cv变天了，但是现在是2022年8月，ConvNeXt已经问世，看来cv界transformer和卷积鹿死谁手犹未可知，真的卷。Swin Transformer是一个用了移动窗口的层级式的Vision Transformer。移动窗口是作者提出的针对VIT等模型注意力机制的改进，保持能获取全局注意力情况下大幅降低计算复杂度，Hierarchical 层级化的意思是类似于传统cnn的encoder-decoder架构中的encoder，往往是通过多个block获取多个size的特征图，即网络结构是分stage的。照例贴一下视频和别人的笔记，自己的论文笔记之后在readpaper里去做，如果要写代码解析的话应该会notion另开一篇文章吧（懒，估计不会了。Swin Transformer相对于VIT而言，目的是推出一个适合cv的高性能，大规模预训练backbone，因为之前的VIT不是层级式架构，许多下游任务应用其实是有困难的。",
+            "runs": [
+              {
+                "text": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"
+              },
+              {
+                "text": "，2021年ICCV最佳论文。去年下半年一直在屠榜，让大家认识到transformer让cv变天了，但是现在是2022年8月，"
+              },
+              {
+                "text": "ConvNeXt"
+              },
+              {
+                "text": "已经问世，看来cv界transformer和卷积鹿死谁手犹未可知，真的卷。Swin Transformer是一个用了移动窗口的层级式的Vision Transformer。移动窗口是作者提出的针对VIT等模型注意力机制的改进，保持能获取全局注意力情况下大幅降低计算复杂度，Hierarchical 层级化的意思是类似于传统cnn的encoder-decoder架构中的encoder，往往是通过多个block获取多个size的特征图，即网络结构是分stage的。照例贴一下视频和别人的笔记，自己的论文笔记之后在"
+              },
+              {
+                "text": "readpaper",
+                "url": "https://readpaper.com/pdf-annotate/note?pdfId=557523391467663360&noteId=715410644951126016"
+              },
+              {
+                "text": "里去做，如果要写代码解析的话应该会notion另开一篇文章吧（懒，估计不会了。Swin Transformer相对于VIT而言，目的是推出一个适合cv的高性能，大规模预训练backbone，因为之前的VIT不是层级式架构，许多下游任务应用其实是有困难的。"
+              }
+            ],
+            "sourceBlockId": "458012f9-75a5-4756-a448-e5b162345f26"
+          },
+          {
+            "type": "link",
+            "text": "Swin Transformer论文精读【论文精读】_哔哩哔哩_bilibili\n更多论文见：https://github.com/mli/paper-reading, 视频播放量 98093、弹幕量 579、点赞数 3819、投硬币枚数 3392、收藏人数 2846、转发人数 615, 视频作者 跟李沐学AI, 作者简介 ，相关视频：Swin Transformer到底怎么滑动/三分钟动画/最直观简单的网络讲解/hierarchical vision transformer using，ViT论文逐段精读【论文精读】，Transformer从零详细解读(可能是你见过最通俗易懂的讲解)，11.1 Vision Transformer(vit)网络详解，【人工智能学习】逐句阅读100篇核心AI论文（双语字幕），12.2 使用Pytorch搭建Swin-Transformer网络，Transformer论文逐段精读【论文精读】，Swin Transformer代码超详细逐行解读，在线激情讲解transformer&Attention注意力机制（上），建议收藏｜论文写作基本功（二）：实操示范｜博士学姐手把手带你遣词造句｜建议边看边思考\nhttps://www.bilibili.com/video/BV13L4y1475U/?spm_id_from=333.788&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV13L4y1475U/?spm_id_from=333.788&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "b8aebcdc-8ffd-4cf0-9b4d-3ccd054e0b0b"
+          },
+          {
+            "type": "link",
+            "text": "Swin Transformer论文精读【论文精读】\nSwin transformer: Hierarchical vision transformer using shifted windows Sw...\nhttps://www.bilibili.com/read/cv14877004?from=note",
+            "url": "https://www.bilibili.com/read/cv14877004?from=note",
+            "sourceBlockId": "aa9af07e-f487-46d7-b3c6-b7e883c682da"
+          },
+          {
+            "type": "subheading",
+            "text": "Patch&Window划分",
+            "sourceBlockId": "d7c37f88-a2f0-44b3-beee-6fcf4a5ba690"
+          },
+          {
+            "type": "paragraph",
+            "text": "VIT如右图所示，采用了16倍的下采样率特征（相当于16*16的pixel整合为一块）做patch，这对于密集预测性的任务比如分割就不友好。Swin-Tran如左图所示，是在不同下采样倍率的图上分别做操作的，不同下采样率的特征图是通过swin-tran块级联的层级式的不同stage得到的，后面会具体介绍。以下方的4x为例，在这个层级中，我们将每个4*4打包成一个patch，8x的层级就是将8*8打包成一个patch。这样序列长度也不至于太大。\nwindow的划分是用来算局部的自注意力的，左图中的意思就是每个4*4的patch作为一个window去算自注意力，window与window间相互独立，只用管自己window内部的自注意力就够了，但是，这样得不到全局的注意力了，于是作者设计了window间的shift操作，之后介绍。基于window的自注意力可以大幅降低计算复杂度，我们知道，VIT的全局自注意力是\n𝑂\n(\n𝑛\n2\n)\nO(n\n2\n)的，即计算量与图片大小成平方关系，引入window后计算量与图片大小降为了线性关系，比如我长宽各乘二，面积变为原来4倍，那我window的数量也会变成原来的4倍，由于window里面的patch数量是固定的，即每个window自注意力计算量是常数，因此计算量与图片大小降为了线性关系。\n需要说明的是，上述图片文字是用来弄明白patch，window如何划分，有什么用的，具体实现的数值可能与上述不一致。论文中一个window是7*7个patch",
+            "sourceBlockId": "cbcc6618-c8c7-46c3-b284-e64c256799b0"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/fbfd68322028c7ea804f.png",
+            "alt": "文章配图",
+            "sourceBlockId": "0851cdf7-e4a3-40b8-9137-74fe40a9f51a"
+          },
+          {
+            "type": "subheading",
+            "text": "Shifted window&Mask",
+            "sourceBlockId": "a9f96173-311c-4df0-b1e9-02f3c4e4dbba"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/09be3562528948e90e63.png",
+            "alt": "文章配图",
+            "sourceBlockId": "c6351b41-8e91-45c8-b441-5dbb4b281ea2"
+          },
+          {
+            "type": "paragraph",
+            "text": "一个shift window操作即如上方图片所示，一个灰色小块就是一个patch，一个红框大正方形就是一个window。一次shift中，每个window会向左下角移动2*2个patch，相当于框出新的window，然后再计算自注意力。需要注意这里是拿2*2window举例，实际不止。这样，新的window里面含有之前不同window的patch，实现了间接的长距离自注意力。\n新的问题随之诞生，我们划分出来新的window很明显好多都不是规则的，虽然自注意力仍然可行，但是无法大规模并行计算，给我们的炼大丹造成了麻烦，作者如何解决呢？cycle shift和掩码mask应运而出。",
+            "sourceBlockId": "00d0865d-b675-42f2-bccc-4ea4c167c2dc"
+          },
+          {
+            "type": "paragraph",
+            "text": "如下方左上图所示，移动后右下方的四个块保持不变，把左上的三个块移动到右下方去拼七巧板，拼成四个标准大小的window块，这样就适合并行计算了，但仍有问题，有些块之间我们不希望他们那么强关联，比如原来的C块可能是天空，现在我们把他挪到最下方去做拼接，那很可能是去跟地面做拼接，这两者特征没必要做注意力，因此作者又引入了掩码。\n如下方右图所示，右图中最开始的左上图其实就对应刚才图中cycle shift上方框红的部分，长宽是14*14个patch，也即一个window内部是7*7patch，标号0134四个部分是原来就在的，25678标号是之后挪过去的。对于36组成的新window，我们如下计算带掩码的自注意力。3的部分展开成28（标号3有7*4个patch）行d维（d由patch展开决定）向量，同理，6的部分展开成21（7*3）行向量，在转置一下跟自己做矩阵乘法（点积注意力），生成一个49*49矩阵，然后我们如左下图中window2所示的掩码跟49*49矩阵做sum相加，将3和6，6和3的注意力结果置为很负而其他不变，这样就相当于各自做自注意力啦。做完之后挪回去，操作完成，继续往下走。\n也有提出其他方法，比如不挪位置直接在四周pad0，这样也可以但是计算量是上述的两倍多（9个window和4个window）。",
+            "sourceBlockId": "5bacea13-3dbe-4908-b3f4-23b45acdcbb5"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/ff62cf5a1206cdec3a7e.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9aeb56e2-9cc1-47ec-81d0-e6252a5b28a7"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/95ebb45d30ba003d38ae.png",
+            "alt": "文章配图",
+            "sourceBlockId": "d33dbf17-da9e-4df8-8eba-35413ef987cc"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f435b41f8d02b6ecb36f.png",
+            "alt": "文章配图",
+            "sourceBlockId": "1144c788-9c0f-4444-b020-92566ac62e0c"
+          },
+          {
+            "type": "subheading",
+            "text": "网络结构和计算量",
+            "sourceBlockId": "35774e8f-cebe-4d55-b02a-f5b1d8408039"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/d5d3cce7a7d034774e56.png",
+            "alt": "文章配图",
+            "sourceBlockId": "6d57a360-b26a-4c17-9af8-94c341a9d19a"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/e1a7686e5668750a0f41.png",
+            "alt": "文章配图",
+            "sourceBlockId": "9e8b69b2-d8a7-4373-8e46-4ebed43bb597"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/e6da30e011fc17dbbd00.png",
+            "alt": "文章配图",
+            "sourceBlockId": "3c172a84-7a78-4c87-b779-b50492e0b354"
+          },
+          {
+            "type": "paragraph",
+            "text": "假定是一个224*224*3的输入，先通过一个patch partition，即打patch，一开始的patch大小是4*4，打完之后size就变成56*56个patch，通道数48就是一个patch展开4*4*3。\n再过一个linear embedding变成3136*96，即序列长度展开维数增多，实际上这两步在代码中是通过一步conv2d实现的（kernel size=4，stride=4，filter=96），相当于vit的linear projection。这里序列长度3136就相对于vit而言太长了，所以才有之前讲的窗口机制，但是全局注意力还是希望能保持住，所有又有滑窗。",
+            "sourceBlockId": "320a5c1c-5bd9-4d22-bbbd-0d54ddee5bf5"
+          },
+          {
+            "type": "paragraph",
+            "text": "接下来过swin-tran块，在图示的（b）部分，它是两个块打包一起的，所以（a）中网络结构每个stage的块2262都是偶数。第一个tran块把注意力改成了窗口注意力，即那刚开始规则的窗口做一次注意力操作，然后第二个tran块用到了swin-msa滑窗自注意力，即先做一次滑窗操作，然后再做w-msa（窗口-多头自注意力），输入输出shape不变。",
+            "sourceBlockId": "da282200-a989-4a16-bdd4-24028355d996"
+          },
+          {
+            "type": "paragraph",
+            "text": "最后一个部分就是patch merging，他的目的是实现类似cnn的池化操作，降低size，增大感受野，增加通道数。（类似于pixel shuffle的上采样过程PixelShuffle原理的反操作），图中上方就是这个操作的草稿，对HWC输入，每隔一个像素取一个，一共四类，同类归并在一块，然后垂直摞起来变成size减半，通道数四倍的特征图，但pool通常通道数翻倍就够了，因此再用一个1*1卷积通道数降为2倍。每个stage的特征图shape如上所标。",
+            "runs": [
+              {
+                "text": "最后一个部分就是patch merging，他的目的是实现类似cnn的池化操作，降低size，增大感受野，增加通道数。（类似于pixel shuffle的上采样过程"
+              },
+              {
+                "text": "PixelShuffle原理",
+                "url": "https://blog.csdn.net/level_code/article/details/123637969"
+              },
+              {
+                "text": "的反操作），图中上方就是这个操作的草稿，对HWC输入，每隔一个像素取一个，一共四类，同类归并在一块，然后垂直摞起来变成size减半，通道数四倍的特征图，但pool通常通道数翻倍就够了，因此再用一个1*1卷积通道数降为2倍。每个stage的特征图shape如上所标。"
+              }
+            ],
+            "sourceBlockId": "9be534ef-4854-426d-bf4d-3d0632816fb8"
+          },
+          {
+            "type": "paragraph",
+            "text": "网络没有使用特殊token，最后特征图7*7*768直接GAP拉直成1*768进softmax。",
+            "sourceBlockId": "25d1e817-9c0e-4603-92b2-85d0ecc8f6fb"
+          },
+          {
+            "type": "paragraph",
+            "text": "对一个h*w（eg，56*56）个patch的图片，接下来计算多头自注意力和窗口注意力的计算量。c是特征维度，M是一个window有M*M个patch，论文中为7。\n如右图，自注意力MSA时，计算qkvA各贡献一个\nℎ\n𝑤\n𝐶\n2\nhwC\n2\n计算量，Av相乘和投影总计\n2\n(\nℎ\n𝑤\n)\n2\n𝐶\n2(hw)\n2\nC；对于窗口注意力而言，一个窗口含M*M个patch，注意力计算量相当于M代h和w的MSA，是\n4\n𝑀\n2\n𝐶\n2\n+\n2\n𝑀\n4\n𝐶\n4M\n2\nC\n2\n+2M\n4\nC，图片中的window数量是\nℎ\n/\n𝑀\n×\n𝑤\n/\n𝑀\nh/M×w/M，相乘就得到（2）",
+            "sourceBlockId": "5e369d42-9b75-4859-8348-0f54f644d698"
+          },
+          {
+            "type": "divider",
+            "sourceBlockId": "80ad3bbc-a86e-4127-9a0b-52b55ff3bee2"
+          },
+          {
+            "type": "paragraph",
+            "text": "结论性能就不介绍了，反正是屠榜，主要是swin这个操作可以泛用，思考没有vit那么多。",
+            "sourceBlockId": "3533a76b-b824-4c28-884e-e3e6aa620bc1"
+          },
+          {
+            "type": "heading",
+            "text": "MAE",
+            "sourceBlockId": "32509a21-f638-4c10-8863-7c8d57874a9a"
+          },
+          {
+            "type": "paragraph",
+            "text": "Masked Autoencoders Are Scalable Vision Learners。目的是想像BERT一样做一个无监督（自监督）的CV预训练模型出来（VIT的方法是监督的）。Masked Autoencoders-带掩码的自编码器是 可扩展的视觉学习器-scalable vision learners。",
+            "sourceBlockId": "5bb4d449-3a02-4798-bd29-dd1b7eca469b"
+          },
+          {
+            "type": "link",
+            "text": "MAE 论文逐段精读【论文精读】_哔哩哔哩_bilibili\nMAE 论文逐段精读【论文精读】, 视频播放量 90945、弹幕量 515、点赞数 2983、投硬币枚数 2421、收藏人数 1596、转发人数 449, 视频作者 跟李沐学AI, 作者简介 ，相关视频：实验室花12万买了个电脑，四块3090显卡，动静太大了。，【不想读paper】视觉自监督学习 MAE 对比 BEIT，偷偷发两篇sci，被导师发现了，我该怎么办？，导师：延毕还是退学你自己选一个吧，3分钟读完20页Paper! 名校学霸们都在用｜赶ddl写论文必备法宝｜效率翻倍｜再也没有读不懂的论文，5分钟，教你做个自动化软件拿来办公、刷副本、回微信 | 源码公开，开箱即用，ViLT 论文精读【论文精读】，Transformer论文逐段精读【论文精读】，ViT论文逐段精读【论文精读】，中南大学博士答辩委员会刷屏。导师和学校哪个更重要？跟对导师从此学术道路一马平川\nhttps://www.bilibili.com/video/BV1sq4y1q77t?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "url": "https://www.bilibili.com/video/BV1sq4y1q77t?spm_id_from=333.999.0.0&vd_source=2389bab1e2b5df1e6b43b657a0e92199",
+            "sourceBlockId": "9b557250-f239-47cb-9752-3312192ca499"
+          },
+          {
+            "type": "link",
+            "text": "MAE 论文逐段精读【论文精读】\nMAE 2021.11.11提交 arxiv 知乎 百万 view; Reddit or Twitter 讨论不多 MAE 很新 --> 如何在读比较新的...\nhttps://www.bilibili.com/read/cv14346518?from=note",
+            "url": "https://www.bilibili.com/read/cv14346518?from=note",
+            "sourceBlockId": "56dd1542-bc89-423e-a502-bf53b32777c0"
+          },
+          {
+            "type": "paragraph",
+            "text": "Autoencoders，auto不是自动的意思，是“自”，类似于自回归模型，表示样本sample和编号label是一个集合，BERT的带掩码的自编吗语言模型（完形填空）训练也可称之为“auto”，nlp中较常见，但cv领域标号往往是文本等等，一般不为同一个集合。",
+            "sourceBlockId": "60237864-425d-4047-b532-3c8ed1a267be"
+          },
+          {
+            "type": "subheading",
+            "text": "Asymmetric Encoder-Decoder Architecture",
+            "sourceBlockId": "55914b6a-5340-4a8e-b403-3fbd10882ef4"
+          },
+          {
+            "type": "paragraph",
+            "text": "非对称的编码器-解码器架构。非对称指的是编码器与解码器看到的不一样，编码器只看到shuffle的可见块，编码器的输出和遮挡块的位置信息放在一起，unshuffle之后输入进解码器，重构 masked patches。为什么非对称？大量 masked 块（mask比例在75%以上），编码器只看可见块，极大降低计算开销、减少内存消耗",
+            "sourceBlockId": "9b95ccf5-e0b6-45e5-bd64-80adc3674f88"
+          },
+          {
+            "type": "paragraph",
+            "text": "编码器是一个只看见可见块的VIT-L/16，当然这些可见块是随机选择出来的并且输入编码器时附加了位置信息。解码器也是一个transformer结构，通过读入带位置信息的可见块和非可见块对应patch非乱序序列输出整图。比较简单。",
+            "sourceBlockId": "56fe5571-0b7d-46e7-8825-72bc964ab74c"
+          },
+          {
+            "type": "image",
+            "url": "../assets/notion/f2f06736bd1fbce69b35.png",
+            "alt": "文章配图",
+            "sourceBlockId": "57f73690-2682-4f80-9948-4a8ce7d93be2"
+          },
+          {
+            "type": "subheading",
+            "text": "Meaningful Self-Supervisory Task",
+            "sourceBlockId": "f847aa95-9534-4896-b3d6-94e78d5b788c"
+          },
+          {
+            "type": "paragraph",
+            "text": "该任务可以看出当然是自监督的，实验表明在加入正则项约束之后，即使是在1k这种较小规模数据集上效果也不错。\n文章对自身动机的阐述是通过三个问题引入的，值得一读。",
+            "sourceBlockId": "eec9b03a-63a2-4b00-bf23-3bd9d3e83e79"
+          }
+        ]
+      }
+    ]
   },
   "profile": {
+    "name": "Jiaqi Li",
+    "affiliation": "Tencent / Huazhong University of Science and Technology",
+    "interests": [
+      "Generative AI",
+      "World Model",
+      "3D Vision"
+    ],
+    "publications": [
+      {
+        "title": "PandaPose: 3D Human Pose Lifting from a Single Image via Propagating 2D Pose Prior to 3D Anchor Space",
+        "authors": "J Zheng, C Jiang, Y Xiao, J Li, H Kuang, H Xu, R Wang, Z Cao, M Du, ...",
+        "venue": "Advances in Neural Information Processing Systems 38, 90147-90169, 2026",
+        "year": "2026",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:M3ejUd6NZC8C"
+      },
+      {
+        "title": "Hy-Nomas: Towards Free-form Interactive World Generation",
+        "authors": "Q Chen, J Cheng, X Deng, T Hang, J Hou, J Li, Y Liu, T Lu, J Tang, ...",
+        "venue": "arXiv preprint arXiv:2610.36729, 2026",
+        "year": "2026",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:Wp0gIr-vW9MC"
+      },
+      {
+        "title": "Hunyuan-gamecraft: High-dynamic interactive game video generation with hybrid history condition",
+        "authors": "J Li, J Tang, Z Xu, L Wu, Y Zhou, S Shao, T Yu, Z Cao, Q Lu",
+        "venue": "arXiv preprint arXiv:2506.17201 2 (3), 6, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:_kc_bZDykSQC"
+      },
+      {
+        "title": "NTIRE 2025 challenge on hr depth from images of specular and transparent surfaces",
+        "authors": "PZ Ramirez, F Tosi, L Di Stefano, R Timofte, A Costanzino, M Poggi, ...",
+        "venue": "Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern …, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:Y0pCki6q_DkC"
+      },
+      {
+        "title": "Hunyuan-gamecraft-2: Instruction-following interactive game world model",
+        "authors": "J Tang, J Liu, J Li, L Wu, H Yang, P Zhao, S Gong, X Yuan, S Shao, ...",
+        "venue": "arXiv preprint arXiv:2511.23429, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qxL8FJ1GzNcC"
+      },
+      {
+        "title": "Tacodepth: Towards efficient radar-camera depth estimation with one-stage fusion",
+        "authors": "Y Wang, J Li, C Hong, R Li, L Sun, X Song, Z Wang, Z Cao, G Lin",
+        "venue": "2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR …, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC"
+      },
+      {
+        "title": "Tricky 2025 challenge on monocular depth from images of specular and transparent surfaces",
+        "authors": "PZ Ramirez, A Costanzino, F Tosi, M Poggi, L Di Stefano, JB Weibel, ...",
+        "venue": "2025 IEEE/CVF International Conference on Computer Vision Workshops (ICCVW …, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:ULOm3_A8WrAC"
+      },
+      {
+        "title": "Dof-gaussian: Controllable depth-of-field for 3d gaussian splatting",
+        "authors": "L Shen, T Liu, H Sun, J Li, Z Cao, W Li, CC Loy",
+        "venue": "2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR …, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:kNdYIx-mwKoC"
+      },
+      {
+        "title": "CH3Depth: Efficient and Flexible Depth Foundation Model with Flow Matching",
+        "authors": "J Li, Y Wang, J Zheng, J Zhang, L Shen, T Liu, Z Cao",
+        "venue": "2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR …, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:YOwf2qJgpHMC"
+      },
+      {
+        "title": "Hunyuan-game: Industrial-grade intelligent game creation model",
+        "authors": "R Li, C Zhou, S Zheng, J Lu, J Huang, C Chen, J Tang, G Xu, J Tao, ...",
+        "venue": "arXiv preprint arXiv:2505.14135, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:Zph67rFs4hoC"
+      },
+      {
+        "title": "GameCraft-2: Instruction-following interactive game world model",
+        "authors": "J Tang, J Liu, J Li, L Wu, H Yang, P Zhao, S Shao, L Zhang, Q Lu",
+        "venue": "",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:4DMP91E08xMC"
+      },
+      {
+        "title": "MuGS: Multi-baseline generalizable gaussian splatting reconstruction",
+        "authors": "Y Lou, L Shen, T Liu, J Li, Z Huang, H Sun, Z Cao",
+        "venue": "2025 IEEE/CVF International Conference on Computer Vision (ICCV), 25583-25593, 2025",
+        "year": "2025",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:4TOpqqG69KYC"
+      },
+      {
+        "title": "NVDS: Towards Efficient and Versatile Neural Stabilizer for Video Depth Estimation",
+        "authors": "Y Wang, M Shi, J Li, C Hong, Z Huang, J Peng, Z Cao, J Zhang, K Xian, ...",
+        "venue": "IEEE transactions on pattern analysis and machine intelligence 47 (1), 583-600, 2024",
+        "year": "2024",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:UebtZRa9Y70C"
+      },
+      {
+        "title": "Towards robust monocular depth estimation in non-lambertian surfaces",
+        "authors": "J Zhang, J Li, Y Huang, Y Wang, J Zheng, L Shen, Z Cao",
+        "venue": "European Conference on Computer Vision, 175-189, 2024",
+        "year": "2024",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:_FxGoFyzp5QC"
+      },
+      {
+        "title": "Self-distilled depth refinement with noisy poisson fusion",
+        "authors": "J Li, Y Wang, J Zheng, Z Huang, K Xian, Z Cao, J Zhang",
+        "venue": "Advances in Neural Information Processing Systems 37, 69999-70025, 2024",
+        "year": "2024",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:roLk4NBRz8UC"
+      },
+      {
+        "title": "Neural video depth stabilizer",
+        "authors": "Y Wang, M Shi, J Li, Z Huang, Z Cao, J Zhang, K Xian, G Lin",
+        "venue": "2023 IEEE/CVF International Conference on Computer Vision (ICCV), 9432-9442, 2023",
+        "year": "2023",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qjMakFHDy7sC"
+      },
+      {
+        "title": "Diffusion-augmented depth prediction with sparse annotations",
+        "authors": "J Li, Y Wang, Z Huang, J Zheng, K Xian, Z Cao, J Zhang",
+        "venue": "Proceedings of the 31st ACM International Conference on Multimedia, 2865-2876, 2023",
+        "year": "2023",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:UeHWp8X0CEIC"
+      },
+      {
+        "title": "Efficient single-image depth estimation on mobile devices, mobile AI & AIM 2022 challenge: report",
+        "authors": "A Ignatov, G Malivenko, R Timofte, L Treszczotko, X Chang, P Ksiazek, ...",
+        "venue": "European Conference on Computer Vision, 71-91, 2022",
+        "year": "2022",
+        "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:u5HHmVD_uO8C"
+      }
+    ],
     "source": "https://scholar.google.com/citations?user=i-2ghuYAAAAJ&hl=zh-CN",
-    "syncedAt": null,
-    "name": "LIJIA7",
-    "affiliation": "",
-    "bio": "",
-    "interests": [],
-    "publications": []
+    "syncedAt": "2026-11-10T05:26:47+00:00",
+    "bio": ""
   }
 }
