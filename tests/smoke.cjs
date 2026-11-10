@@ -117,7 +117,9 @@ async function gullBodyPoint(page) {
       const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
       const floatRest=detailPoint(duck,352,850,0), floatPeak=detailPoint(duck,352,850,1.1);
       const duckLength=time=>distance(detailPoint(duck,316,798,time),detailPoint(duck,390,825,time));
+      const distantWing=renderer.plate.getContext('2d').getImageData(1234,185,1,1).data;
       return { ...changed, coverage, columns: renderer.columns,
+        distantWingCleared:distantWing[1]-distantWing[0]>20 && distantWing[2]-distantWing[0]>20,
         sizeRatio:Math.max(...renderer.cells.map(c=>c.size))/Math.min(...renderer.cells.map(c=>c.size)),
         largeLetters:renderer.cells.filter(c=>c.size>1.5).length, openEye, closedEye,
         floatRise:floatPeak[1]-floatRest[1], rigidError:Math.abs(duckLength(0)-duckLength(3)),
@@ -135,6 +137,7 @@ async function gullBodyPoint(page) {
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
+    assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
     assert(changes.sizeRatio>1.9 && changes.largeLetters>200, 'mixed typography needs visibly different sizes');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
