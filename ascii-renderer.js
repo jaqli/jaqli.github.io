@@ -1,10 +1,10 @@
 // Scene motion is expressed in source-image coordinates. Architecture and screens
 // stay still; the moving objects are sampled and drawn separately.
 export const birds = [
-  { id: 'life', center: [991, 263], phase: 0, lift: 8, points: [[939,223],[962,235],[980,250],[1016,237],[1041,241],[1014,254],[1001,270],[1017,275],[1008,283],[982,275],[974,260],[958,250],[944,233]] },
-  { id: 'upper', center: [957,112], phase: 1.2, lift: 6, points: [[912,94],[936,93],[950,103],[969,94],[977,87],[998,82],[989,94],[977,98],[971,116],[962,124],[966,131],[951,128],[943,113],[925,106]] },
-  { id: 'middle', center: [1053,184], phase: 2.4, lift: 4, points: [[1024,181],[1044,178],[1053,182],[1068,164],[1081,163],[1072,174],[1065,189],[1057,194],[1051,190],[1037,190]] },
-  { id: 'right', center: [1153,224], phase: .7, lift: 4, points: [[1134,224],[1145,221],[1152,223],[1164,207],[1175,204],[1173,212],[1165,214],[1161,231],[1153,236],[1147,230]] },
+  { id: 'life', center: [991, 263], phase: 0, lift: 15, points: [[939,223],[962,235],[980,250],[1016,237],[1041,241],[1014,254],[1001,270],[1017,275],[1008,283],[982,275],[974,260],[958,250],[944,233]] },
+  { id: 'upper', center: [957,112], phase: 1.2, lift: 11, points: [[912,94],[936,93],[950,103],[969,94],[977,87],[998,82],[989,94],[977,98],[971,116],[962,124],[966,131],[951,128],[943,113],[925,106]] },
+  { id: 'middle', center: [1053,184], phase: 2.4, lift: 8, points: [[1024,181],[1044,178],[1053,182],[1068,164],[1081,163],[1072,174],[1065,189],[1057,194],[1051,190],[1037,190]] },
+  { id: 'right', center: [1153,224], phase: .7, lift: 7, points: [[1134,224],[1145,221],[1152,223],[1164,207],[1175,204],[1173,212],[1165,214],[1161,231],[1153,236],[1147,230]] },
 ];
 
 export function inside(x, y, polygon) {
@@ -26,9 +26,9 @@ const sky = (r, g, b) => g - r > 26 && b - r > 33;
 export function birdPoint(bird, x, y, time) {
   const [cx, cy] = bird.center;
   const wing = clamp(Math.abs(x - cx) / 40) * clamp((cy - y) / 18);
-  const flap = (Math.sin(time * 1.35 + bird.phase) - Math.sin(bird.phase)) * bird.lift * wing;
-  return [x + 3 * (Math.sin(time * .42 + bird.phase) - Math.sin(bird.phase)),
-    y + 1.7 * (Math.sin(time * .68 + bird.phase) - Math.sin(bird.phase)) + flap];
+  const flap = (Math.sin(time * 2.05 + bird.phase) - Math.sin(bird.phase)) * bird.lift * wing;
+  return [x + 8 * (Math.sin(time * .48 + bird.phase) - Math.sin(bird.phase)),
+    y + 3.6 * (Math.sin(time * .86 + bird.phase) - Math.sin(bird.phase)) + flap];
 }
 
 const waterAreas = [
@@ -107,7 +107,7 @@ export class AsciiRenderer {
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isWater ? 'water' : isCloth ? 'cloth' : 'ambient' };
-      if (isWater || isCloth || seed < .035) this.dynamic.push(cell);
+      if (isWater || isCloth || seed < .05) this.dynamic.push(cell);
       else this.paint(baseCtx, cell, cell.x, cell.y, 1, cell.color);
     }
     this.sprites = this.birdMasks.map(region => {
@@ -128,6 +128,24 @@ export class AsciiRenderer {
       }
       return { bird: region.bird, cells };
     });
+    // Rasterize colored characters once. Repeated fillText + transform + color
+    // sampling for thousands of cells made the previous animation CPU-bound.
+    const movingCells = [...this.dynamic, ...this.sprites.flatMap(sprite => sprite.cells)];
+    this.atlas = document.createElement('canvas');
+    this.tilePixels = Math.ceil(this.fontSize * 1.6 * dpr);
+    this.tileSize = this.tilePixels / dpr;
+    const atlasColumns = 64;
+    this.atlas.width = atlasColumns * this.tilePixels;
+    this.atlas.height = Math.ceil(movingCells.length / atlasColumns) * this.tilePixels;
+    const atlasCtx = this.atlas.getContext('2d');
+    atlasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.prepare(atlasCtx);
+    movingCells.forEach((cell, index) => {
+      cell.tx = (index % atlasColumns) * this.tilePixels;
+      cell.ty = Math.floor(index / atlasColumns) * this.tilePixels;
+      this.paint(atlasCtx, cell, cell.tx / dpr + this.tileSize / 2,
+        cell.ty / dpr + this.tileSize / 2, 1, cell.color);
+    });
   }
 
   sample(sx, sy) {
@@ -144,32 +162,35 @@ export class AsciiRenderer {
     if (Math.abs(size - 1) < .005) ctx.fillText(cell.glyph, x, y);
     else { ctx.save(); ctx.translate(x, y); ctx.scale(size, size); ctx.fillText(cell.glyph, 0, 0); ctx.restore(); }
   }
+  stamp(cell, x, y, size) {
+    const side = this.tileSize * size;
+    this.ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
+      x - side / 2, y - side / 2, side, side);
+  }
   draw(time) {
     const ctx = this.ctx;
     ctx.drawImage(this.base, 0, 0, this.width, this.height);
-    this.prepare(ctx);
     for (const cell of this.dynamic) {
-      let x = cell.x, y = cell.y, size = 1, fill = cell.color;
+      let x = cell.x, y = cell.y, size = 1;
       if (cell.kind === 'water') {
-        const drift = Math.sin(time * .68 + cell.sy * .024) * 2.3 + Math.sin(time * .39 + cell.sx * .019) * 1.1;
-        const rise = Math.sin(time * .57 + cell.sx * .013) * .7;
-        x += drift * this.scale * .4; y += rise * this.scale;
-        fill = color(this.sample(cell.sx - drift, cell.sy - rise));
-        size = 1 + .035 * Math.sin(time * .75 + cell.phase);
+        const drift = Math.sin(time * .95 + cell.sy * .024) * 4.8 + Math.sin(time * .55 + cell.sx * .019) * 2.5;
+        const rise = Math.sin(time * .8 + cell.sx * .013) * 1.8;
+        x += drift * this.scale; y += rise * this.scale;
+        size = 1 + .1 * Math.sin(time * 1.15 + cell.phase);
       } else if (cell.kind === 'cloth') {
         const hem = clamp((cell.sy - 490) / 125);
-        x += Math.sin(time * 1.15 + cell.sy * .026) * 3.2 * hem * this.scale;
-        y += Math.sin(time * .85 + cell.sx * .02) * 1.6 * hem * this.scale;
-        size = 1 + .075 * hem * Math.sin(time * 1.1 + cell.phase);
+        x += Math.sin(time * 1.65 + cell.sy * .026) * 7 * hem * this.scale;
+        y += Math.sin(time * 1.15 + cell.sx * .02) * 3 * hem * this.scale;
+        size = 1 + .14 * hem * Math.sin(time * 1.5 + cell.phase);
       } else {
         // Independent, sparse breathing. No row/column phase or traveling bands.
-        size = 1 + .06 * Math.sin(time * .55 + cell.phase);
+        size = 1 + .14 * Math.sin(time * .95 + cell.phase);
       }
-      this.paint(ctx, cell, x, y, size, fill);
+      this.stamp(cell, x, y, size);
     }
     for (const sprite of this.sprites) for (const cell of sprite.cells) {
       const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time);
-      this.paint(ctx, cell, x * this.scale, y * this.scale, cell.size, cell.color);
+      this.stamp(cell, x * this.scale, y * this.scale, cell.size);
     }
   }
 }

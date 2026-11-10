@@ -1,5 +1,5 @@
 import { site } from './site.config.js';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js';
+import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-motion2';
 import './navigation.js';
 
 const viewport = document.querySelector('#scene-viewport');
@@ -12,7 +12,7 @@ const status = document.querySelector('#scene-status');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
-let frame = null, elapsed = 0, previousFrame = 0;
+let frame = null, elapsed = 0, previousFrame = 0, accumulated = 0;
 let paused = motion.matches, ready = false, resizeFrame = null;
 
 
@@ -68,11 +68,14 @@ function draw() {
 function tick(now) {
   frame = null;
   if (!ready || paused || document.hidden) return;
-  if (!previousFrame) previousFrame = now;
-  const delta = now - previousFrame;
-  if (delta >= 1000 / 24) {
-    elapsed += Math.min(delta, 100) / 1000;
-    previousFrame = now;
+  const delta = previousFrame ? now - previousFrame : 0;
+  previousFrame = now;
+  // Keep real-time speed on slower devices. Visibility/pause resets the clock,
+  // so background tabs do not accumulate a large jump on return.
+  elapsed += delta / 1000;
+  accumulated += delta;
+  if (accumulated >= 1000 / 30) {
+    accumulated %= 1000 / 30;
     draw();
   }
   frame = requestAnimationFrame(tick);
@@ -81,10 +84,11 @@ function syncMotion() {
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
   previousFrame = 0;
-  pause.textContent = paused ? '▷' : 'Ⅱ';
+  accumulated = 0;
+  pause.textContent = paused ? '▷ 播放动效' : 'Ⅱ';
   pause.setAttribute('aria-pressed', String(paused));
   pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
-  pause.title = paused ? '播放动效' : '暂停动效';
+  pause.title = paused ? (motion.matches ? '系统已启用减少动态效果，点击播放场景动效' : '播放动效') : '暂停动效';
   if (ready && !paused && !document.hidden) frame = requestAnimationFrame(tick);
 }
 pause.addEventListener('click', () => { paused = !paused; syncMotion(); });

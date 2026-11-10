@@ -31,6 +31,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .pan-hint span { margin-right: 7px; }
 .motion-toggle { position: fixed; right: max(25px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); width: 34px; height: 34px; border: 1px solid #a4c5cc4d; border-radius: 50%; color: #dcf1e5; background: #08121ab3; }
 .motion-toggle:hover { border-color: var(--accent); }
+.motion-toggle[aria-pressed="true"] { width: auto; padding: 0 13px; border-radius: 17px; font-size: 11px; }
 .scene-status { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #080d13dc; padding: 18px 25px; font-size: 11px; letter-spacing: 2px; }
 .no-script { position: fixed; inset: auto 15px 65px; background: #080d13; padding: 15px; font-size: 12px; }
 .no-script a { display: inline-block; margin-left: 20px; text-decoration: underline; }

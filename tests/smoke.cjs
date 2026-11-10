@@ -112,12 +112,45 @@ async function clickScenePoint(page, x, y, { pan = false, tap = false } = {}) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openScene(page);
     assert.equal(await page.locator('#pause').getAttribute('aria-pressed'), 'true');
+    assert.match(await page.locator('#pause').textContent(), /播放动效/);
+    first = await snapshot(); await page.waitForTimeout(150); assert.equal(await snapshot(), first);
+    await page.locator('#pause').click();
+    first = await snapshot(); await page.waitForTimeout(250); assert.notEqual(await snapshot(), first);
+    await page.locator('#pause').click();
     first = await snapshot(); await page.waitForTimeout(150); assert.equal(await snapshot(), first);
     await page.locator('[data-hotspot="tech"]').focus();
     await page.keyboard.press('Enter');
     await page.waitForURL(`${origin}/tech/`);
     assert.equal(await page.locator('.page-transition').count(), 0);
-    console.log('PASS reduced motion and keyboard navigation');
+    console.log('PASS reduced motion, explicit playback override and keyboard navigation');
+
+    // The same real-world duration must move the gull equally on fast and slow
+    // devices. Drive actual app callbacks at two cadences, without wall-clock
+    // performance assertions that would depend on the test runner's load.
+    const clockPage = await browser.newPage({ viewport: { width: 960, height: 640 } });
+    await clockPage.addInitScript(() => {
+      let nextId = 0;
+      const callbacks = new Map();
+      window.requestAnimationFrame = callback => { callbacks.set(++nextId, callback); return nextId; };
+      window.cancelAnimationFrame = id => callbacks.delete(id);
+      window.advanceFrame = time => {
+        const pending = [...callbacks.values()]; callbacks.clear();
+        pending.forEach(callback => callback(time));
+      };
+    });
+    async function runCadence(step) {
+      await openScene(clockPage);
+      return clockPage.evaluate(step => {
+        advanceFrame(1000);
+        for (let time = 1000 + step; time <= 4000; time += step) advanceFrame(time);
+        return document.querySelector('[data-hotspot="life"] polygon').getAttribute('points').split(/[ ,]/).map(Number);
+      }, step);
+    }
+    const fastPosition = await runCadence(50);
+    const slowPosition = await runCadence(250);
+    assert(fastPosition.every((value, i) => Math.abs(value - slowPosition[i]) < .001), 'low frame rates must not slow the animation clock');
+    await clockPage.close();
+    console.log('PASS motion speed is independent of frame rate');
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     mobile.on('pageerror', e => errors.push(e.message));
