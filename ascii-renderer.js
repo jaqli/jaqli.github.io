@@ -1,6 +1,6 @@
 import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
 import { GlyphAtlas } from './glyph-atlas.js?v=20261110-depth6';
-import { screens, paintScreen } from './screen-content.js?v=20261110-depth6';
+import { screens, paintScreen } from './screen-content.js?v=20261110-screens7';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-depth6';
 
@@ -95,6 +95,17 @@ const waterAreas = [
   [[255,804],[428,815],[605,863],[725,902],[866,902],[948,884],[1074,929],[1234,931],[1349,986],[1069,1023],[694,1023],[535,948],[372,938],[242,899],[154,850]],
 ];
 const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],[890,524],[876,613],[848,643],[812,642],[802,599],[771,564],[689,560]];
+// Trace the actual curls separately from the broad body/motion exclusion area.
+// The screen stays whole behind this foreground silhouette, including the
+// loose locks to the left of the head and the neck at its lower-right corner.
+const screenOccluder = [[722,460],[724,457],[727,457],[725,454],[728,452],[729,449],
+  [726,445],[723,443],[724,441],[729,444],[732,447],[733,450],[743,449],[751,446],
+  [757,440],[762,440],[759,444],[758,448],[757,451],[768,451],[769,449],[770,452],
+  [769,457],[778,464],[781,463],[780,466],[785,466],[801,478],[801,540],[710,540],
+  [710,515],[713,512],[708,509],[708,505],[706,501],[702,504],[699,503],[701,499],
+  [703,495],[704,488],[699,488],[696,484],[697,482],[699,485],[704,486],[705,480],
+  [707,476],[707,474],[701,475],[700,474],[700,472],[704,472],[707,470],[708,466],
+  [713,462],[719,460]];
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
 const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
@@ -297,7 +308,7 @@ export class AsciiRenderer {
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
-      const isAmbient = !isWater && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,monitorHousing);
+      const isAmbient = !isWater && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
       if (cloudIndex>=0) {
         // Calm typography for the sky; independent random sizes at every cell
@@ -462,7 +473,7 @@ export class AsciiRenderer {
       if (screen.kind==='plot') {
         // The expanded right display remains behind the person's hair/shoulder.
         ctx.beginPath(); ctx.rect(0,0,this.sourceW,this.sourceH);
-        personArea.forEach(([x,y],i)=>i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath();
+        screenOccluder.forEach(([x,y],i)=>i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath();
         ctx.clip('evenodd');
       }
       drawQuad(ctx,screen.canvas,screen.quad,screen.width,screen.height);

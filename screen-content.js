@@ -2,9 +2,11 @@
 // Render once into their source-space textures; don't resample the text a second time.
 export const screens = [
   { kind: 'code', quad: [[434,359],[602,377],[608,479],[437,479]], width: 173, height: 120 },
-  { kind: 'wave', quad: [[333,403],[439,409],[442,481],[335,482]], width: 108, height: 78 },
-  // Include the inner one to two rings of white characters, keeping the casing.
-  { kind: 'plot', quad: [[633,431],[725,437],[727,497],[634,490]], width: 93, height: 60 },
+  // Extend the upper display through another one to two pale character rows.
+  { kind: 'wave', quad: [[333,395],[439,401],[442,481],[335,482]], width: 108, height: 86 },
+  // A complete parallelogram continues down/right behind the head. Occlusion
+  // belongs to the foreground hair, not to the display's four-corner geometry.
+  { kind: 'plot', quad: [[633,431],[733,438],[737,507],[637,500]], width: 100, height: 69 },
 ];
 const lines = [
   'import { field } from "./sim";', 'const state = new Map();', '',
@@ -54,10 +56,10 @@ export function paintScreen(screen, time) {
   } else if (kind === 'wave') {
     text(ctx, `SCOPE  ${time.toFixed(1)}s  CH1+CH2`, 3, 2, '#b5ddeb');
     for (let i = 0; i < 3; i++) text(ctx, `> ${['sample(field)', 'integrate(dt)', 'stream(buffer)'][(i + Math.floor(time / 2)) % 3]}`, 3, 9 + i * 5, '#86cda9');
-    for (let y = 29; y < 59; y += 10) text(ctx, '- . '.repeat(10), 4, y, '#325568');
-    wave(ctx, time, 4, 41, 96, 10, 0, '#50e4d4');
-    wave(ctx, time * .7, 4, 43, 96, 6, 2.3, '#7badea');
-    text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, 61, '#a3d2b7');
+    for (let y = 29; y < h-15; y += 10) text(ctx, '- . '.repeat(10), 4, y, '#325568');
+    wave(ctx, time, 4, h*.57, 96, h*.14, 0, '#50e4d4');
+    wave(ctx, time * .7, 4, h*.6, 96, h*.085, 2.3, '#7badea');
+    text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, h-7, '#a3d2b7');
   } else {
     text(ctx, `FIELD / ${Math.floor(time * 12)}`, 2, 1, '#bededa');
     wave(ctx, time, 3, 20, w-8, 8, .8, '#8cd9e8');

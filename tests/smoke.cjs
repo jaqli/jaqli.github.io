@@ -75,7 +75,8 @@ async function gullBodyPoint(page) {
         boat: [1158,486,78,51], blueCan: [575,757,26,47], redCan: [1139,719,25,34],
         floatingPages: [623,792,128,58], tablet: [953,795,166,86], phone: [724,940,102,55],
         floatingPage: [395,881,214,100], paperBoat: [753,870,73,52], waterCar: [1090,844,252,123],
-        expandedPlot: [634,439,9,45], city: [1180,356,30,85],
+        expandedPlot: [634,439,9,45], leftTop: [349,398,16,8],
+        hair: [716,468,15,31], looseHair: [708,482,5,14], city: [1180,356,30,85],
         // The lower part of the central monitor's left rim is occluded by the
         // foreground waveform monitor; test only the exposed upper frame.
         windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [420,353,8,40] };
@@ -161,6 +162,9 @@ async function gullBodyPoint(page) {
     assert(changes.wall < .04, 'architecture should stay still');
     assert.equal(changes.body, 0, 'the seated torso must not twist');
     assert.equal(changes.hand, 0, 'hands stay resting on the desk');
+    assert.equal(changes.hair, 0, 'the complete right display must remain behind the head');
+    assert.equal(changes.looseHair, 0, 'the irregular left hair edge must also occlude the display');
+    assert(changes.leftTop>.02, 'the newly exposed top rows of the left display should animate');
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
