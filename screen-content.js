@@ -1,0 +1,79 @@
+// These displays are already ASCII, at a finer pitch than the surrounding room.
+// Render once into their source-space textures; don't resample the text a second time.
+export const screens = [
+  { kind: 'code', quad: [[434,359],[602,377],[608,479],[437,479]], width: 173, height: 120 },
+  { kind: 'wave', quad: [[334,404],[439,412],[439,480],[334,472]], width: 105, height: 68 },
+  { kind: 'plot', quad: [[641,438],[717,444],[717,490],[641,484]], width: 76, height: 46 },
+];
+const lines = [
+  'import { field } from "./sim";', 'const state = new Map();', '',
+  'function step(dt) {', '  for (const p of field) {',
+  '    const v = sample(p, dt);', '    state.set(p.id, v);', '  }',
+  '  return state;', '}', '', 'const frame = step(clock.dt);',
+  'render(frame);', 'await nextFrame();', '', 'export { step, state };',
+];
+function text(ctx, value, x, y, color = '#84d6cd') {
+  ctx.fillStyle = color; ctx.fillText(value, x, y);
+}
+function wave(ctx, time, x, y, width, amplitude, phase = 0, color = '#56dfd5') {
+  for (let i = 0; i < width; i += 1.65) {
+    const v = Math.sin(i * .12 - time * 1.8 + phase) + .32 * Math.sin(i * .3 + time * 2.1);
+    text(ctx, i % 5 < 2 ? '+' : ':', x + i, y + v * amplitude, color);
+  }
+}
+export function paintScreen(screen, time) {
+  const { ctx, width: w, height: h, kind } = screen;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0a1923'; ctx.fillRect(0, 0, w, h);
+  ctx.font = kind === 'code' ? '500 5px monospace' : '500 4.2px monospace'; ctx.textBaseline = 'top';
+  // A dim character bed and a feathered perimeter integrate the fine display
+  // into the original reflection and rim without a sharp rectangular patch.
+  for (let y = 1; y < h; y += 4.8) text(ctx, '. : '.repeat(Math.ceil(w / 8)), 1, y, '#1e3440');
+  if (kind === 'code') {
+    text(ctx, `main.ts  /  frame ${String(Math.floor(time * 30)).padStart(5, '0')}`, 3, 2, '#a9d6de');
+    const top = Math.floor(time / 2.8), typed = Math.floor(time % 2.8 * 17);
+    for (let row = 0; row < 14; row++) {
+      const line = lines[(top + row) % lines.length];
+      text(ctx, String(top + row + 1).padStart(2, '0'), 3, 11 + row * 6.4, '#4f7e92');
+      text(ctx, row === 13 ? line.slice(0, typed) : line, 13, 11 + row * 6.4,
+        ['#7eebad','#b3d6eb','#f0c77b','#8ed6e1'][row % 4]);
+    }
+    if (time % 1 < .55) text(ctx, '_', 13 + Math.min(typed, lines[(top + 13) % lines.length].length) * 3, 94.2, '#ddffe8');
+    for (let y = 10; y < h - 12; y += 4) text(ctx, '|', 122, y, '#42616f');
+    text(ctx, 'CPU / MEM', 128, 11, '#9edce5');
+    for (let i = 0; i < 5; i++) {
+      const value = Math.round(3 + 2 * Math.sin(time * 1.2 + i));
+      text(ctx, `${i} ${'|'.repeat(value)}${'.'.repeat(6 - value)}`, 128, 19 + i * 6.5, i % 2 ? '#e8c17a' : '#74c9e3');
+    }
+    wave(ctx, time, 128, 64, 37, 5);
+    text(ctx, `dt ${(16 + Math.sin(time) * 2).toFixed(1)}`, 128, 79, '#c4e4d2');
+    text(ctx, `${Math.floor(256 + time * 24)} KB/s`, 128, 93, '#b7dcd2');
+    text(ctx, `> ${['compile','running','syncing','ready'][Math.floor(time / 1.8) % 4]}  ${Math.floor(time * 61)} ops`, 4, h-10, '#e2bc77');
+    text(ctx, `${'='.repeat(1 + Math.floor(time * 3) % 10)}>`, 126, h-10, '#80d4c6');
+  } else if (kind === 'wave') {
+    text(ctx, `SCOPE  ${time.toFixed(1)}s  CH1+CH2`, 3, 2, '#b5ddeb');
+    for (let i = 0; i < 3; i++) text(ctx, `> ${['sample(field)', 'integrate(dt)', 'stream(buffer)'][(i + Math.floor(time / 2)) % 3]}`, 3, 9 + i * 5, '#86cda9');
+    for (let y = 29; y < 59; y += 10) text(ctx, '- . '.repeat(10), 4, y, '#325568');
+    wave(ctx, time, 4, 41, 96, 10, 0, '#50e4d4');
+    wave(ctx, time * .7, 4, 43, 96, 6, 2.3, '#7badea');
+    text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, 61, '#a3d2b7');
+  } else {
+    text(ctx, `FIELD / ${Math.floor(time * 12)}`, 2, 1, '#bededa');
+    wave(ctx, time, 3, 17, 68, 7, .8, '#8cd9e8');
+    for (let col = 0; col < 14; col++) {
+      const level = 1 + Math.floor((1 + Math.sin(time * 1.4 + col * .6)) * 2.5);
+      for (let y = 0; y < level; y++) text(ctx, '=', 3 + col * 5, 39 - y * 2.2, '#90c8b1');
+    }
+    text(ctx, 'FFT  /  live', 2, 41, '#edca86');
+  }
+  // Alpha ramps at all four edges retain the original edge pixels/reflections.
+  ctx.globalCompositeOperation = 'destination-in';
+  for (const horizontal of [true, false]) {
+    const end = horizontal ? w : h, feather = Math.min(3 / end, .12);
+    const fade = ctx.createLinearGradient(0, 0, horizontal ? w : 0, horizontal ? 0 : h);
+    fade.addColorStop(0, '#0000'); fade.addColorStop(feather, '#000');
+    fade.addColorStop(1 - feather, '#000'); fade.addColorStop(1, '#0000');
+    ctx.fillStyle = fade; ctx.fillRect(0, 0, w, h);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}

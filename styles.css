@@ -34,7 +34,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .motion-toggle { position: fixed; right: max(25px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); width: 34px; height: 34px; border: 1px solid #a4c5cc4d; border-radius: 50%; color: #dcf1e5; background: #08121ab3; }
 .motion-toggle:hover { border-color: var(--accent); }
 .motion-toggle[aria-pressed="true"] { width: auto; padding: 0 13px; border-radius: 17px; font-size: 11px; }
-.scene-status { position: fixed; left: max(23px, env(safe-area-inset-left)); bottom: max(24px, env(safe-area-inset-bottom)); margin: 0; background: #080d13c7; padding: 8px; border-radius: 3px; font-size: 10px; letter-spacing: .5px; }
+.scene-status { position: fixed; left: max(23px, env(safe-area-inset-left)); bottom: max(70px, env(safe-area-inset-bottom)); width: 180px; margin: 0; background: #080d13db; padding: 11px 12px; border: 1px solid #54777b55; border-radius: 3px; font-size: 10px; letter-spacing: .5px; }
+.progress-caption { display: flex; justify-content: space-between; margin-bottom: 8px; }
+#scene-progress { appearance: none; display: block; border: 0; height: 3px; width: 100%; background: #284149; accent-color: #9de5cf; }
+#scene-progress::-webkit-progress-bar { background: #284149; }
+#scene-progress::-webkit-progress-value { background: #9de5cf; }
+#scene-progress::-moz-progress-bar { background: #9de5cf; }
 .no-script { position: fixed; inset: auto 15px 65px; background: #080d13; padding: 15px; font-size: 12px; }
 .no-script a { display: inline-block; margin-left: 20px; text-decoration: underline; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

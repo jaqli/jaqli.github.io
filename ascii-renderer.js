@@ -1,5 +1,7 @@
-import { detailShapes, detailPoint, cloudWindows } from './scene-details.js?v=20261110-scene4';
+import { detailShapes, detailPoint, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-details5';
 import { GlyphAtlas } from './glyph-atlas.js?v=20261110-scene4';
+import { screens, paintScreen } from './screen-content.js?v=20261110-details5';
+import { faceLight, lampColor } from './scene-lights.js?v=20261110-details5';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -20,7 +22,14 @@ export const birds = [
     points: [[1201,203],[1211,197],[1222,193],[1227,185],[1238,176],[1243,175],[1241,183],[1236,191],[1230,197],[1224,201],[1223,207],[1220,207],[1220,201],[1212,206],[1201,206]] },
 ];
 
+const polygonBounds = new WeakMap();
 export function inside(x, y, polygon) {
+  let bounds = polygonBounds.get(polygon);
+  if (!bounds) {
+    bounds = [Math.min(...polygon.map(p=>p[0])), Math.min(...polygon.map(p=>p[1])), Math.max(...polygon.map(p=>p[0])), Math.max(...polygon.map(p=>p[1]))];
+    polygonBounds.set(polygon,bounds);
+  }
+  if (x < bounds[0] || y < bounds[1] || x > bounds[2] || y > bounds[3]) return false;
   let contained = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const [xi, yi] = polygon[i], [xj, yj] = polygon[j];
@@ -39,13 +48,7 @@ const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] 
 const mix = (a, b, amount) => a.map((v, i) => v * (1 - amount) + b[i] * amount);
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
-
-function screenUV(x, y, screen) {
-  const [a,b,,d] = screen.quad;
-  const ax = b[0]-a[0], ay = b[1]-a[1], bx = d[0]-a[0], by = d[1]-a[1];
-  const det = ax*by-ay*bx, dx = x-a[0], dy = y-a[1];
-  return [(dx*by-dy*bx)/det, (ax*dy-ay*dx)/det];
-}
+export const fontSizes = [.5,.6,.7,.8,.9,1,1.1,1.2,1.3];
 
 function flight(bird, time) {
   const route = bird.route, count = route.length;
@@ -93,18 +96,8 @@ const waterAreas = [
 const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],[890,524],[876,613],[848,643],[812,642],[802,599],[771,564],[689,560]];
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
+const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
 const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
-const screens = [
-  { kind: 'code', quad: [[437,369],[560,382],[554,471],[437,458]], width: 124, height: 90 },
-  { kind: 'terminal', quad: [[334,404],[439,412],[439,480],[335,475]], width: 105, height: 72 },
-  { kind: 'plot', quad: [[641,438],[717,444],[716,490],[641,486]], width: 77, height: 48 },
-];
-const codeLines = [
-  'import { field } from "./sim";', '', 'const state = new Map();',
-  'function step(dt) {', '  for (const p of field) {',
-  '    const v = sample(p, dt);', '    state.set(p.id, v);', '  }', '  return state;', '}', '',
-  'const frame = step(clock.dt);', 'render(frame);', '', 'export { step, state };',
-];
 
 function nearPolygon(x, y, polygon) {
   if (inside(x, y, polygon)) return true;
@@ -132,9 +125,9 @@ export class AsciiRenderer {
     this.preparation = this.prepareSource(bitmap, ctx);
     if (!deferred) for (const _ of this.preparation) { /* synchronous API for exports and tests */ }
   }
-  static async create(image, canvas) {
+  static async create(image, canvas, onProgress = () => {}) {
     const renderer = new AsciiRenderer(image,canvas,true);
-    for (const _ of renderer.preparation) await yieldToBrowser();
+    for (const progress of renderer.preparation) { onProgress(progress); await yieldToBrowser(); }
     return renderer;
   }
   *prepareSource(bitmap, ctx) {
@@ -157,7 +150,7 @@ export class AsciiRenderer {
         for (let channel = 0; channel < 3; channel++) bitmap.data[i + channel] = this.original[left + channel] * (1 - mix) + this.original[right + channel] * mix;
       }
       this.birdMasks.push({ bird, x0, y0, x1, y1, mask, stride });
-      yield;
+      yield this.birdMasks.length / birds.length * .15;
     }
     this.detailMasks = [];
     for (const shape of detailShapes) {
@@ -179,25 +172,38 @@ export class AsciiRenderer {
         }
       }
       this.detailMasks.push({ shape,x0,x1,y0,y1,mask,stride });
-      yield;
+      yield .15 + this.detailMasks.length / detailShapes.length * .15;
+    }
+    for (const emitter of emitters) {
+      const [x0,y0,w,h]=emitter.box;
+      for (let y=y0;y<y0+h;y++) for (let x=x0;x<x0+w;x++) {
+        if (!inside(x,y,emitter.polygon)) continue;
+        const i=(y*this.sourceW+x)*4;
+        if (emitter.kind==='lamp' && !(this.original[i+1]>120 && this.original[i+2]>130)) continue;
+        bitmap.data[i]=12; bitmap.data[i+1]=25; bitmap.data[i+2]=33;
+      }
     }
     ctx.putImageData(bitmap, 0, 0);
     this.cloudSources = [];
     for (const window of cloudWindows) {
       const [x0,y0,width,height] = window.box, pixels = new Uint8ClampedArray(width*height*4);
+      const validX = new Int32Array(width), validPixel = new Int32Array(width), source = bitmap.data;
       for (let y=0; y<height; y++) {
-        const valid=[];
+        let count=0;
         for (let x=0; x<width; x++) {
-          const i=((y+y0)*this.sourceW+x+x0)*4, rgb=Array.from(bitmap.data.slice(i,i+3));
-          const outsideSun=Math.hypot(x+x0-1100,y+y0-375)>34;
-          if (skyPixel(rgb) && window.accepts(x+x0,y+y0) && outsideSun) valid.push({x,rgb});
+          const i=((y+y0)*this.sourceW+x+x0)*4, r=source[i], g=source[i+1], b=source[i+2];
+          const outsideSun=(x+x0-1100)**2+(y+y0-375)**2>34**2;
+          if (((g-r>15 && b-r>20 && g>110) || Math.min(r,g,b)>150) && window.accepts(x+x0,y+y0) && outsideSun) {
+            validX[count]=x; validPixel[count++]=i;
+          }
         }
         let next=0;
         for (let x=0; x<width; x++) {
-          while (next<valid.length-1 && valid[next].x<x) next++;
-          const a=valid[Math.max(0,next-1)], b=valid[next];
-          const rgb = a && b ? mix(a.rgb,b.rgb,clamp((x-a.x)/Math.max(1,b.x-a.x))) : [123,202,216];
-          pixels.set([...rgb,255],(y*width+x)*4);
+          while (next<count-1 && validX[next]<x) next++;
+          const previous=Math.max(0,next-1), a=validPixel[previous], b=validPixel[next];
+          const blend=clamp((x-validX[previous])/Math.max(1,validX[next]-validX[previous])), target=(y*width+x)*4;
+          for (let c=0;c<3;c++) pixels[target+c]=count ? source[a+c]*(1-blend)+source[b+c]*blend : [123,202,216][c];
+          pixels[target+3]=255;
         }
         // Match the ends of the repeating texture, so a wrap cannot introduce
         // a vertical seam as the clouds travel in one direction.
@@ -206,13 +212,13 @@ export class AsciiRenderer {
           const mean=(pixels[l]+pixels[r])/2, amount=(1-edge/32)**2;
           pixels[l]=pixels[l]*(1-amount)+mean*amount; pixels[r]=pixels[r]*(1-amount)+mean*amount;
         }
-        if (!(y%12)) yield;
+        if (!(y%24)) yield .3 + .7 * (this.cloudSources.length + y/height) / cloudWindows.length;
       }
       this.cloudSources.push({ ...window,width,height,pixels });
     }
     this.base = document.createElement('canvas');
     this.cloudLayer = document.createElement('canvas');
-    this.screenLayer = document.createElement('canvas');
+    this.lightLayer = document.createElement('canvas');
     this.screens = screens.map(screen => {
       const canvas = document.createElement('canvas');
       canvas.width = screen.width * 3; canvas.height = screen.height * 3;
@@ -220,16 +226,19 @@ export class AsciiRenderer {
       ctx.scale(3, 3);
       return { ...screen, canvas, ctx, frame: -1 };
     });
+    yield 1;
   }
 
   resize(width, height) {
     for (const _ of this.prepareSize(width,height)) { /* synchronous resize after orientation changes */ }
   }
-  async resizeAsync(width, height) {
-    for (const _ of this.prepareSize(width,height)) await yieldToBrowser();
+  async resizeAsync(width, height, onProgress = () => {}) {
+    for (const progress of this.prepareSize(width,height)) { onProgress(progress); await yieldToBrowser(); }
     this.drawClouds(0);
     await yieldToBrowser();
     this.drawScreens(0);
+    this.drawLights(0);
+    onProgress(1);
     await yieldToBrowser();
   }
   *prepareSize(width, height) {
@@ -237,7 +246,7 @@ export class AsciiRenderer {
     this.scale = width / this.sourceW;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     this.pixelRatio = dpr;
-    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.lightLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
@@ -245,8 +254,8 @@ export class AsciiRenderer {
     this.fontSize = this.cellH * 1.06;
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,0,0);
-    this.cloudFrame = this.screenFrame = -1;
+    this.lightCtx = this.lightLayer.getContext('2d'); this.lightCtx.setTransform(dpr,0,0,dpr,0,0);
+    this.cloudFrame = this.lightFrame = -1;
     const texture = document.createElement('canvas');
     texture.width = this.columns * 2; texture.height = this.rows * 2;
     const texCtx = texture.getContext('2d', { willReadFrequently: true });
@@ -259,7 +268,8 @@ export class AsciiRenderer {
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
-    this.cloudCells = []; this.screenCells = []; this.cells = [];
+    this.cloudCells = []; this.cells = [];
+    const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
@@ -271,20 +281,17 @@ export class AsciiRenderer {
       const cloudIndex = skyPixel(rgb) ? this.cloudSources.findIndex(source => {
         const [x,y,w,h]=source.box; return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
       }) : -1;
-      const screenIndex = this.screens.findIndex(screen => inside(sx,sy,screen.quad));
-      // Modest variation within one cell: shrinking the previous double-size
-      // letters must also restore their neighboring cells, not leave empty gaps.
-      const cell = { sx, sy, rgb, span: 1, size: .88+seed*.24,
+      // Nine discrete sizes, with one occupied cell at every grid position.
+      const cell = { sx, sy, rgb, size: fontSizes[Math.floor(seed*fontSizes.length)],
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
-      const isAmbient = !isWater && !inside(sx, sy, personArea) && seed < .018;
+      const isAmbient = !isWater && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,monitorHousing);
       this.cells.push(cell);
       if (cloudIndex>=0) this.cloudCells.push({...cell,cloudIndex});
-      else if (screenIndex>=0) this.screenCells.push({...cell,screen:this.screens[screenIndex],uv:screenUV(sx,sy,this.screens[screenIndex])});
       else if (isHem || isAmbient) this.dynamic.push(cell);
-      else this.paint(baseCtx, cell, cell.x, cell.y, cell.size, cell.color);
+      else { staticCells.push(cell); this.palette.get(cell.glyph,cell.rgb); }
       if (isWater) {
         // Water keeps a complete, fixed character bed. Moving light is added on
         // top; no character leaves a hole at the edge of a moving region.
@@ -293,7 +300,14 @@ export class AsciiRenderer {
           rings: rippleSources.map(([x, y, phase]) => ({ distance: Math.hypot((sx - x) / 1.7, (sy - y) * 2.2), phase })) });
       }
       }
-      if (!(row%2)) yield;
+      if (!(row%4)) yield row / this.rows * .6;
+    }
+    // Cache glyphs first, then draw: thousands of repeated fillText calls and
+    // interleaved atlas uploads previously dominated startup CPU time.
+    for (let i=0;i<staticCells.length;i++) {
+      const cell=staticCells[i];
+      this.palette.draw(baseCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
+      if (!(i%1024)) yield .6 + .15*i/staticCells.length;
     }
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
@@ -315,9 +329,21 @@ export class AsciiRenderer {
       return cells;
     };
     this.sprites = [];
-    for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region)}); yield; }
+    for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region)}); yield .75; }
     this.details = [];
-    for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}); yield; }
+    for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}); yield .78; }
+    this.lights = emitters.map(emitter => {
+      const [bx,by,w,h]=emitter.box, cells=[];
+      for (let y=by+1;y<by+h;y+=1.8) for (let x=bx+1;x<bx+w;x+=1.5) {
+        if (!inside(x,y,emitter.polygon)) continue;
+        const i=(Math.floor(y)*this.sourceW+Math.floor(x))*4;
+        const intensity=(this.original[i]+this.original[i+1]+this.original[i+2])/765;
+        if (emitter.kind==='lamp' && !(this.original[i+1]>120 && this.original[i+2]>130)) continue;
+        cells.push({x:x*this.scale,y:y*this.scale,u:(x-bx)/w,v:(y-by)/h,intensity,
+          glyph: '+*'[Math.floor(hash(x,y)*2)],size:(emitter.kind==='lamp'?3.4:2.8)/syStep});
+      }
+      return {emitter,cells};
+    });
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
     const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
@@ -336,7 +362,7 @@ export class AsciiRenderer {
       cell.ty = Math.floor(index / atlasColumns) * this.tilePixels;
       this.paint(atlasCtx, cell, cell.tx / dpr + this.tileSize / 2,
         cell.ty / dpr + this.tileSize / 2, 1, cell.color);
-      if (!(index%256)) yield;
+      if (!(index%512)) yield .8 + .18*index/movingCells.length;
     }
   }
 
@@ -366,7 +392,7 @@ export class AsciiRenderer {
       this.cloudCtx.clearRect(0,0,this.width,this.height);
       for (const cell of this.cloudCells) {
         const source=this.cloudSources[cell.cloudIndex], [bx,by,w,h]=source.box;
-        const x=((cell.sx-bx-time*2.6)%w+w)%w, y=clamp(cell.sy-by,0,h-1);
+        const x=((cell.sx-bx-time*cloudSpeed)%w+w)%w, y=clamp(cell.sy-by,0,h-1);
         const x0=Math.floor(x), x1=(x0+1)%w, y0=Math.floor(y), y1=Math.min(y0+1,h-1);
         const fx=x-x0, fy=y-y0, p=source.pixels;
         const cloud=[0,1,2].map(c=>
@@ -387,74 +413,47 @@ export class AsciiRenderer {
     this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
   }
   drawScreens(time) {
-    const frame = Math.floor(time * 8);
+    const frame = Math.floor(time * 12), ctx = this.ctx;
     for (const screen of this.screens) {
-      if (screen.frame !== frame) {
-        screen.frame = frame;
-        const { ctx, width, height, kind } = screen;
-        ctx.fillStyle = kind==='plot' ? '#c4dbe0' : '#102633';
-        ctx.fillRect(0, 0, width, height);
-        ctx.font = '600 6px monospace'; ctx.textBaseline = 'top';
-        if (kind === 'code') {
-          const topLine = Math.floor(time / 3.4), typed = Math.floor((time % 3.4) * 15);
-          for (let row = 0; row < 12; row++) {
-            const line = codeLines[(topLine + row) % codeLines.length];
-            ctx.fillStyle = '#080d13'; ctx.fillRect(0, 2 + row * 7, 12 + line.length * 3, 5);
-            ctx.fillStyle = '#527587'; ctx.fillText(String(topLine + row + 1).padStart(2, '0'), 2, 2 + row * 7);
-            ctx.fillStyle = ['#72d9b2','#9fbfd1','#e4ba75','#8cd6df'][row % 4];
-            ctx.fillText(row === 11 ? line.slice(0, typed) : line, 12, 2 + row * 7);
-          }
-          if (time % 1.2 < .7) { ctx.fillStyle = '#b6f4db'; ctx.fillRect(12 + Math.min(typed, codeLines[(topLine + 11) % codeLines.length].length) * 3, 79, 2.6, 5); }
-        } else if (kind === 'terminal') {
-          const history = ['> sample(field)', 'position = vec3(...)', 'velocity += force * dt',
-            'field.update(dt)', '> integrate(state)', 'state.frame += 1', 'write(buffer)', '> draw(frame)'];
-          const offset = Math.floor(time / 2.6), typed = Math.floor((time % 2.6) * 14);
-          const current = history[(offset + 7) % history.length].slice(0, typed);
-          const logs = [`[ t = ${time.toFixed(1)} ]`, ...Array.from({ length: 7 }, (_, row) => history[(offset + row) % history.length]), current];
-          logs.forEach((line, row) => {
-            ctx.fillStyle = '#080d13'; ctx.fillRect(3, 3 + row * 7.5, line.length * 3, 5);
-            ctx.fillStyle = row === 4 ? '#e2ba76' : '#75c9c7'; ctx.fillText(line, 3, 3 + row * 7.5);
-          });
-          if (time % 1 < .55) { ctx.fillStyle = '#b1e8bc'; ctx.fillRect(3 + current.length * 3, 63, 3, 5); }
-        } else {
-          ctx.fillStyle = '#080d13'; ctx.fillRect(2, 1, 38, 6);
-          ctx.fillStyle = '#90c7d9'; ctx.fillText('FIELD / LIVE', 3, 2);
-          for (let col = 0; col < 23; col++) {
-            const value = Math.sin(col * .36 - time * 1.6) * 5 + Math.sin(col * .71 + time * .6) * 2;
-            ctx.fillStyle = '#080d13'; ctx.fillRect(col * 3 + 2, 19 + value, 3, 6);
-            ctx.fillStyle = '#3b899f'; ctx.fillText('~', col * 3 + 2, 20 + value);
-          }
-          for (let col = 0; col < 9; col++) {
-            const level = Math.round(2 + 1.5 * Math.sin(time * .8 + col));
-            ctx.fillStyle = '#5990a4'; ctx.fillText('|'.repeat(level), 3 + col * 8, 38);
-          }
+      if (screen.frame !== frame) { screen.frame = frame; paintScreen(screen, time); }
+      const [tl,tr,br,bl] = screen.quad;
+      ctx.save();
+      ctx.scale(this.scale,this.scale);
+      ctx.beginPath(); ctx.moveTo(...tl); ctx.lineTo(...tr); ctx.lineTo(...br); ctx.lineTo(...bl); ctx.closePath(); ctx.clip();
+      // Thin source-space strips follow all four corners of the perspective
+      // display, including the lower edge, without spilling onto its bezel.
+      for (let row=0;row<screen.height;row+=3) {
+        const v=row/screen.height, h=Math.min(3.08,screen.height-row);
+        const lx=tl[0]+(bl[0]-tl[0])*v, ly=tl[1]+(bl[1]-tl[1])*v;
+        const rx=tr[0]+(br[0]-tr[0])*v, ry=tr[1]+(br[1]-tr[1])*v;
+        ctx.save();
+        ctx.transform((rx-lx)/screen.width,(ry-ly)/screen.width,
+          (bl[0]-tl[0])/screen.height,(bl[1]-tl[1])/screen.height,lx,ly);
+        ctx.drawImage(screen.canvas,0,row*3,screen.canvas.width,h*3,0,0,screen.width,h);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+  }
+  drawLights(time) {
+    const frame=Math.floor(time*12);
+    if (frame!==this.lightFrame) {
+      this.lightFrame=frame;
+      this.lightCtx.clearRect(0,0,this.width,this.height);
+      for (const {emitter,cells} of this.lights) {
+        const tint=emitter.kind==='lamp' ? lampColor(time) : emitter.tint;
+        for (const cell of cells) {
+          const brightness=emitter.kind==='lamp' ? .5+cell.intensity*.5 : Math.sqrt(faceLight(emitter,cell.u,cell.v,time));
+          const core=emitter.kind==='lamp' ? clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*.7)**2) : 0;
+          cell.rgb=tint.map((c,i)=>[10,21,28][i]+c*brightness*(1-core)+255*core);
+          this.palette.get(cell.glyph,cell.rgb);
         }
-        screen.pixels=ctx.getImageData(0,0,screen.canvas.width,screen.canvas.height).data;
+      }
+      for (const {cells} of this.lights) for (const cell of cells) {
+        this.palette.draw(this.lightCtx,cell.glyph,cell.rgb,cell.x,cell.y,cell.size);
       }
     }
-    if (frame!==this.screenFrame) {
-      this.screenFrame=frame;
-      this.screenCtx.clearRect(0,0,this.width,this.height);
-      for (const cell of this.screenCells) {
-        const screen=cell.screen, [u,v]=cell.uv, w=screen.canvas.width,h=screen.canvas.height;
-        const x=Math.round(clamp(u)* (w-1)),y=Math.round(clamp(v)*(h-1));
-        const rgb=[0,0,0];
-        for (const dx of [-2,0,2]) for (const dy of [-2,0,2]) {
-          const i=(clamp(y+dy,0,h-1)*w+clamp(x+dx,0,w-1))*4;
-          for (let c=0;c<3;c++) rgb[c]+=screen.pixels[i+c]/9;
-        }
-        const edge=smooth(Math.min(u,v,1-u,1-v)/.12);
-        const blended=mix(cell.rgb,rgb,edge*.65);
-        // Exactly the scene's grid, font, sizing and color pipeline. Only the
-        // display interior changes; the original rim and edge light are retained.
-        cell.frameRGB=blended; cell.frameGlyph=glyph(blended,cell.seed);
-        this.palette.get(cell.frameGlyph,blended);
-      }
-      for (const cell of this.screenCells) {
-        this.palette.draw(this.screenCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
-      }
-    }
-    this.ctx.drawImage(this.screenLayer,0,0,this.width,this.height);
+    this.ctx.drawImage(this.lightLayer,0,0,this.width,this.height);
   }
   drawDetails(time) {
     for (const sprite of this.details) {
@@ -494,12 +493,13 @@ export class AsciiRenderer {
       if (cell.kind === 'hem') {
         y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
       } else {
-        size *= 1 + .065 * Math.sin(time * .75 + cell.phase);
+        size = fontSizes[Math.max(0,Math.min(8,Math.round((cell.size-.5)*10) + Math.round(Math.sin(time*.75+cell.phase))))];
       }
       this.stamp(cell, x, y, size);
     }
     this.drawScreens(time);
     this.drawDetails(time);
+    this.drawLights(time);
     for (const sprite of this.sprites) {
       const pose = birdPose(sprite.bird, time);
       // Occlude only occupied feather cells. Filling the whole hit polygon can

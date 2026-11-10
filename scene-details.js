@@ -8,6 +8,18 @@ export const detailShapes = [
     polygon: [[505,228],[540,237],[535,281],[499,274]] },
   { id: 'paper-loose', kind: 'paper', anchor: [530,308], length: 36, phase: 2.7,
     polygon: [[513,303],[540,307],[556,316],[550,337],[526,344],[496,330]] },
+  { id: 'paper-wall-blue', kind: 'paper', anchor: [132,154], length: 70, phase: .8,
+    polygon: [[113,150],[148,156],[154,217],[116,225]] },
+  { id: 'paper-wall-white', kind: 'paper', anchor: [95,188], length: 43, phase: 3.6,
+    polygon: [[81,185],[112,192],[112,230],[82,221]] },
+  { id: 'paper-board-top', kind: 'paper', anchor: [397,174], length: 36, phase: 2,
+    polygon: [[383,170],[415,177],[416,211],[386,208]] },
+  { id: 'paper-board-white', kind: 'paper', anchor: [433,199], length: 41, phase: 4.2,
+    polygon: [[421,196],[447,202],[455,242],[415,235]] },
+  { id: 'paper-board-bottom', kind: 'paper', anchor: [374,299], length: 37, phase: 5.3,
+    polygon: [[358,296],[386,299],[391,333],[361,331]] },
+  { id: 'paper-monitor', kind: 'paper', anchor: [476,468], length: 48, phase: 1.9,
+    polygon: [[458,467],[493,474],[501,514],[457,517]] },
   { id: 'eye-left', kind: 'eye', anchor: [149,440], phase: 0, background: [159,451],
     polygon: [[141,429],[157,429],[157,450],[141,450]] },
   { id: 'eye-right', kind: 'eye', anchor: [172,438], phase: .055, background: [159,451],
@@ -18,7 +30,7 @@ export const detailShapes = [
 
 const clamp = (v, low = 0, high = 1) => Math.max(low, Math.min(high, v));
 export function eyeOpening(time, phase = 0) {
-  const cycle = (time + phase) % 6.6;
+  const cycle = (time + phase) % 3.2;
   return 1 - .94 * Math.exp(-(((cycle - 2.1) / .11) ** 2));
 }
 export function detailPoint(shape, x, y, time) {
@@ -48,4 +60,18 @@ export const cloudWindows = [
   { box: [532,78,262,300], accepts: (x,y) => !(x < 600 && y > 168) },
   { box: [864,80,494,333], accepts: (x,y) => !(x > 1140 && y > 345) && !(x > 1282 && x < 1375 && y > 118 && y < 191) },
   { box: [1392,80,144,132], accepts: () => true },
+];
+
+export const cloudSpeed = 6.8;
+
+// Emitters are confined to their original light/face panels; their housings stay still.
+export const emitters = [
+  { id: 'cloud-lamp', kind: 'lamp', box: [155,56,48,43], tint: [55,218,255],
+    polygon: [[160,56],[184,60],[191,70],[203,74],[201,94],[183,98],[164,90],[155,79]] },
+  { id: 'red-robot', kind: 'red-eye', box: [275,213,32,21], tint: [255,83,62],
+    polygon: [[275,213],[307,213],[307,234],[275,234]] },
+  { id: 'left-face', kind: 'face', box: [294,658,60,38], tint: [30,222,239],
+    polygon: [[294,658],[354,658],[354,696],[294,696]] },
+  { id: 'right-face', kind: 'face', box: [1464,391,52,35], tint: [30,244,157],
+    polygon: [[1464,391],[1516,391],[1516,426],[1464,426]] },
 ];

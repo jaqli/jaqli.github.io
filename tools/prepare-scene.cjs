@@ -8,7 +8,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
 
 (async () => {
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i',
-    path.join(root, 'assets/IMG_1183.PNG'), '-c:v', 'libwebp', '-quality', '92',
+    path.join(root, 'assets/IMG_1183.PNG'), '-c:v', 'libwebp', '-quality', '86',
     '-compression_level', '6', path.join(root, 'assets/scene.webp')]);
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
   try {
@@ -25,7 +25,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
       const preview = document.createElement('canvas');
       preview.width = 960; preview.height = 640;
       preview.getContext('2d').drawImage(canvas, 0, 0, preview.width, preview.height);
-      return preview.toDataURL('image/webp', .65).split(',')[1];
+      return preview.toDataURL('image/webp', .55).split(',')[1];
     });
     fs.writeFileSync(path.join(root, 'assets/scene-preview.webp'), Buffer.from(data, 'base64'));
     for (const name of ['scene.webp', 'scene-preview.webp']) {

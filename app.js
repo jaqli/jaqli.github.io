@@ -1,5 +1,6 @@
-import { site } from './site.config.js?v=20261110-load1';
-import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-load1';
+import { site } from './site.config.js?v=20261110-details5';
+import { AsciiRenderer, birds, birdPoint } from './ascii-renderer.js?v=20261110-details5';
+import { loadSceneImage } from './scene-loader.js?v=20261110-details5';
 import './navigation.js?v=20261110-load1';
 
 const viewport = document.querySelector('#scene-viewport');
@@ -10,6 +11,17 @@ const canvas = document.querySelector('#ascii-canvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 const pause = document.querySelector('#pause');
 const status = document.querySelector('#scene-status');
+const progress = document.querySelector('#scene-progress');
+const progressText = document.querySelector('#scene-progress-text');
+const progressNumber = document.querySelector('#scene-progress-number');
+let progressValue = 0;
+function reportProgress(value, label) {
+  progressText.textContent = label;
+  if (value === null) { progress.removeAttribute('value'); progressNumber.textContent = ''; return; }
+  progressValue = Math.max(progressValue, Math.min(100, Math.round(value)));
+  progress.value = progressValue;
+  progressNumber.textContent = `${progressValue}%`;
+}
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
@@ -104,17 +116,18 @@ layout();
 syncMotion();
 poster.decode().then(() => performance.mark('scene-preview-ready')).catch(() => {});
 try {
-  await image.decode();
+  await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
   if (!ctx) throw new Error('Canvas unavailable');
-  renderer = await AsciiRenderer.create(image, canvas);
-  do { await renderer.resizeAsync(width, height); }
+  renderer = await AsciiRenderer.create(image, canvas, value => reportProgress(35 + value * 20, '准备动效'));
+  do { await renderer.resizeAsync(width, height, value => reportProgress(55 + value * 44, '绘制字符')); }
   while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== Math.min(devicePixelRatio || 1, 2));
   ready = true;
   draw();
   document.body.classList.add('scene-ready');
   performance.mark('scene-ready');
-  status.hidden = true;
+  reportProgress(100, '就绪');
+  setTimeout(() => { status.hidden = true; }, 200);
   syncMotion();
 } catch {
   status.textContent = '动态场景暂时无法载入，仍可点击画面入口。';

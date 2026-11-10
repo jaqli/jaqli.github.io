@@ -59,7 +59,7 @@ async function gullBodyPoint(page) {
     assert.equal(await page.locator('[data-hotspot="cv"] .hotspot-label').evaluate(e => getComputedStyle(e).opacity), '1');
     const changes = await page.evaluate(async () => {
       const { AsciiRenderer, birds, birdPoint } = await import('./ascii-renderer.js');
-      const { detailShapes, detailPoint } = await import('./scene-details.js');
+      const { detailShapes, detailPoint, eyeOpening, cloudSpeed } = await import('./scene-details.js');
       const canvas = document.createElement('canvas');
       const renderer = new AsciiRenderer(document.querySelector('#scene-image'), canvas);
       renderer.resize(1536, 1024);
@@ -68,8 +68,13 @@ async function gullBodyPoint(page) {
       const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80],
         body: [785,505,55,75], hand: [665,520,40,25],
         code: [441,383,109,77], terminal: [337,414,95,56], plot: [643,446,70,39],
+        sidebar: [567,385,25,65], status: [443,454,100,13], lamp: [155,56,48,43],
+        redEye: [275,213,32,21], leftFace: [294,658,60,38], rightFace: [1464,391,52,35],
+        wallPaper: [113,150,42,76], boardPaper: [415,196,41,48], monitorPaper: [457,467,45,51],
         duck: [290,785,130,89], paper: [394,250,44,48], cloud: [610,190,140,120],
-        windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [421,354,8,120] };
+        // The lower part of the central monitor's left rim is occluded by the
+        // foreground waveform monitor; test only the exposed upper frame.
+        windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [420,353,8,40] };
       const first = Object.fromEntries(Object.entries(regions).map(([key, box]) => [key, ctx.getImageData(...box).data]));
       renderer.draw(6.2);
       const changed = Object.fromEntries(Object.entries(regions).map(([key, box]) => {
@@ -120,8 +125,8 @@ async function gullBodyPoint(page) {
       const distantWing=renderer.plate.getContext('2d').getImageData(1234,185,1,1).data;
       return { ...changed, coverage, columns: renderer.columns,
         distantWingCleared:distantWing[1]-distantWing[0]>20 && distantWing[2]-distantWing[0]>20,
-        sizeRatio:Math.max(...renderer.cells.map(c=>c.size))/Math.min(...renderer.cells.map(c=>c.size)),
-        largestLetter:Math.max(...renderer.cells.map(c=>c.size)), openEye, closedEye,
+        sizes:[...new Set(renderer.cells.map(c=>c.size))].sort((a,b)=>a-b), openEye, closedEye,
+        repeatedBlink:eyeOpening(5.3), cloudSpeed, paperCount:detailShapes.filter(s=>s.kind==='paper').length,
         floatRise:floatPeak[1]-floatRest[1], rigidError:Math.abs(duckLength(0)-duckLength(3)),
         pinError:distance(detailPoint(paper,...paper.anchor,3),paper.anchor),
         paperTip:distance(detailPoint(paper,414,293,0),detailPoint(paper,414,293,1.1)),
@@ -138,8 +143,12 @@ async function gullBodyPoint(page) {
     assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert(changes.sizeRatio>1.2 && changes.sizeRatio<1.3 && changes.largestLetter<=1.12, 'mixed sizes should stay subtle, without oversized symbols');
+    assert.deepEqual(changes.sizes,[.5,.6,.7,.8,.9,1,1.1,1.2,1.3], 'all nine requested font sizes must be present');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
+    assert(changes.repeatedBlink<.1, 'the robot should blink again after 3.2 seconds');
+    assert(changes.cloudSpeed>6 && changes.cloudSpeed<8, 'clouds should move noticeably faster');
+    assert(changes.paperCount>=9, 'additional papers should join the wind animation');
+    for (const key of ['sidebar','status','lamp','redEye','leftFace','rightFace','wallPaper','boardPaper','monitorPaper']) assert(changes[key]>.02, `${key} must visibly animate`);
     assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
     assert(changes.pinError<.001 && changes.paperTip>1, 'paper moves only away from its fixed attachment');
     assert(changes.stemError<.001 && changes.leafTip>1, 'leaf tips move while their stem stays attached');

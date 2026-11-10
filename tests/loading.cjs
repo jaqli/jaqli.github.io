@@ -8,7 +8,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     let releaseSource;
     const sourceGate = new Promise(resolve => { releaseSource = resolve; });
-    await page.route('**/assets/scene.webp', async route => {
+    await page.route('**/assets/scene.webp*', async route => {
       await sourceGate;
       await route.continue().catch(() => {});
     });
@@ -16,6 +16,8 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     await page.waitForFunction(() => document.querySelector('#scene-poster')?.naturalWidth > 0);
     await page.waitForSelector('[data-hotspot="cv"]');
     assert.equal(await page.locator('body.scene-ready').count(), 0, 'preview must be available before animation source arrives');
+    assert.equal(await page.locator('#scene-progress').getAttribute('value'), '0', 'loading must not invent progress while the download is blocked');
+    assert(await page.locator('#scene-progress').isVisible());
     assert.equal(await page.locator('#scene-poster').evaluate(e => getComputedStyle(e).opacity), '1');
     await page.locator('[data-hotspot="cv"] .hotspot-label rect').click();
     await page.waitForSelector('.page-transition');
@@ -38,6 +40,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     await resized.waitForFunction(() => performance.getEntriesByName('scene-source-ready').length > 0);
     await resized.setViewportSize({ width: 390, height: 844 });
     await resized.waitForSelector('body.scene-ready');
+    assert.equal(await resized.locator('#scene-progress').getAttribute('value'), '100');
     const dimensions = await resized.locator('#ascii-canvas').evaluate(canvas => {
       const rect = canvas.getBoundingClientRect();
       return { raster: [canvas.width, canvas.height], view: [Math.round(rect.width), Math.round(rect.height)], height: innerHeight };
@@ -56,6 +59,11 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await slow.addInitScript(() => {
       window.startupTasks = [];
+      window.progressValues = [];
+      new MutationObserver(() => {
+        const progress=document.querySelector('#scene-progress');
+        if (progress?.hasAttribute('value')) progressValues.push(progress.value);
+      }).observe(document,{subtree:true,attributes:true,attributeFilter:['value']});
       new PerformanceObserver(list => startupTasks.push(...list.getEntries().map(e => ({ start: e.startTime, duration: e.duration })))).observe({ type: 'longtask', buffered: true });
     });
     await slow.goto(origin, { waitUntil: 'commit' });
@@ -64,11 +72,14 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
       const mark = name => Math.round(performance.getEntriesByName(name)[0].startTime);
       const ready = mark('scene-ready');
       return { previewMs: mark('scene-preview-ready'), sourceMs: mark('scene-source-ready'), animatedMs: ready,
+        progressSteps:[...new Set(progressValues)],
         longestStartupTaskMs: Math.round(Math.max(0, ...startupTasks.filter(t => t.start < ready).map(t => t.duration))),
         sourceImages: performance.getEntriesByType('resource').filter(r => /scene.*webp|IMG_1183/.test(r.name)).map(r => ({ file: r.name.split('/').pop(), bytes: r.encodedBodySize })) };
     });
     assert(timing.previewMs < timing.sourceMs && timing.sourceMs < timing.animatedMs);
     assert.equal(timing.sourceImages.length, 2, 'load only the preview and compressed animation source');
+    assert(timing.progressSteps.length>10 && timing.progressSteps.at(-1)===100);
+    assert(timing.progressSteps.every((value,i,array)=>i===0 || value>=array[i-1]), 'progress should reflect completed work and never move backwards');
     await slow.locator('#pause').click();
     await slow.screenshot({ path: '/tmp/jaqli-load-desktop.png' });
     console.log('Cold load, 1.6 Mbps / 150 ms latency / 4× CPU slowdown:', JSON.stringify(timing));
