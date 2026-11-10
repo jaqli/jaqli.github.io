@@ -59,6 +59,7 @@ async function gullBodyPoint(page) {
     assert.equal(await page.locator('[data-hotspot="cv"] .hotspot-label').evaluate(e => getComputedStyle(e).opacity), '1');
     const changes = await page.evaluate(async () => {
       const { AsciiRenderer, birds, birdPoint } = await import('./ascii-renderer.js');
+      const { detailShapes, detailPoint } = await import('./scene-details.js');
       const canvas = document.createElement('canvas');
       const renderer = new AsciiRenderer(document.querySelector('#scene-image'), canvas);
       renderer.resize(1536, 1024);
@@ -66,7 +67,9 @@ async function gullBodyPoint(page) {
       const ctx = canvas.getContext('2d');
       const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80],
         body: [785,505,55,75], hand: [665,520,40,25],
-        code: [441,383,109,77], terminal: [337,414,95,56], plot: [643,446,70,39] };
+        code: [441,383,109,77], terminal: [337,414,95,56], plot: [643,446,70,39],
+        duck: [290,785,130,89], paper: [394,250,44,48], cloud: [610,190,140,120],
+        windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [421,354,8,120] };
       const first = Object.fromEntries(Object.entries(regions).map(([key, box]) => [key, ctx.getImageData(...box).data]));
       renderer.draw(6.2);
       const changed = Object.fromEntries(Object.entries(regions).map(([key, box]) => {
@@ -100,7 +103,28 @@ async function gullBodyPoint(page) {
         current.forEach((value, index) => { coverage = Math.min(coverage, value / baseline[index]); });
       }
       const flight = Array.from({ length: 57 }, (_, i) => birdPoint(birds[0], 991, 263, i * .5));
+      const eyeHeight = time => {
+        renderer.draw(time);
+        const pixels=ctx.getImageData(141,429,17,23).data, rows=[];
+        for (let y=0;y<23;y++) for (let x=0;x<17;x++) {
+          const i=(y*17+x)*4;
+          if (pixels[i+1]-pixels[i]>50 && pixels[i+2]-pixels[i]>50 && pixels[i+1]>80) rows.push(y);
+        }
+        return Math.max(...rows)-Math.min(...rows)+1;
+      };
+      const openEye=eyeHeight(0), closedEye=eyeHeight(2.1);
+      const duck=detailShapes.find(s=>s.id==='duck'), paper=detailShapes.find(s=>s.id==='paper-yellow'), leaves=detailShapes.find(s=>s.id==='leaves');
+      const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+      const floatRest=detailPoint(duck,352,850,0), floatPeak=detailPoint(duck,352,850,1.1);
+      const duckLength=time=>distance(detailPoint(duck,316,798,time),detailPoint(duck,390,825,time));
       return { ...changed, coverage, columns: renderer.columns,
+        sizeRatio:Math.max(...renderer.cells.map(c=>c.size))/Math.min(...renderer.cells.map(c=>c.size)),
+        largeLetters:renderer.cells.filter(c=>c.size>1.5).length, openEye, closedEye,
+        floatRise:floatPeak[1]-floatRest[1], rigidError:Math.abs(duckLength(0)-duckLength(3)),
+        pinError:distance(detailPoint(paper,...paper.anchor,3),paper.anchor),
+        paperTip:distance(detailPoint(paper,414,293,0),detailPoint(paper,414,293,1.1)),
+        stemError:distance(detailPoint(leaves,...leaves.anchor,3),leaves.anchor),
+        leafTip:distance(detailPoint(leaves,1270,84,0),detailPoint(leaves,1270,84,1.1)),
         flightX: Math.max(...flight.map(p => p[0])) - Math.min(...flight.map(p => p[0])),
         flightY: Math.max(...flight.map(p => p[1])) - Math.min(...flight.map(p => p[1])) };
     });
@@ -111,7 +135,15 @@ async function gullBodyPoint(page) {
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns >= 320, 'desktop ASCII should retain finer detail');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
+    assert(changes.sizeRatio>1.9 && changes.largeLetters>200, 'mixed typography needs visibly different sizes');
+    assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
+    assert(changes.floatRise>2 && changes.floatRise<5 && changes.rigidError<.001, 'duck and ring float as a rigid object');
+    assert(changes.pinError<.001 && changes.paperTip>1, 'paper moves only away from its fixed attachment');
+    assert(changes.stemError<.001 && changes.leafTip>1, 'leaf tips move while their stem stays attached');
+    for (const key of ['duck','paper','cloud']) assert(changes[key]>.08, `${key} must visibly animate`);
+    for (const key of ['windowFrame','sun','pot','rim']) assert(changes[key]<.01, `${key} must stay fixed while surrounding details move`);
     console.log('PASS finer ASCII, continuous water coverage, steady person, three live screens and broad gull flight');
+    console.log('PASS mixed sizes, integrated monitor rims, blinking eyes, floating duck, pinned paper, drifting clouds and anchored leaves');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);
     const bounds = await page.locator('canvas').boundingBox();
     assert(bounds.x <= 0 && bounds.y <= 0 && bounds.width >= 1440 && bounds.height >= 900);

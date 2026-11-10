@@ -1,3 +1,6 @@
+import { detailShapes, detailPoint, cloudWindows } from './scene-details.js?v=20261110-scene4';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261110-scene4';
+
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
   { id: 'life', center: [991,263], phase: 0, lift: 17, duration: 28,
@@ -29,6 +32,16 @@ const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
 const glyph = (c, seed) => { const band = bands[Math.min(bands.length - 1, Math.floor(Math.sqrt(light(c)) * bands.length))]; return band[Math.floor(seed * band.length) % band.length]; };
 const sky = (r, g, b) => g - r > 26 && b - r > 33;
+const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
+const mix = (a, b, amount) => a.map((v, i) => v * (1 - amount) + b[i] * amount);
+const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
+
+function screenUV(x, y, screen) {
+  const [a,b,,d] = screen.quad;
+  const ax = b[0]-a[0], ay = b[1]-a[1], bx = d[0]-a[0], by = d[1]-a[1];
+  const det = ax*by-ay*bx, dx = x-a[0], dy = y-a[1];
+  return [(dx*by-dy*bx)/det, (ax*dy-ay*dx)/det];
+}
 
 function flight(bird, time) {
   const route = bird.route, count = route.length;
@@ -76,7 +89,7 @@ const waterAreas = [
 const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],[890,524],[876,613],[848,643],[812,642],[802,599],[771,564],[689,560]];
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
-const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4]];
+const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
 const screens = [
   { kind: 'code', quad: [[437,369],[560,382],[554,471],[437,458]], width: 124, height: 90 },
   { kind: 'terminal', quad: [[334,404],[439,412],[439,480],[335,475]], width: 105, height: 72 },
@@ -131,12 +144,60 @@ export class AsciiRenderer {
       }
       return { bird, x0, y0, x1, y1, mask, stride };
     });
+    this.detailMasks = detailShapes.map(shape => {
+      const x0 = Math.floor(Math.min(...shape.polygon.map(p => p[0]))) - 2;
+      const x1 = Math.ceil(Math.max(...shape.polygon.map(p => p[0]))) + 2;
+      const y0 = Math.floor(Math.min(...shape.polygon.map(p => p[1]))) - 2;
+      const y1 = Math.ceil(Math.max(...shape.polygon.map(p => p[1]))) + 2;
+      const stride = x1-x0+1, mask = new Uint8Array(stride*(y1-y0+1));
+      for (let y=y0; y<=y1; y++) for (let x=x0; x<=x1; x++) {
+        if (!inside(x,y,shape.polygon)) continue;
+        const i=(y*this.sourceW+x)*4, r=this.original[i], g=this.original[i+1], b=this.original[i+2];
+        if (shape.kind==='eye' && !(g-r>45 && b-r>45 && g>125)) continue;
+        if (shape.kind==='leaves' && !(g>r*1.2 && g>b*.9 && g>40)) continue;
+        mask[(y-y0)*stride+x-x0]=1;
+        const left=(y*this.sourceW+x0-3)*4, right=(y*this.sourceW+x1+3)*4;
+        for (let c=0; c<3; c++) {
+          bitmap.data[i+c]=shape.background ? this.original[(shape.background[1]*this.sourceW+shape.background[0])*4+c] :
+            this.original[left+c]*(1-(x-x0)/stride)+this.original[right+c]*(x-x0)/stride;
+        }
+      }
+      return { shape,x0,x1,y0,y1,mask,stride };
+    });
     ctx.putImageData(bitmap, 0, 0);
+    this.cloudSources = cloudWindows.map(window => {
+      const [x0,y0,width,height] = window.box, pixels = new Uint8ClampedArray(width*height*4);
+      for (let y=0; y<height; y++) {
+        const valid=[];
+        for (let x=0; x<width; x++) {
+          const i=((y+y0)*this.sourceW+x+x0)*4, rgb=Array.from(bitmap.data.slice(i,i+3));
+          const outsideSun=Math.hypot(x+x0-1100,y+y0-375)>34;
+          if (skyPixel(rgb) && window.accepts(x+x0,y+y0) && outsideSun) valid.push({x,rgb});
+        }
+        let next=0;
+        for (let x=0; x<width; x++) {
+          while (next<valid.length-1 && valid[next].x<x) next++;
+          const a=valid[Math.max(0,next-1)], b=valid[next];
+          const rgb = a && b ? mix(a.rgb,b.rgb,clamp((x-a.x)/Math.max(1,b.x-a.x))) : [123,202,216];
+          pixels.set([...rgb,255],(y*width+x)*4);
+        }
+        // Match the ends of the repeating texture, so a wrap cannot introduce
+        // a vertical seam as the clouds travel in one direction.
+        for (let edge=0; edge<32; edge++) for (let c=0; c<3; c++) {
+          const l=(y*width+edge)*4+c, r=(y*width+width-1-edge)*4+c;
+          const mean=(pixels[l]+pixels[r])/2, amount=(1-edge/32)**2;
+          pixels[l]=pixels[l]*(1-amount)+mean*amount; pixels[r]=pixels[r]*(1-amount)+mean*amount;
+        }
+      }
+      return { ...window,width,height,pixels };
+    });
     this.base = document.createElement('canvas');
+    this.cloudLayer = document.createElement('canvas');
+    this.screenLayer = document.createElement('canvas');
     this.screens = screens.map(screen => {
       const canvas = document.createElement('canvas');
       canvas.width = screen.width * 3; canvas.height = screen.height * 3;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.scale(3, 3);
       return { ...screen, canvas, ctx, frame: -1 };
     });
@@ -146,12 +207,16 @@ export class AsciiRenderer {
     this.width = width; this.height = height;
     this.scale = width / this.sourceW;
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    for (const canvas of [this.canvas, this.base]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
+    for (const canvas of [this.canvas, this.base, this.cloudLayer, this.screenLayer]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.columns = Math.min(380, Math.max(240, Math.round(width / 4.6)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
     this.fontSize = this.cellH * 1.06;
+    this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
+    this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,0,0);
+    this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,0,0);
+    this.cloudFrame = this.screenFrame = -1;
     const texture = document.createElement('canvas');
     texture.width = this.columns * 2; texture.height = this.rows * 2;
     const texCtx = texture.getContext('2d', { willReadFrequently: true });
@@ -164,20 +229,54 @@ export class AsciiRenderer {
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
+    this.cloudCells = []; this.screenCells = []; this.cells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
+    const grid=[];
     for (let row = 0; row < this.rows; row++) for (let col = 0; col < this.columns; col++) {
       const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
       const rgb = this.sample(sx, sy), seed = hash(col, row);
       const isWater = waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
       const isHem = inside(sx, sy, hemArea) && rgb[0] > rgb[2] * 1.8;
-      const cell = { sx, sy, x: sx * this.scale + (seed - .5) * .4,
+      const cloudIndex = skyPixel(rgb) ? this.cloudSources.findIndex(source => {
+        const [x,y,w,h]=source.box; return sx>x && sx<x+w && sy>y && sy<y+h && source.accepts(sx,sy);
+      }) : -1;
+      const screenIndex = this.screens.findIndex(screen => inside(sx,sy,screen.quad));
+      grid.push({sx,sy,rgb,seed,isWater,isHem,cloudIndex,screenIndex});
+    }
+    const occupied=new Uint8Array(grid.length);
+    for (let row=0; row<this.rows; row++) for (let col=0; col<this.columns; col++) {
+      const index=row*this.columns+col;
+      if (occupied[index]) continue;
+      const first=grid[index];
+      let span=1, rgb=first.rgb, sx=first.sx, sy=first.sy;
+      // Merge a few smooth 2×2 patches into one larger letter. Edges, small
+      // objects and screens keep the fine grid; unlike arbitrary font inflation,
+      // each large character has its own space and cannot collide with neighbors.
+      if (!(col%2) && !(row%2) && col+1<this.columns && row+1<this.rows &&
+          first.screenIndex<0 && !first.isHem && hash(Math.floor(col/8),Math.floor(row/8))<.42 &&
+          !this.detailMasks.some(r=>sx>r.x0-4 && sx<r.x1+4 && sy>r.y0-4 && sy<r.y1+4)) {
+        const indices=[index,index+1,index+this.columns,index+this.columns+1], block=indices.map(i=>grid[i]);
+        const same=block.every(c=>c.cloudIndex===first.cloudIndex && c.screenIndex===first.screenIndex && c.isWater===first.isWater && !c.isHem);
+        const contrast=Math.max(...[0,1,2].map(c=>Math.max(...block.map(p=>p.rgb[c]))-Math.min(...block.map(p=>p.rgb[c]))));
+        if (same && contrast<38) {
+          span=2; sx+=sxStep/2; sy+=syStep/2;
+          rgb=[0,1,2].map(c=>block.reduce((sum,p)=>sum+p.rgb[c],0)/4);
+          indices.forEach(i=>occupied[i]=1);
+        }
+      }
+      const {seed,isWater,isHem,cloudIndex,screenIndex}=first;
+      const cell = { sx, sy, rgb, span, size: span===2 ? 1.8+seed*.18 : .84+seed*.28,
+        x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient' };
       const isAmbient = !isWater && !inside(sx, sy, personArea) && seed < .018;
-      if (isHem || isAmbient) this.dynamic.push(cell);
-      else this.paint(baseCtx, cell, cell.x, cell.y, 1, cell.color);
+      this.cells.push(cell);
+      if (cloudIndex>=0) this.cloudCells.push({...cell,cloudIndex});
+      else if (screenIndex>=0) this.screenCells.push({...cell,screen:this.screens[screenIndex],uv:screenUV(sx,sy,this.screens[screenIndex])});
+      else if (isHem || isAmbient) this.dynamic.push(cell);
+      else this.paint(baseCtx, cell, cell.x, cell.y, cell.size, cell.color);
       if (isWater) {
         // Water keeps a complete, fixed character bed. Moving light is added on
         // top; no character leaves a hole at the edge of a moving region.
@@ -186,12 +285,13 @@ export class AsciiRenderer {
           rings: rippleSources.map(([x, y, phase]) => ({ distance: Math.hypot((sx - x) / 1.7, (sy - y) * 2.2), phase })) });
       }
     }
-    this.sprites = this.birdMasks.map(region => {
+    const spriteCells = (region, detail=1) => {
+      const xStep=sxStep*detail, yStep=syStep*detail;
       const cells = [];
-      for (let sy = region.y0; sy < region.y1; sy += syStep) for (let sx = region.x0; sx < region.x1; sx += sxStep) {
+      for (let sy = region.y0; sy < region.y1; sy += yStep) for (let sx = region.x0; sx < region.x1; sx += xStep) {
         const sum = [0, 0, 0]; let count = 0, px = 0, py = 0;
-        for (let y = Math.floor(sy); y < Math.min(region.y1 + 1, sy + syStep); y++) {
-          for (let x = Math.floor(sx); x < Math.min(region.x1 + 1, sx + sxStep); x++) {
+        for (let y = Math.floor(sy); y < Math.min(region.y1 + 1, sy + yStep); y++) {
+          for (let x = Math.floor(sx); x < Math.min(region.x1 + 1, sx + xStep); x++) {
             if (!region.mask[(y - region.y0) * region.stride + x - region.x0]) continue;
             const i = (y * this.sourceW + x) * 4;
             for (let c = 0; c < 3; c++) sum[c] += this.original[i + c];
@@ -200,13 +300,15 @@ export class AsciiRenderer {
         }
         if (count < 3) continue;
         const rgb = sum.map(v => v / count);
-        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: .7 + .3 * clamp(count / (sxStep * syStep)) });
+        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: detail*(.78 + .22 * clamp(count / (xStep * yStep))) });
       }
-      return { bird: region.bird, cells };
-    });
+      return cells;
+    };
+    this.sprites = this.birdMasks.map(region=>({bird:region.bird,cells:spriteCells(region)}));
+    this.details = this.detailMasks.map(region=>({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.46:1)}));
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
-    const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells)];
+    const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
     this.atlas = document.createElement('canvas');
     this.tilePixels = Math.ceil(this.fontSize * 1.6 * dpr);
     this.tileSize = this.tilePixels / dpr;
@@ -243,18 +345,42 @@ export class AsciiRenderer {
     this.ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
       x - side / 2, y - side / 2, side, side);
   }
+  drawClouds(time) {
+    const frame=Math.floor(time*8);
+    if (frame!==this.cloudFrame) {
+      this.cloudFrame=frame;
+      this.cloudCtx.clearRect(0,0,this.width,this.height);
+      for (const cell of this.cloudCells) {
+        const source=this.cloudSources[cell.cloudIndex], [bx,by,w,h]=source.box;
+        const x=((cell.sx-bx-time*2.6)%w+w)%w, y=clamp(cell.sy-by,0,h-1);
+        const x0=Math.floor(x), x1=(x0+1)%w, y0=Math.floor(y), y1=Math.min(y0+1,h-1);
+        const fx=x-x0, fy=y-y0, p=source.pixels;
+        const cloud=[0,1,2].map(c=>
+          (p[(y0*w+x0)*4+c]*(1-fx)+p[(y0*w+x1)*4+c]*fx)*(1-fy)+
+          (p[(y1*w+x0)*4+c]*(1-fx)+p[(y1*w+x1)*4+c]*fx)*fy);
+        const edge=smooth(Math.min((cell.sx-bx)/24,(bx+w-cell.sx)/24,(cell.sy-by)/18,(by+h-cell.sy)/18));
+        const sun=smooth((Math.hypot(cell.sx-1100,cell.sy-375)-35)/60);
+        const rgb=mix(cell.rgb,cloud,.84*edge*sun);
+        cell.frameRGB=rgb; cell.frameGlyph=glyph(rgb,cell.seed);
+        this.palette.get(cell.frameGlyph,rgb);
+      }
+      // Finish atlas writes before reading from it; interleaving them forces a
+      // full texture upload for every newly encountered color on some devices.
+      for (const cell of this.cloudCells) {
+        this.palette.draw(this.cloudCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
+      }
+    }
+    this.ctx.drawImage(this.cloudLayer,0,0,this.width,this.height);
+  }
   drawScreens(time) {
     const frame = Math.floor(time * 8);
     for (const screen of this.screens) {
       if (screen.frame !== frame) {
         screen.frame = frame;
         const { ctx, width, height, kind } = screen;
-        ctx.fillStyle = '#080d13';
+        ctx.fillStyle = kind==='plot' ? '#c4dbe0' : '#102633';
         ctx.fillRect(0, 0, width, height);
-        ctx.font = '5px monospace'; ctx.textBaseline = 'top';
-        ctx.fillStyle = kind === 'plot' ? '#b4d0d4' : '#243e4b';
-        const background = (kind === 'plot' ? '@WM' : '.: ').repeat(Math.ceil(width / 9));
-        for (let y = 0; y < height; y += 6) ctx.fillText(background, 0, y);
+        ctx.font = '600 6px monospace'; ctx.textBaseline = 'top';
         if (kind === 'code') {
           const topLine = Math.floor(time / 3.4), typed = Math.floor((time % 3.4) * 15);
           for (let row = 0; row < 12; row++) {
@@ -289,21 +415,52 @@ export class AsciiRenderer {
             ctx.fillStyle = '#5990a4'; ctx.fillText('|'.repeat(level), 3 + col * 8, 38);
           }
         }
+        screen.pixels=ctx.getImageData(0,0,screen.canvas.width,screen.canvas.height).data;
       }
-      const ctx = this.ctx, [tl, tr, br, bl] = screen.quad;
-      ctx.save();
-      ctx.scale(this.scale, this.scale);
-      ctx.beginPath(); ctx.moveTo(...tl); ctx.lineTo(...tr); ctx.lineTo(...br); ctx.lineTo(...bl); ctx.closePath(); ctx.clip();
-      ctx.transform((tr[0] - tl[0]) / screen.width, (tr[1] - tl[1]) / screen.width,
-        (bl[0] - tl[0]) / screen.height, (bl[1] - tl[1]) / screen.height, tl[0], tl[1]);
-      ctx.drawImage(screen.canvas, 0, 0, screen.width, screen.height);
-      ctx.restore();
+    }
+    if (frame!==this.screenFrame) {
+      this.screenFrame=frame;
+      this.screenCtx.clearRect(0,0,this.width,this.height);
+      for (const cell of this.screenCells) {
+        const screen=cell.screen, [u,v]=cell.uv, w=screen.canvas.width,h=screen.canvas.height;
+        const x=Math.round(clamp(u)* (w-1)),y=Math.round(clamp(v)*(h-1));
+        const rgb=[0,0,0];
+        for (const dx of [-2,0,2]) for (const dy of [-2,0,2]) {
+          const i=(clamp(y+dy,0,h-1)*w+clamp(x+dx,0,w-1))*4;
+          for (let c=0;c<3;c++) rgb[c]+=screen.pixels[i+c]/9;
+        }
+        const edge=smooth(Math.min(u,v,1-u,1-v)/.12);
+        const blended=mix(cell.rgb,rgb,edge*.65);
+        // Exactly the scene's grid, font, sizing and color pipeline. Only the
+        // display interior changes; the original rim and edge light are retained.
+        cell.frameRGB=blended; cell.frameGlyph=glyph(blended,cell.seed);
+        this.palette.get(cell.frameGlyph,blended);
+      }
+      for (const cell of this.screenCells) {
+        this.palette.draw(this.screenCtx,cell.frameGlyph,cell.frameRGB,cell.x,cell.y,cell.size);
+      }
+    }
+    this.ctx.drawImage(this.screenLayer,0,0,this.width,this.height);
+  }
+  drawDetails(time) {
+    for (const sprite of this.details) {
+      this.ctx.fillStyle='#080d13';
+      for (const cell of sprite.cells) {
+        const [x,y]=detailPoint(sprite.shape,cell.sx,cell.sy,time);
+        this.ctx.fillRect(x*this.scale-this.cellW*.47*cell.size,y*this.scale-this.cellH*.44*cell.size,
+          this.cellW*.94*cell.size,this.cellH*.88*cell.size);
+      }
+      for (const cell of sprite.cells) {
+        const [x,y]=detailPoint(sprite.shape,cell.sx,cell.sy,time);
+        this.stamp(cell,x*this.scale,y*this.scale,cell.size);
+      }
     }
   }
   draw(time) {
     const ctx = this.ctx;
     ctx.globalAlpha = 1;
     ctx.drawImage(this.base, 0, 0, this.width, this.height);
+    this.drawClouds(time);
     for (const cell of this.water) {
       const interference = .62 * Math.sin(cell.waveA - time * 1.8) + .38 * Math.sin(cell.waveB + time * .9);
       let shine = Math.max(0, interference) ** 5 * .65;
@@ -315,19 +472,20 @@ export class AsciiRenderer {
       }
       if (shine < .035) continue;
       ctx.globalAlpha = Math.min(.85, shine);
-      this.stamp(cell, cell.x, cell.y, 1);
+      this.stamp(cell, cell.x, cell.y, cell.size);
     }
     ctx.globalAlpha = 1;
     for (const cell of this.dynamic) {
-      let x = cell.x, y = cell.y, size = 1;
+      let x = cell.x, y = cell.y, size = cell.size;
       if (cell.kind === 'hem') {
         y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
       } else {
-        size = 1 + .045 * Math.sin(time * .75 + cell.phase);
+        size *= 1 + .065 * Math.sin(time * .75 + cell.phase);
       }
       this.stamp(cell, x, y, size);
     }
     this.drawScreens(time);
+    this.drawDetails(time);
     for (const sprite of this.sprites) {
       const pose = birdPose(sprite.bird, time);
       // Occlude only occupied feather cells. Filling the whole hit polygon can
