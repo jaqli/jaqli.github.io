@@ -6,6 +6,8 @@ import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight, lampColor } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
+import { SceneExtras } from './scene-extras.js?v=20261111-extras41';
+
 const W=1536,H=1024;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
@@ -127,6 +129,8 @@ export class PixelScene {
       (r,g,b)=>r>155&&g>95&&r>=g*.95&&r>=b,false);
     const bulb=this.ceilingLamp.canvas.getContext('2d');bulb.globalCompositeOperation='source-atop';
     bulb.fillStyle='#000';bulb.fillRect(0,0,this.ceilingLamp.w,this.ceilingLamp.h);bulb.globalCompositeOperation='source-over';
+    this.extras=new SceneExtras();let extraStep=0;
+    for(const _ of this.extras.prepare(this))yield .4+.01*++extraStep;
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
     yield* this.prepareSky();
     this.screenLayer=surface(1260,570);this.screenCtx=this.screenLayer.getContext('2d');this.screenCtx.scale(3,3);
@@ -299,7 +303,7 @@ export class PixelScene {
   draw(time){
     const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.drawWater(time);this.drawScreens(time);
     for(const sprite of this.details)this.drawDetail(sprite,time);
-    this.drawLights(time);for(const sprite of this.birds)this.drawBird(sprite,time);
+    this.drawLights(time);this.extras.draw(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
   }
-  dispose(){for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }

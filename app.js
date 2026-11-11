@@ -1,6 +1,6 @@
 import { site } from './site.config.js?v=20261110-flight11';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-detail39';
-import { PixelScene } from './pixel-scene.js?v=20261111-lamp40';
+import { PixelScene } from './pixel-scene.js?v=20261111-extras41';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import { sceneIntro } from './scene-intro.js?v=20261111-motion38';
 import './navigation.js?v=20261111-detail39';
