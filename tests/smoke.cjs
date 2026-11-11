@@ -182,7 +182,11 @@ async function duckBodyPoint(page) {
         }
       }
       renderer.stamp=stamp;
+      const typeMeasure=document.createElement('canvas').getContext('2d');typeMeasure.font=`500 ${renderer.fontSize}px monospace`;
       return { ...changed, coverage, columns: renderer.columns,
+        cellW:renderer.cellW,cellH:renderer.cellH,letterGap:renderer.cellW-typeMeasure.measureText('M').width*1.2,totalCells:renderer.cells.length,
+        mediumLargeShare:renderer.cells.filter(c=>c.size>=1.1&&c.size<=1.3).length/renderer.cells.length,
+        largeShare:renderer.cells.filter(c=>c.size>=1.3).length/renderer.cells.length,
         citySizes,cityAnimates,fixedBirdSizeError,fallbackBirdSizeError,
         faceTilt, floatMotion, paperCrossings,
         cityContrast:regionLight([1160,365,17,25])/regionLight([1191,365,17,35]),
@@ -207,7 +211,9 @@ async function duckBodyPoint(page) {
     assert(changes.leftTop>.02, 'the newly exposed top rows of the left display should animate');
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
-    assert(changes.columns >= 420, 'the unified desktop grid should retain fine skyline and hair detail');
+    assert(changes.columns>=300&&changes.columns<=360&&changes.totalCells<75000,'open up the desktop lattice without losing the city silhouette');
+    assert(changes.cellW>=4.4&&changes.cellH>=5.6&&changes.letterGap>.35,'typical letters need real horizontal and vertical breathing room');
+    assert(changes.mediumLargeShare>.75&&changes.largeShare>.2,'medium and large glyphs must visibly dominate the scene');
     assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1.5, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
@@ -230,7 +236,7 @@ async function duckBodyPoint(page) {
     assert(changes.stemError<.001 && changes.leafTip>1, 'leaf tips move while their stem stays attached');
     for (const key of ['duck','paper','cloud']) assert(changes[key]>.08, `${key} must visibly animate`);
     for (const key of ['windowFrame','sun','pot','rim']) assert(changes[key]<.01, `${key} must stay fixed while surrounding details move`);
-    console.log('PASS finer ASCII, continuous water coverage, steady person, three live screens and broad gull flight');
+    console.log('PASS readable spaced ASCII, continuous water coverage, steady person, three live screens and broad gull flight');
     console.log('PASS mixed sizes, integrated monitor rims, blinking eyes, floating duck, pinned paper, drifting clouds and anchored leaves');
     console.log('PASS slanted robot face, expanded right display, fine skyline, quicker paper and eleven intact floating objects');
     assert.equal(await page.locator('input[type=file], input[type=range], #choose-image').count(), 0);

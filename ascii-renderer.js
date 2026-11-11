@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-flow18';
+import { scenePixelRatio } from './render-budget.js?v=20261111-space19';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-flow18';
-import { screens, paintScreen } from './screen-content.js?v=20261111-flow18';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-space19';
+import { screens, paintScreen } from './screen-content.js?v=20261111-space19';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-flow18';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow18';
-import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-flow18';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-space19';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space19';
+import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-space19';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -45,8 +45,9 @@ export function inside(x, y, polygon) {
 }
 const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
-// Ten sizes, weighted toward the readable middle rather than the extremes.
-const sizeStops=[.02,.07,.17,.35,.61,.81,.92,.97,.99,1];
+// Give the readable 1.1–1.3 sizes most of the image; reserve small letters
+// for fine detail instead of making them dominate every surface.
+const sizeStops=[.005,.015,.035,.075,.155,.375,.675,.905,.975,1];
 const bands = ['.,', ':;', '-=', '+*', 'xo', '%#', 'MW', '@'];
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
@@ -332,12 +333,13 @@ export class AsciiRenderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // One sampling lattice across the entire room: local half-pitch overlays
     // created visible islands of different texture around the head and skyline.
-    this.columns = Math.min(480, Math.max(320, Math.round(width / 3.5)));
+    this.columns = Math.min(360, Math.max(200, Math.round(width / 4.6)));
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
-    // Keep the previous ~5.8px reference font on desktop while packing the
-    // readable 0.6–1.5 glyphs on a single fine lattice.
-    this.fontSize = this.cellH * 1.28;
+    // Size and spacing are independent: opening the grid must not enlarge
+    // every letter by the same factor and immediately fill the gaps again.
+    // Retain a readable desktop floor, with proportional sizing in small views.
+    this.fontSize = Math.min(width*.005, Math.max(5.6,width*.0034));
     this.maxGlyphSize=fontSizes.at(-1);
     for (const screen of this.screens) {
       screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?1:.9);
@@ -372,15 +374,15 @@ export class AsciiRenderer {
       // Most letters share a calm middle weight. Retain all ten size steps,
       // but use the extremes sparingly instead of making every surface noisy.
       const variedSize=fontSizes[sizeStops.findIndex(stop=>seed<stop)];
-      const calmSize=variedSize+(1-variedSize)*skyWeight;
+      const calmSize=variedSize+(1.2-variedSize)*skyWeight*.35;
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=calmSize+(Math.min(calmSize,1.1)-calmSize)*smooth((contrast-45)/100);
+      const edgeSize=calmSize+(Math.min(calmSize,1.3)-calmSize)*smooth((contrast-45)/100);
       const size=isCity ? minFontSize : fontStep(edgeSize);
       // Ten discrete sizes, with one occupied cell at every grid position.
       const cell = { sx, sy, rgb, size,
-        x: sx * this.scale + (seed - .5) * .4,
-        y: sy * this.scale + (hash(row, col) - .5) * .35,
+        x: sx * this.scale + (seed - .5) * .2,
+        y: sy * this.scale + (hash(row, col) - .5) * .2,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient', glyphVariant:0 };
       const isAmbient = !isCity && !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);

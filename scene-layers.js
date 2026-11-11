@@ -1,4 +1,4 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-flow18';
+import { waterSampleInterval } from './render-budget.js?v=20261111-space19';
 import { detailPoint } from './scene-details.js?v=20261110-depth6';
 
 // The browser composites small canvases in their original image coordinates.

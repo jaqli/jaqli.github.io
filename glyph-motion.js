@@ -1,8 +1,8 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-flow18';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow18';
+import { glyphColor } from './glyph-atlas.js?v=20261111-space19';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space19';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 
-import { alternatives } from './glyph-rhythm.js?v=20261111-flow18';
+import { alternatives } from './glyph-rhythm.js?v=20261111-space19';
 const random=i=>{const n=Math.sin(i*127.1+1729)*43758.5453;return n-Math.floor(n);};
 export const glyphUpdateLimit=12; // small blocks per draw, never queued behind input
 export const glyphPassSeconds=12;
