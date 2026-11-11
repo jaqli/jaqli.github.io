@@ -1,6 +1,6 @@
-import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-scatter23';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-scatter23';
-import { glyphVariant } from './glyph-rhythm.js?v=20261111-scatter23';
+import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-mixed24';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-mixed24';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-mixed24';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do

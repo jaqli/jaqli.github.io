@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-scatter23';
+import { scenePixelRatio } from './render-budget.js?v=20261111-mixed24';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-scatter23';
-import { screens, paintScreen } from './screen-content.js?v=20261111-scatter23';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-scatter23';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-mixed24';
+import { screens, paintScreen } from './screen-content.js?v=20261111-mixed24';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-mixed24';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-scatter23';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-scatter23';
-import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-scatter23';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-mixed24';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-mixed24';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-mixed24';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -45,9 +45,13 @@ export function inside(x, y, polygon) {
 }
 const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
-// Give the readable 1.1–1.3 sizes most of the image; reserve small letters
-// for fine detail instead of making them dominate every surface.
-const sizeStops=[.005,.015,.035,.075,.155,.375,.675,.905,.975,1];
+// Interleave small and large letters locally, independently of symbol choice
+// and negative space. Sizes are assigned once, not randomized each frame.
+const sizeStops=[.015,.04,.09,.17,.29,.46,.66,.84,.95,1];
+const mixedSize=(x,y)=>{
+  const seed=hash(x+137,y+271);
+  return fontSizes[sizeStops.findIndex(stop=>seed<stop)];
+};
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
 const glyph = sceneGlyph;
@@ -371,13 +375,12 @@ export class AsciiRenderer {
         const [x,y,w,h]=source.box;
         return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
       }));
-      // Most letters share a calm middle weight. Retain all ten size steps,
-      // but use the extremes sparingly instead of making every surface noisy.
-      const variedSize=fontSizes[sizeStops.findIndex(stop=>seed<stop)];
-      const calmSize=variedSize+(1.2-variedSize)*skyWeight*.35;
+      // The sky shares the same local size variety as the room; do not pull
+      // whole regions toward one size. Keep silhouette protection at edges.
+      const variedSize=mixedSize(col,row);
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=calmSize+(Math.min(calmSize,1.3)-calmSize)*smooth((contrast-45)/100);
+      const edgeSize=variedSize+(Math.min(variedSize,1.3)-variedSize)*smooth((contrast-45)/100);
       const size=isCity ? minFontSize : fontStep(edgeSize);
       // Open up the dark room edges, not the colorful sky or bright water.
       // Featureless shadows may stay entirely empty; wider sampling protects
@@ -450,7 +453,11 @@ export class AsciiRenderer {
         }
         if (count < 3) continue;
         const rgb = sum.map(v => v / count);
-        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: region.bird ? minFontSize : fontStep(detail*(1 + .2 * clamp(count / (xStep * yStep)))) });
+        const coverage=clamp(count/(xStep*yStep));
+        // Papers and floats use the room's mixed sizes. Keep tiny LED features
+        // legible and trim large letters at partially covered object edges.
+        const size=region.bird?minFontSize:detail<1?fontStep(detail*(1+.2*coverage)):fontStep(Math.min(mixedSize(sx,sy),1+.5*coverage));
+        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size });
       }
       return cells;
     };

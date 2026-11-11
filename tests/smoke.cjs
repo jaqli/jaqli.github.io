@@ -188,10 +188,18 @@ async function duckBodyPoint(page) {
       }
       renderer.stamp=stamp;
       const typeMeasure=document.createElement('canvas').getContext('2d');typeMeasure.font=`500 ${renderer.fontSize}px monospace`;
+      // Local samples catch a uniform sky even when the whole scene happens
+      // to contain all ten sizes. Include the room, person and water as well.
+      const localSizeMix=[[610,190],[940,140],[1060,260],[350,40],[780,500],[1000,490]].map(([x,y])=>{
+        const cells=renderer.cells.filter(c=>c.occupied&&c.sx>x&&c.sx<x+90&&c.sy>y&&c.sy<y+90);
+        const mean=cells.reduce((sum,c)=>sum+c.size,0)/cells.length;
+        return {bins:new Set(cells.map(c=>c.size)).size,spread:Math.sqrt(cells.reduce((sum,c)=>sum+(c.size-mean)**2,0)/cells.length)};
+      });
       return { ...changed, coverage, columns: renderer.columns,
         cellW:renderer.cellW,cellH:renderer.cellH,letterGap:renderer.cellW-typeMeasure.measureText('M').width*1.2,totalCells:renderer.cells.length,
         mediumLargeShare:renderer.cells.filter(c=>c.size>=1.1&&c.size<=1.3).length/renderer.cells.length,
         largeShare:renderer.cells.filter(c=>c.size>=1.3).length/renderer.cells.length,
+        localSizeMix,spriteSizeBins:new Set(spriteSizes).size,
         citySizes,cityAnimates,fixedBirdSizeError,fallbackBirdSizeError,
         faceTilt, floatMotion, paperCrossings,
         cityContrast:regionLight([1160,365,17,25])/regionLight([1191,365,17,35]),
@@ -207,6 +215,7 @@ async function duckBodyPoint(page) {
         flightX: Math.max(...flight.map(p => p[0])) - Math.min(...flight.map(p => p[0])),
         flightY: Math.max(...flight.map(p => p[1])) - Math.min(...flight.map(p => p[1])) };
     });
+    console.log('Scene motion and local type',JSON.stringify({wall:changes.wall,water:changes.water,localSizeMix:changes.localSizeMix,mediumLargeShare:changes.mediumLargeShare,largeShare:changes.largeShare}));
     assert(changes.wall < .04, 'architecture should stay still');
     assert.equal(changes.body, 0, 'the seated torso must not twist');
     assert.equal(changes.hand, 0, 'hands stay resting on the desk');
@@ -214,11 +223,15 @@ async function duckBodyPoint(page) {
     assert.equal(changes.looseHair, 0, 'the irregular left hair edge must also occlude the display');
     assert(changes.hairGap>.1, 'the real background gap between curls should reveal the animated display');
     assert(changes.leftTop>.02, 'the newly exposed top rows of the left display should animate');
-    for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
+    // Mixed sizes change the amount of ink in a crop. Require both a visible
+    // absolute change and motion clearly above the stationary wall sample.
+    for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key]>.03&&changes[key]>changes.wall*3, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns>=260&&changes.columns<=300&&changes.totalCells<40000,'open up the desktop lattice without losing the city silhouette');
     assert(changes.cellW>=5.5&&changes.cellH>=7.8&&changes.letterGap>1.4,'typical letters need real horizontal and vertical breathing room');
-    assert(changes.mediumLargeShare>.75&&changes.largeShare>.2,'medium and large glyphs must visibly dominate the scene');
+    assert(changes.mediumLargeShare>.5&&changes.mediumLargeShare<.65&&changes.largeShare>.25,'mix smaller letters among readable medium and large glyphs');
+    assert(changes.localSizeMix.every(region=>region.bins>=8&&region.spread>.17),'sky and room must each mix sizes locally, rather than only across different regions');
+    assert(changes.spriteSizeBins>=8,'papers and floating objects must also contain varied letter sizes');
     assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1.5, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');

@@ -1,7 +1,7 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-scatter23';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-scatter23';
+import { glyphColor } from './glyph-atlas.js?v=20261111-mixed24';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-mixed24';
 
-import { glyphAt } from './glyph-rhythm.js?v=20261111-scatter23';
+import { glyphAt } from './glyph-rhythm.js?v=20261111-mixed24';
 export const glyphUpdateLimit=8192; // changed characters per draw; old states are skipped
 
 // Every retained letter has its own 1.2–1.5 Hz clock and symbol sequence.
