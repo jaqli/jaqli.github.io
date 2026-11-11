@@ -1,5 +1,6 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { glyphColor } from './glyph-atlas.js?v=20261111-layout25';
+import { glyphColor } from './glyph-atlas.js?v=20261111-type26';
+import { glyphWeight } from './scene-style.js?v=20261111-type26';
 
 // All visible ASCII characters. Space is represented by the stable scene mask;
 // control characters have no printable shape.
@@ -12,7 +13,7 @@ export function glyphPools(){
   if(pools)return pools;
   const canvas=createCanvas();canvas.width=canvas.height=40;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  ctx.font='500 24px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+  ctx.font=`${glyphWeight} 24px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
   const ranked=[...asciiCharacters].map(char=>{
     ctx.clearRect(0,0,40,40);ctx.fillText(char,20,20);
     const pixels=ctx.getImageData(0,0,40,40).data;let ink=0;

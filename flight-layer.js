@@ -1,6 +1,6 @@
-import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-layout25';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-layout25';
-import { glyphVariant } from './glyph-rhythm.js?v=20261111-layout25';
+import { birdPose, detailFontSize } from './ascii-renderer.js?v=20261111-type26';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-type26';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-type26';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do
@@ -39,9 +39,9 @@ export class FlightLayer {
         ctx.clearRect(0,0,width,height); ctx.fillStyle='#080d13';
         for (const cell of cells) {
           cell.dy=cell.y+pose.flap*cell.wing*this.scale;
-          // Perspective changes the flock's spacing, never its minimum-sized
+          // Perspective changes the flock's spacing, never its fixed-size
           // letters: cancel the scale applied by the composited bird canvas.
-          cell.drawSize=minFontSize/pose.scale;
+          cell.drawSize=detailFontSize/pose.scale;
           ctx.fillRect(cell.x-this.cellW*.43*cell.drawSize,cell.dy-this.cellH*.4*cell.drawSize,
             this.cellW*.86*cell.drawSize,this.cellH*.8*cell.drawSize);
         }

@@ -1,4 +1,4 @@
-import { drawSceneLayers } from './scene-snapshot.js?v=20261111-layout25';
+import { drawSceneLayers, drawSceneAmbience } from './scene-snapshot.js?v=20261111-type26';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let navigating = false;
 let overlay;
@@ -40,6 +40,7 @@ document.addEventListener('click', event => {
     if (document.body.classList.contains('scene-ready')) {
       drawSceneLayers(snap);
     }
+    drawSceneAmbience(snap);
   }
   const pixels = snap.getImageData(0, 0, snapshot.width, snapshot.height).data;
   const fragments = [];

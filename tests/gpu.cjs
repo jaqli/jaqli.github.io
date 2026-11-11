@@ -11,11 +11,12 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   await page.goto(origin);await page.waitForSelector('body.scene-ready');
   assert.equal(await page.locator('#ascii-canvas').getAttribute('data-raster'),'webgl');
   const worker=page.workers()[0];
-  const result=await worker.evaluate(()=>{
+  const result=await worker.evaluate(async()=>{
+   const{fontStep}=await import('/ascii-renderer.js'+location.search);
    const gpu=gpuProbe,gl=gpu.gl,r=gpu.renderer;
    const a=new Uint8Array(gpu.canvas.width*gpu.canvas.height*4),b=new Uint8Array(a.length);let worst=0;
    for(let frame=1;frame<=24;frame++){
-    for(const cell of r.dynamic){cell.glyphVariant=frame%cell.glyphPool.length;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(frame)*.3*r.scale:0);cell.renderSize=cell.kind==='hem'?cell.size:Math.max(.6,Math.min(1.5,cell.size+(frame%2?.1:-.1)));}
+    for(const cell of r.dynamic){cell.glyphVariant=frame%cell.glyphPool.length;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(frame)*.3*r.scale:0);cell.renderSize=cell.kind==='hem'?cell.size:fontStep(cell.size+(frame%2?.1:-.1));}
     gpu.draw(frame/120);gl.readPixels(0,0,gpu.canvas.width,gpu.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,a);
     gpu.frame=-1;gpu.draw(frame/120);gl.readPixels(0,0,gpu.canvas.width,gpu.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,b);
     let error=0;for(let i=0;i<a.length;i++)error+=Math.abs(a[i]-b[i]);worst=Math.max(worst,error/a.length);

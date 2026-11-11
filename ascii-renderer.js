@@ -1,14 +1,15 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-layout25';
+import { scenePixelRatio } from './render-budget.js?v=20261111-type26';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-layout25';
-import { screens, paintScreen } from './screen-content.js?v=20261111-layout25';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-layout25';
+import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261111-type26';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-type26';
+import { screens, paintScreen } from './screen-content.js?v=20261111-type26';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-type26';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-layout25';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-layout25';
-import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-layout25';
-import { glyphLayout } from './glyph-layout.js?v=20261111-layout25';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-type26';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-type26';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-type26';
+import { glyphLayout } from './glyph-layout.js?v=20261111-type26';
+import { glyphWeight, sceneColor, sceneRGB } from './scene-style.js?v=20261111-type26';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -48,20 +49,21 @@ const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
 // Interleave small and large letters locally, independently of symbol choice
 // and negative space. Sizes are assigned once, not randomized each frame.
-const sizeStops=[.015,.04,.09,.17,.29,.46,.66,.84,.95,1];
+const sizeStops=[.03,.09,.19,.33,.52,.74,.90,1];
 const mixedSize=(x,y)=>{
   const seed=hash(x+137,y+271);
   return fontSizes[sizeStops.findIndex(stop=>seed<stop)];
 };
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
-const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
+const color = sceneColor;
 const glyph = sceneGlyph;
 const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
-export const fontSizes = [.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5];
+export const fontSizes = [.5,.6,.7,.8,.9,1,1.1,1.2];
 export const minFontSize=fontSizes[0];
+export const detailFontSize=.5;
 export const fontIncrement=.1;
 export const fontStep = size => fontSizes[clamp(Math.round((size-minFontSize)/fontIncrement),0,fontSizes.length-1)];
 
@@ -277,15 +279,16 @@ export class AsciiRenderer {
       for (const canvas of [texture,fade,layer]) { canvas.width=width; canvas.height=height; }
       const textureCtx=texture.getContext('2d'), colors=textureCtx.createImageData(width,height);
       const fadeCtx=fade.getContext('2d'), opacity=fadeCtx.createImageData(width,height);
-      const gamma=Uint8Array.from({length:256},(_,i)=>Math.round(255*(i/255)**.84));
+      const tone=new Uint8Array(3);
       for (let y=0;y<height;y++) {
         for (let x=0;x<width;x++) {
           const i=(y*width+x)*4;
-          for (let c=0;c<3;c++) colors.data[i+c]=gamma[pixels[i+c]];
+          sceneRGB(pixels[i],pixels[i+1],pixels[i+2],tone);
+          for (let c=0;c<3;c++) colors.data[i+c]=tone[c];
           colors.data[i+3]=255;
           const edge=smooth(Math.min(x/24,(width-x)/24,y/18,(height-y)/18));
           const sun=smooth((Math.hypot(x+x0-1100,y+y0-375)-35)/60);
-          opacity.data[i+3]=Math.round(255*.38*edge*sun);
+          opacity.data[i+3]=Math.round(255*.78*edge*sun);
         }
         if (!(y%32)) yield .3 + .7*(this.cloudSources.length+.95)/cloudWindows.length;
       }
@@ -363,7 +366,8 @@ export class AsciiRenderer {
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
     const layout=glyphLayout({columns:this.columns,rows:this.rows,width:this.sourceW,height:this.sourceH,
-      fontSize:this.fontSize/this.scale,sizeAt:mixedSize,fixedAt:(x,y)=>distantCity.some(poly=>inside(x,y,poly))});
+      fontSize:this.fontSize/this.scale,maxSize:this.maxGlyphSize,fixedSize:detailFontSize,
+      sizeAt:mixedSize,fixedAt:(x,y)=>distantCity.some(poly=>inside(x,y,poly))});
     let placement=layout.next();
     while(!placement.done){yield placement.value*.08;placement=layout.next();}
     const points=placement.value;
@@ -381,12 +385,10 @@ export class AsciiRenderer {
         return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
       }));
       // The sky shares the same local size variety as the room; do not pull
-      // whole regions toward one size. Keep silhouette protection at edges.
+      // whole regions toward one size. The maximum stays below the former
+      // silhouette cap, so no extra edge-dependent shrinking is needed.
       const variedSize=point.size;
-      // Large glyphs crossing high-contrast silhouettes made bright outlines.
-      // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=variedSize+(Math.min(variedSize,1.3)-variedSize)*smooth((contrast-45)/100);
-      const size=isCity ? minFontSize : fontStep(edgeSize);
+      const size=isCity ? detailFontSize : variedSize;
       // Open up the dark room edges, not the colorful sky or bright water.
       // Featureless shadows may stay entirely empty; wider sampling protects
       // nearby contours without limiting hole size. The mask is fixed for the
@@ -469,7 +471,7 @@ export class AsciiRenderer {
         const coverage=clamp(count/(xStep*yStep));
         // Papers and floats use the room's mixed sizes. Keep tiny LED features
         // legible and trim large letters at partially covered object edges.
-        const size=region.bird?minFontSize:detail<1?fontStep(detail*(1+.2*coverage)):fontStep(Math.min(point.size,1+.5*coverage));
+        const size=region.bird?detailFontSize:detail<1?fontStep(detail*(1+.2*coverage)):fontStep(Math.min(point.size,1+.5*coverage));
         cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size });
       }
       return cells;
@@ -571,7 +573,7 @@ export class AsciiRenderer {
     }
     return contrast;
   }
-  prepare(ctx) { ctx.font = `500 ${this.fontSize}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; }
+  prepare(ctx) { ctx.font = `${glyphWeight} ${this.fontSize}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; }
   paint(ctx, cell, x, y, size, fill) {
     ctx.fillStyle = fill;
     if (Math.abs(size - 1) < .005) ctx.fillText(cell.glyph, x, y);
@@ -739,14 +741,14 @@ export class AsciiRenderer {
       ctx.fillStyle = '#080d13';
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
-        const size = minFontSize;
+        const size = detailFontSize;
         ctx.fillRect(x * this.scale - this.cellW * .43 * size, y * this.scale - this.cellH * .4 * size,
           this.cellW * .86 * size, this.cellH * .8 * size);
       }
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
         cell.glyphVariant=glyphVariant(cell,time);
-        this.stamp(cell, x * this.scale, y * this.scale, minFontSize);
+        this.stamp(cell, x * this.scale, y * this.scale, detailFontSize);
       }
     }
   }

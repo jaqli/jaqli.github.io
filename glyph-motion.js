@@ -1,7 +1,7 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-layout25';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-layout25';
+import { glyphColor } from './glyph-atlas.js?v=20261111-type26';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-type26';
 
-import { glyphAt } from './glyph-rhythm.js?v=20261111-layout25';
+import { glyphAt } from './glyph-rhythm.js?v=20261111-type26';
 export const glyphUpdateLimit=8192; // changed characters per draw; old states are skipped
 
 // Every retained letter has its own 1.2–1.5 Hz clock and symbol sequence.
@@ -11,8 +11,8 @@ export class GlyphMotion {
     this.r=renderer;this.enabled=true;this.lastBatch={cells:0};
     this.base=renderer.base.getContext('2d');this.cloud=renderer.cloudBase.getContext('2d');
     this.palette=new SpriteAtlas(renderer.fontSize,Math.max(2,renderer.pixelRatio));
-    // Include the largest allowed letters and their neighbors when replacing
-    // ink; a 1.0-sized patch would crop the new 1.5-sized strokes.
+    // Include the current maximum size and neighboring strokes when replacing
+    // ink, including the largest state of each breathing character.
     this.radiusX=renderer.fontSize*renderer.maxGlyphSize*.45+1/renderer.pixelRatio;
     this.radiusY=renderer.fontSize*renderer.maxGlyphSize*.65+1/renderer.pixelRatio;
     this.cells=renderer.cells.filter(c=>c.occupied&&c.glyphLayer!=='dynamic');
@@ -20,7 +20,7 @@ export class GlyphMotion {
   *prepare(){
     yield* this.palette.prepare(this.cells,c=>glyphColor(c.rgb));
     for(const cell of this.r.cells)if(cell.occupied){
-      const breathing=cell.glyphLayer==='dynamic',size=breathing?Math.min(1.5,cell.size+.1):cell.size;
+      const breathing=cell.glyphLayer==='dynamic',size=breathing?Math.min(this.r.maxGlyphSize,cell.size+.1):cell.size;
       const atlas=breathing?this.r.spriteAtlas:this.palette;
       const [l,t,rr,b]=atlas.inkBounds(cell,size),dpr=this.r.pixelRatio;
       const dy=cell.kind==='hem'?.35*this.r.scale:0;

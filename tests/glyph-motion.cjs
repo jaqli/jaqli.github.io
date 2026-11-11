@@ -106,7 +106,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     brightRetained:renderer.cells.filter(c=>(.2126*c.rgb[0]+.7152*c.rgb[1]+.0722*c.rgb[2])/255>=(c.pillar?.63:.34)).every(c=>c.occupied),
     pillarSpaces:[false,true].map(right=>renderer.cells.filter(c=>c.pillar&&(c.sx>1000)===right&&!c.occupied).length),
     emptyStable:empty.every(c=>!c.occupied&&!c.liveGlyph&&!c.glyphVariant)&&[...renderer.dynamic,...renderer.cloudCells].every(c=>c.occupied),
-    cityRetained:renderer.cells.filter(c=>c.sx>1183&&c.sx<1197&&c.sy>380&&c.sy<435).every(c=>c.occupied&&c.size===.6),
+    cityRetained:renderer.cells.filter(c=>c.sx>1183&&c.sx<1197&&c.sy>380&&c.sy<435).every(c=>c.occupied&&c.size===.5),
     paletteSize:renderer.glyphMotion.palette.entries,paletteBytes:renderer.glyphMotion.palette.canvas.width*renderer.glyphMotion.palette.canvas.height*4,immutablePalette:entries===renderer.glyphMotion.palette.entries};
   });
   console.log('Global glyph changes',JSON.stringify(result));
@@ -152,7 +152,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   const afterBody=await page.screenshot({clip});assert(!beforeBody.equals(afterBody),'the actual stationary torso must display changing glyphs');
   const afterFloat=await floatPixels();assert.notEqual(beforeFloat,afterFloat,'the duck must change its letters inside its texture, not only move the same bitmap');
   const visible=await worker.evaluate(()=>({changed:glyphProbe.cells.filter(c=>c.liveGlyph).length,city:glyphProbe.cells.filter(c=>c.sx>1183&&c.sx<1197&&c.sy>380&&c.sy<435).map(c=>c.size)}));
-  assert(visible.changed>500&&visible.city.every(size=>size===.6));
+  assert(visible.changed>500&&visible.city.every(size=>size===.5));
   const cadence=await worker.evaluate(()=>({maxGap:Math.max(rateProbe.maxGap,...rateProbe.last.map(t=>rateProbe.time-t)),minChanges:Math.min(...rateProbe.counts)}));
   console.log('Actual worker glyph cadence',JSON.stringify(cadence));
   assert(cadence.minChanges>=3&&cadence.maxGap<=1.1,'actual worker must keep every character near or above 1 Hz, allowing one late display frame');

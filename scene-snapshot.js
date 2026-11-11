@@ -1,5 +1,14 @@
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 
+// Screen is commutative. Apply the backing after composing every normal art
+// layer, matching the isolated CSS group without an extra full-size canvas.
+export function drawSceneAmbience(ctx,rect=document.querySelector('#scene-world')?.getBoundingClientRect()){
+  const image=document.querySelector('#scene-ambience');
+  if(!rect||!image?.complete||!image.naturalWidth)return;
+  ctx.save();ctx.globalCompositeOperation='screen';
+  ctx.drawImage(image,rect.x,rect.y,rect.width,rect.height);ctx.restore();
+}
+
 export function drawSceneLayers(ctx){
   for(const root of document.querySelectorAll('#motion-layers, #flight-layer')){
     const origin=root.getBoundingClientRect();

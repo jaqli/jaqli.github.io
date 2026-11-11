@@ -4,18 +4,18 @@ const clamp=(n,limit)=>Math.max(.1,Math.min(limit-.1,n));
 // The sampling grid sets a bounded point budget, not the displayed positions.
 // Release points across its boundaries, then reserve space proportional to
 // each glyph's footprint. This runs only when preparing a new scene size.
-export function* glyphLayout({columns,rows,width,height,fontSize,sizeAt,fixedAt}){
+export function* glyphLayout({columns,rows,width,height,fontSize,maxSize,fixedSize,sizeAt,fixedAt}){
   const dx=width/columns,dy=height/rows,points=[];
   for(let row=0;row<rows;row++){
     for(let col=0;col<columns;col++){
-      const x=(col+.5)*dx,y=(row+.5)*dy,fixed=fixedAt(x,y),size=fixed ? .6 : sizeAt(col,row);
+      const x=(col+.5)*dx,y=(row+.5)*dy,fixed=fixedAt(x,y),size=fixed ? fixedSize : sizeAt(col,row);
       points.push({x:fixed?x:clamp(x+(random(col,row)-.5)*dx*1.4,width),
         y:fixed?y:clamp(y+(random(row+83,col+197)-.5)*dy*1.4,height),size,
         rx:fontSize*.32*size+.6,ry:fontSize*.46*size+.7,mobility:fixed?0:1/size});
     }
     if(!(row%16))yield .1*row/rows;
   }
-  const bucketW=fontSize*.32*3+1.2,bucketH=fontSize*.46*3+1.4;
+  const bucketW=fontSize*.32*maxSize*2+1.2,bucketH=fontSize*.46*maxSize*2+1.4;
   const cols=Math.ceil(width/bucketW),lines=Math.ceil(height/bucketH);
   const heads=new Int32Array(cols*lines),next=new Int32Array(points.length);
   for(let pass=0;pass<8;pass++){

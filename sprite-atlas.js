@@ -1,5 +1,6 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { prepareGlyph } from './glyph-rhythm.js?v=20261111-layout25';
+import { prepareGlyph } from './glyph-rhythm.js?v=20261111-type26';
+import { glyphWeight } from './scene-style.js?v=20261111-type26';
 
 // Pack just the ink and one transparent border pixel. Deduplicating by actual
 // symbol/color keeps a richer alphabet close to the old two-letter atlas size.
@@ -11,7 +12,7 @@ export class SpriteAtlas {
   measureGlyphs(chars){
     const canvas=createCanvas(),side=this.tile;canvas.width=canvas.height=side;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.font=`500 ${this.fontSize*this.dpr}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.font=`${glyphWeight} ${this.fontSize*this.dpr}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
     for(const char of chars){
       ctx.clearRect(0,0,side,side);ctx.fillText(char,side/2,side/2);
       const p=ctx.getImageData(0,0,side,side).data;let left=side,top=side,right=0,bottom=0;
@@ -39,7 +40,7 @@ export class SpriteAtlas {
     let x=0,y=0,rowHeight=0;
     for(const entry of entries){const {w,h}=entry.metric;if(x+w>this.canvas.width){y+=rowHeight;x=0;rowHeight=0;}entry.x=x;entry.y=y;x+=w;rowHeight=Math.max(rowHeight,h);}
     this.canvas.height=Math.max(1,y+rowHeight);this.entries=entries.length;
-    const ctx=this.canvas.getContext('2d');ctx.font=`500 ${this.fontSize*this.dpr}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+    const ctx=this.canvas.getContext('2d');ctx.font=`${glyphWeight} ${this.fontSize*this.dpr}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
     for(let i=0;i<entries.length;i++){
       const entry=entries[i],m=entry.metric;ctx.fillStyle=entry.color;
       ctx.fillText(entry.glyph,entry.x+this.tile/2-m.x,entry.y+this.tile/2-m.y);

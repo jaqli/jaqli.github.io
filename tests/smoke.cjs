@@ -131,8 +131,11 @@ async function duckBodyPoint(page) {
       }
       const flight = Array.from({ length: 57 }, (_, i) => birdPoint(birds[0], 991, 263, i * .5));
       const eyeHeight = time => {
-        renderer.draw(time);
-        const pixels=ctx.getImageData(141,429,17,23).data, rows=[];
+        // Measure the LED itself; a brighter blue face is not an open eye.
+        const eye=document.createElement('canvas');eye.width=17;eye.height=23;
+        const eyeCtx=eye.getContext('2d');eyeCtx.translate(-141,-429);
+        renderer.drawDetails(time,renderer.details.filter(sprite=>sprite.shape.kind==='eye'),eyeCtx);
+        const pixels=eyeCtx.getImageData(0,0,17,23).data, rows=[];
         for (let y=0;y<23;y++) for (let x=0;x<17;x++) {
           const i=(y*17+x)*4;
           if (pixels[i+1]-pixels[i]>50 && pixels[i+2]-pixels[i]>50 && pixels[i+1]>80) rows.push(y);
@@ -164,8 +167,12 @@ async function duckBodyPoint(page) {
       const paperOffsets=Array.from({length:241},(_,i)=>detailPoint(paper,414,293,i*.05)[0]-414);
       const paperCrossings=paperOffsets.slice(1).filter((x,i)=>x*paperOffsets[i]<0).length;
       renderer.draw(0);
+      const litScene=document.createElement('canvas');litScene.width=1536;litScene.height=1024;
+      const litCtx=litScene.getContext('2d');litCtx.drawImage(canvas,0,0);
+      const {drawSceneAmbience}=await import('./scene-snapshot.js');
+      drawSceneAmbience(litCtx,{x:0,y:0,width:1536,height:1024});
       const regionLight = box => {
-        const p=ctx.getImageData(...box).data; let sum=0;
+        const p=litCtx.getImageData(...box).data; let sum=0;
         for (let i=0;i<p.length;i+=4) sum+=.2126*p[i]+.7152*p[i+1]+.0722*p[i+2];
         return sum/(p.length/4);
       };
@@ -178,18 +185,18 @@ async function duckBodyPoint(page) {
       const flightLayer=new FlightLayer(document.createElement('div'));flightLayer.configure(renderer.getFlightData());
       let fixedBirdSizeError=0,fallbackBirdSizeError=0;
       const stamp=renderer.stamp;
-      renderer.stamp=function(cell,x,y,size,...args){fallbackBirdSizeError=Math.max(fallbackBirdSizeError,Math.abs(size-.6));return stamp.call(this,cell,x,y,size,...args);};
+      renderer.stamp=function(cell,x,y,size,...args){fallbackBirdSizeError=Math.max(fallbackBirdSizeError,Math.abs(size-.5));return stamp.call(this,cell,x,y,size,...args);};
       for(const time of [0,.001,.01,6.2,14,27,60]){
         flightLayer.draw(time);renderer.drawBirds(time);
         for(const sprite of flightLayer.sprites){
           const matrix=new DOMMatrix(sprite.canvas.style.transform),scale=Math.hypot(matrix.a,matrix.b);
-          for(const cell of sprite.cells)fixedBirdSizeError=Math.max(fixedBirdSizeError,Math.abs(cell.drawSize*scale-.6));
+          for(const cell of sprite.cells)fixedBirdSizeError=Math.max(fixedBirdSizeError,Math.abs(cell.drawSize*scale-.5));
         }
       }
       renderer.stamp=stamp;
       const typeMeasure=document.createElement('canvas').getContext('2d');typeMeasure.font=`500 ${renderer.fontSize}px monospace`;
       // Local samples catch a uniform sky even when the whole scene happens
-      // to contain all ten sizes. Include the room, person and water as well.
+      // to contain all eight sizes. Include the room, person and water as well.
       const localSizeMix=[[610,190],[940,140],[1060,260],[350,40],[780,500],[1000,490]].map(([x,y])=>{
         const cells=renderer.cells.filter(c=>c.occupied&&c.sx>x&&c.sx<x+90&&c.sy>y&&c.sy<y+90);
         const mean=cells.reduce((sum,c)=>sum+c.size,0)/cells.length;
@@ -197,8 +204,8 @@ async function duckBodyPoint(page) {
       });
       return { ...changed, coverage, columns: renderer.columns,
         cellW:renderer.cellW,cellH:renderer.cellH,letterGap:renderer.cellW-typeMeasure.measureText('M').width*1.2,totalCells:renderer.cells.length,
-        mediumLargeShare:renderer.cells.filter(c=>c.size>=1.1&&c.size<=1.3).length/renderer.cells.length,
-        largeShare:renderer.cells.filter(c=>c.size>=1.3).length/renderer.cells.length,
+        middleShare:renderer.cells.filter(c=>c.size>=.8&&c.size<=1).length/renderer.cells.length,
+        largeShare:renderer.cells.filter(c=>c.size>=1.1).length/renderer.cells.length,
         localSizeMix,spriteSizeBins:new Set(spriteSizes).size,
         citySizes,cityAnimates,fixedBirdSizeError,fallbackBirdSizeError,
         faceTilt, floatMotion, paperCrossings,
@@ -215,7 +222,7 @@ async function duckBodyPoint(page) {
         flightX: Math.max(...flight.map(p => p[0])) - Math.min(...flight.map(p => p[0])),
         flightY: Math.max(...flight.map(p => p[1])) - Math.min(...flight.map(p => p[1])) };
     });
-    console.log('Scene motion and local type',JSON.stringify({wall:changes.wall,water:changes.water,localSizeMix:changes.localSizeMix,mediumLargeShare:changes.mediumLargeShare,largeShare:changes.largeShare}));
+    console.log('Scene motion and local type',JSON.stringify({wall:changes.wall,water:changes.water,city:changes.city,cityContrast:changes.cityContrast,localSizeMix:changes.localSizeMix,middleShare:changes.middleShare,largeShare:changes.largeShare}));
     assert(changes.wall < .04, 'architecture should stay still');
     assert.equal(changes.body, 0, 'the seated torso must not twist');
     assert.equal(changes.hand, 0, 'hands stay resting on the desk');
@@ -229,19 +236,19 @@ async function duckBodyPoint(page) {
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns>=260&&changes.columns<=300&&changes.totalCells<40000,'open up the desktop lattice without losing the city silhouette');
     assert(changes.cellW>=5.5&&changes.cellH>=7.8&&changes.letterGap>1.4,'typical letters need real horizontal and vertical breathing room');
-    assert(changes.mediumLargeShare>.5&&changes.mediumLargeShare<.65&&changes.largeShare>.25,'mix smaller letters among readable medium and large glyphs');
-    assert(changes.localSizeMix.every(region=>region.bins>=8&&region.spread>.17),'sky and room must each mix sizes locally, rather than only across different regions');
-    assert(changes.spriteSizeBins>=8,'papers and floating objects must also contain varied letter sizes');
-    assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1.5, 'moving objects must share the requested font range');
+    assert(changes.middleShare>.45&&changes.middleShare<.65&&changes.largeShare>.2,'mix smaller letters among readable medium and large glyphs');
+    assert(changes.localSizeMix.every(region=>region.bins>=7&&region.spread>.14),'sky and room must each mix sizes locally, rather than only across different regions');
+    assert(changes.spriteSizeBins>=7,'papers and floating objects must also contain varied letter sizes');
+    assert(changes.spriteSizeRange[0]>=.5 && changes.spriteSizeRange[1]<=1.2, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert.deepEqual(changes.sizes,[.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5], 'all ten requested font sizes must be present');
-    assert(changes.citySizes.every(sizes=>sizes.length===1&&sizes[0]===.6)&&!changes.cityAnimates, 'distant buildings must always use the minimum size');
+    assert.deepEqual(changes.sizes,[.5,.6,.7,.8,.9,1,1.1,1.2], 'all eight requested font sizes must be present');
+    assert(changes.citySizes.every(sizes=>sizes.length===1&&sizes[0]===.5)&&!changes.cityAnimates, 'distant buildings must retain the fixed 0.50 detail size');
     // CSS serializes matrix coefficients to six significant digits.
-    assert(changes.fixedBirdSizeError<1e-5&&changes.fallbackBirdSizeError===0, 'flight perspective must never enlarge or shrink the minimum-sized bird glyphs');
+    assert(changes.fixedBirdSizeError<1e-5&&changes.fallbackBirdSizeError===0, 'flight perspective must never enlarge or shrink the fixed-size bird glyphs');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.repeatedBlink<.1, 'the robot should blink again after 3.2 seconds');
-    assert(changes.cloudSpeed>6 && changes.cloudSpeed<8, 'clouds should move noticeably faster');
+    assert(changes.cloudSpeed>=14 && changes.cloudSpeed<=16, 'clouds should move at the faster requested speed');
     assert(changes.paperCount>=9, 'additional papers should join the wind animation');
     for (const key of ['sidebar','status','lamp','redEye','leftFace','rightFace','wallPaper','boardPaper','monitorPaper']) assert(changes[key]>.02, `${key} must visibly animate`);
     for (const key of ['boat','blueCan','redCan','floatingPages','tablet','phone','floatingPage','paperBoat','waterCar','expandedPlot']) assert(changes[key]>.03, `${key} must animate in its actual image region`);

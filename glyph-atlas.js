@@ -1,9 +1,9 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-// Gamma/color quantization is independent of animation time. A lookup table
-// avoids exponentiation, temporary arrays and string keys for every lit glyph.
-const bins=Uint8Array.from({length:4097},(_,i)=>Math.min(16,Math.round(255*(i/4096)**.84/16)));
-const channel=v=>bins[Math.max(0,Math.min(4096,Math.round(v*4096/255)))];
-export const glyphColor=rgb=>`rgb(${rgb.map(v=>Math.min(255,channel(v)*16)).join(' ')})`;
+import { glyphWeight, sceneRGB } from './scene-style.js?v=20261111-type26';
+// Tone mapping is shared by the room, clouds and moving objects. Its lookup
+// table avoids repeated exponentiation; the bounded atlas uses numeric keys.
+const channel=v=>Math.min(16,Math.round(v/16));
+export const glyphColor=rgb=>`rgb(${sceneRGB(...rgb).map(v=>Math.min(255,channel(v)*16)).join(' ')})`;
 // A bounded color/glyph cache shared by the sky and monitor layers. Reusing
 // rasterized letters keeps color changes from invoking fillText every frame.
 export class GlyphAtlas {
@@ -20,15 +20,17 @@ export class GlyphAtlas {
     this.ctx = this.canvas.getContext('2d');
     this.prepare();
     this.cache = new Map();
+    this.tone=new Uint8Array(3);
   }
   prepare() {
-    this.ctx.font = `500 ${this.fontSize * this.dpr}px monospace`;
+    this.ctx.font = `${glyphWeight} ${this.fontSize * this.dpr}px monospace`;
     this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
   }
   get(glyph, rgb) {
     // Finer color steps preserve the original blue / cream gradients; coarse
     // independent RGB rounding introduced colored speckles in the sky.
-    const r=channel(rgb[0]), g=channel(rgb[1]), b=channel(rgb[2]);
+    const tone=sceneRGB(rgb[0],rgb[1],rgb[2],this.tone);
+    const r=channel(tone[0]),g=channel(tone[1]),b=channel(tone[2]);
     const key = glyph.charCodeAt(0)*4913+(r*17+g)*17+b;
     let tile = this.cache.get(key);
     if (!tile) {

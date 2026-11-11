@@ -16,6 +16,8 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     const {AsciiRenderer}=await import('./ascii-renderer.js');
     const reference=document.createElement('canvas'),renderer=new AsciiRenderer(document.querySelector('#scene-image'),reference);
     renderer.resize(1536,1024);renderer.draw(time);
+    const {drawSceneAmbience}=await import('./scene-snapshot.js');
+    drawSceneAmbience(reference.getContext('2d'),{x:0,y:0,width:1536,height:1024});
     const image=new Image();image.src='data:image/png;base64,'+picture;await image.decode();
     const actual=document.createElement('canvas');actual.width=1536;actual.height=1024;actual.getContext('2d').drawImage(image,0,0);
     const waterSource=document.querySelector('.water-blend'),water=document.createElement('canvas');

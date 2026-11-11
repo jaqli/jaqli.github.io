@@ -7,7 +7,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
 (async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
  try{
-  for(const time of [0,6.2]){
+  for(const [time,ambient] of [[0,false],[6.2,false],[0,true],[6.2,true]]){
    const page=await browser.newPage({viewport:{width:1440,height:960},deviceScaleFactor:2,reducedMotion:'reduce'});
    if(process.env.TEST_GPU==='1')await page.context().route('**/layered-scene.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace('new GlyphBatch(this.display,r)','new GlyphBatch(this.display,r,true)')});});
    await page.route('**/app.js*',async route=>{
@@ -16,13 +16,16 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    });
    await page.goto(origin);await page.waitForSelector('body.scene-ready');
    await page.addStyleTag({content:'.scene-header,#hotspots,#pause,#scene-status,#pan-hint{visibility:hidden}'});
+   if(!ambient)await page.addStyleTag({content:'.scene-ambience{display:none}.scene-art{mix-blend-mode:normal}'});
    await page.waitForTimeout(250);
-   const picture=(await page.screenshot({path:`/tmp/jaqli-quality-${time}.png`})).toString('base64');
-   const result=await page.evaluate(async({picture,time})=>{
+   const picture=(await page.screenshot({path:`/tmp/jaqli-quality-${time}-${ambient}.png`})).toString('base64');
+   const result=await page.evaluate(async({picture,time,ambient})=>{
     const {scenePixelRatio}=await import('./render-budget.js');
     const {AsciiRenderer}=await import('./ascii-renderer.js');
     const reference=document.createElement('canvas'),renderer=new AsciiRenderer(document.querySelector('#scene-image'),reference);
     renderer.resize(1440,960);renderer.draw(time);
+    const {drawSceneAmbience}=await import('./scene-snapshot.js');
+    if(ambient)drawSceneAmbience(reference.getContext('2d'),{x:0,y:0,width:1440,height:960});
     const image=new Image();image.src='data:image/png;base64,'+picture;await image.decode();
     const actual=document.createElement('canvas');actual.width=image.width;actual.height=image.height;actual.getContext('2d').drawImage(image,0,0);
     const sourceScale=1440/1536*2;
@@ -54,7 +57,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     const base=document.querySelector('#ascii-canvas');
     return {raster:base.dataset.raster,width:base.width,height:base.height,largeDisplayDpr:scenePixelRatio(3840,2160),comparison,screenErrors,
      screens:[...document.querySelectorAll('[data-layer^="screen-"]')].map(c=>[c.width,c.height])};
-   },{picture,time});
+   },{picture,time,ambient});
    assert.equal(result.width,2880,'do not upscale a low-resolution scene on Retina displays');
    assert.equal(result.height,1920);
    assert.equal(result.largeDisplayDpr,2,'large screens must not silently lose raster resolution');
@@ -66,10 +69,13 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     // GPU bilinear sampling has different rounding from Skia. Bound its RGB
     // difference as well as edge contrast and total energy, so blur cannot pass.
     assert(value.contrast>.98&&value.contrast<1.03&&value.energy>.98&&value.energy<1.02,`${name}: sharpness or tone changed`);
-    assert(value.error<(gpu?(name==='water'?2.25:1.2):.3),`${name}: glyph sharpness changed (${value.error})`);
-    assert(value.colorShift<(gpu?.8:.15),`${name}: color drift (${value.colorShift})`);
+    // CSS screen blending and Canvas2D round 8-bit channels differently.
+    // The unblended pass keeps the strict original raster checks; the final
+    // color pass allows less than one additional channel level for rounding.
+    assert(value.error<(gpu?(name==='water'?2.25:1.2):.3)+(ambient?.6:0),`${name}: glyph sharpness changed (${value.error})`);
+    assert(value.colorShift<(gpu?.8:.15)+(ambient?.6:0),`${name}: color drift (${value.colorShift})`);
    }
-   console.log('PASS Retina sharpness and RGB fidelity',time,JSON.stringify({raster:result.raster,comparison:result.comparison,screenErrors:result.screenErrors}));
+   console.log('PASS Retina sharpness and RGB fidelity',time,{ambient},JSON.stringify({raster:result.raster,comparison:result.comparison,screenErrors:result.screenErrors}));
    await page.close();
   }
  }finally{await browser.close();}
