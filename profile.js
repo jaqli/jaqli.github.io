@@ -1,3 +1,5 @@
+import { videoPreview } from './publication-video.js?v=20261111-loops31';
+
 function el(tag,text,className){
   const node=document.createElement(tag);
   if(text!=null)node.textContent=text;
@@ -43,17 +45,7 @@ function publication(paper){
     const preview=el('img');preview.src=url(media.url);preview.alt=media.alt||`${paper.shortTitle||paper.title} teaser`;
     preview.width=media.width;preview.height=media.height;preview.loading='lazy';preview.decoding='async';
     if(url(media.video)){
-      const button=el('button',null,'publication-play');button.type='button';
-      button.setAttribute('aria-label',`Play ${paper.shortTitle||paper.title} video`);
-      const label=el('span','▶ PLAY VIDEO','publication-play-label');
-      button.append(preview,label);figure.append(button);
-      button.addEventListener('click',()=>{
-        const video=el('video');video.controls=true;video.playsInline=true;video.preload='none';
-        video.poster=url(media.url);video.setAttribute('aria-label',`${paper.shortTitle||paper.title} video`);
-        video.src=url(media.video);figure.replaceChild(video,button);
-        video.addEventListener('play',()=>document.querySelectorAll('.publication-media video').forEach(other=>{if(other!==video)other.pause();}));
-        video.play().catch(()=>{});video.focus();
-      },{once:true});
+      figure.append(videoPreview({mp4:url(media.video),width:media.videoWidth,height:media.videoHeight,label:paper.shortTitle||paper.title,preview}));
     }else{
       const a=link('',media.source||paper.url,'publication-preview');a.setAttribute('aria-label',`View ${paper.shortTitle||paper.title} figure`);a.append(preview);figure.append(a);
     }
@@ -104,22 +96,14 @@ export function renderProfile(profile){
   if(selected.length||all.length){
     const body=el('div',null,'publications-list');
     for(const paper of selected.length?selected:all)body.append(publication(paper));
-    body.append(link('Google Scholar ↗',profile.source));section('publications','Publications',body);
+    section('publications','Publications',body);
   }
   if(about.awards?.length){
     const list=el('ul',null,'honor-list');
     for(const entry of about.awards){
-      const item=el('li'),text=el('div');text.append(el('h3',entry.title),el('p',[entry.organization,entry.note].filter(Boolean).join(' · ')));
-      item.append(el('span',entry.year,'profile-date'),text);list.append(item);
+      const item=el('li');item.append(el('span',entry.year,'profile-date'),el('span',entry.displayTitle||entry.title,'honor-title'));list.append(item);
     }
     section('honors','Honors',list);
   }
-  if(contacts.email||contacts.github){
-    const body=el('div',null,'profile-contact'),mail=emailLink(contacts.email);if(mail)body.append(mail);
-    if(contacts.github)body.append(link('GitHub ↗',contacts.github));
-    section('contact','Contact',body);
-  }
   if(about.source){const source=el('p',null,'profile-source');source.append(link('About on Notion ↗',about.source,''));root.append(source);}
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden)document.querySelectorAll('.publication-media video').forEach(video=>video.pause());});
-window.addEventListener('pagehide',()=>document.querySelectorAll('.publication-media video').forEach(video=>video.pause()));

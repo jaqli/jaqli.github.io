@@ -1,4 +1,4 @@
-import { birdPose, detailFontSize } from './ascii-renderer.js?v=20261111-flow28';
+import { birdPose, detailFontSize } from './ascii-renderer.js?v=20261111-scene32';
 import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow28';
 import { glyphVariant } from './glyph-rhythm.js?v=20261111-flow28';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));

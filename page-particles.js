@@ -10,15 +10,14 @@ function particle(x,y,color,char,index,size=12){
 
 // One small color read on navigation, never a per-frame full-scene snapshot.
 function sceneParticles(){
-  const source=document.querySelector(document.body.classList.contains('scene-ready')?'#ascii-canvas':'#scene-poster');
+  const source=document.querySelector(document.body.classList.contains('scene-ready')?'#ascii-canvas':document.body.classList.contains('scene-fallback')?'#scene-poster':'#scene-intro');
   if(!source||(source instanceof HTMLImageElement&&!source.naturalWidth))return [];
   const sample=document.createElement('canvas'),scale=Math.min(1,512/innerWidth,320/innerHeight);
   sample.width=Math.ceil(innerWidth*scale);sample.height=Math.ceil(innerHeight*scale);
   const ctx=sample.getContext('2d',{willReadFrequently:true});if(!ctx)return [];
   ctx.scale(scale,scale);
   const bounds=source.getBoundingClientRect();ctx.drawImage(source,bounds.x,bounds.y,bounds.width,bounds.height);
-  if(document.body.classList.contains('scene-ready'))drawSceneLayers(ctx);
-  drawSceneAmbience(ctx);
+  if(document.body.classList.contains('scene-ready')){drawSceneLayers(ctx);drawSceneAmbience(ctx);}
   let pixels;try{pixels=ctx.getImageData(0,0,sample.width,sample.height).data;}catch{return [];}
   const result=[],step=Math.max(15,Math.sqrt(innerWidth*innerHeight/limit));
   for(let y=step/2;y<innerHeight;y+=step)for(let x=step/2;x<innerWidth;x+=step){
@@ -66,11 +65,11 @@ export function createParticles(canvas,focus){
     p.vy=dy*(.35+p.depth*.6)+Math.sin(p.phase)*100;
   }
   return {
-    draw(progress,entering,zoom){
+    draw(progress,entering,zoom,shiftX=0,shiftY=0){
       const t=entering?1-progress:progress;
       const spread=t*t,alpha=entering?Math.sin(Math.PI*Math.min(1,progress*1.08)) : Math.sin(Math.PI*progress);
       ctx.clearRect(0,0,width,height);
-      ctx.save();ctx.translate(fx,fy);ctx.scale(zoom,zoom);ctx.translate(-fx,-fy);
+      ctx.save();ctx.translate(fx+shiftX,fy+shiftY);ctx.scale(zoom,zoom);ctx.translate(-fx,-fy);
       ctx.globalAlpha=Math.max(0,alpha)*.9;
       let font='';
       for(let i=0;i<particles.length;i++){

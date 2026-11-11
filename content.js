@@ -1,4 +1,4 @@
-import './navigation.js?v=20261111-profile30';
+import './navigation.js?v=20261111-scene32';
 
 // Content is a reviewed local snapshot. No browser tokens or third-party scripts.
 const root = document.querySelector('#content');
@@ -73,11 +73,11 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261111-profile30', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261111-loops31', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {
-    const { renderProfile } = await import('./profile.js?v=20261111-profile30');
+    const { renderProfile } = await import('./profile.js?v=20261111-loops31');
     renderProfile(data.profile);
   }
   else if (section === 'post') renderPost(data);

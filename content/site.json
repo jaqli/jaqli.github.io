@@ -3712,9 +3712,14 @@
             "width": 1100,
             "height": 399,
             "alt": "Hunyuan-GameCraft generated worlds and camera-control examples",
-            "source": "https://hunyuan-gamecraft.github.io/",
-            "caption": "Official teaser ↗",
-            "video": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov"
+            "source": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
+            "caption": "Full video ↗",
+            "video": "../assets/publications/gamecraft-loop.mp4",
+            "videoOriginal": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
+            "videoWidth": 480,
+            "videoHeight": 278,
+            "previewStart": 8,
+            "previewDuration": 12
           },
           "verifiedAt": "2026-11-11",
           "role": "First Author"
@@ -3748,9 +3753,14 @@
             "width": 1280,
             "height": 720,
             "alt": "Hy-Nomas interactive world generation video preview",
-            "source": "https://hy-nomas.hy.tencent.com/",
-            "caption": "Official demo video ↗",
-            "video": "https://hy-nomas.hy.tencent.com/gallery/hy_nomas_promo.mp4"
+            "source": "https://hy-nomas.hy.tencent.com/gallery/hy_nomas_promo.mp4",
+            "caption": "Full video ↗",
+            "video": "../assets/publications/nomas-loop.mp4",
+            "videoOriginal": "https://hy-nomas.hy.tencent.com/gallery/hy_nomas_promo.mp4",
+            "videoWidth": 480,
+            "videoHeight": 270,
+            "previewStart": 48,
+            "previewDuration": 12
           },
           "verifiedAt": "2026-11-11"
         },
@@ -3877,24 +3887,11 @@
       "awards": [
         {
           "year": "2023",
-          "title": "First-Class Scholarship for Postgraduates",
-          "organization": "HUST",
-          "note": "研究生一等学业奖学金",
-          "sourceBlockId": "0fe0d69f-6ec8-40cc-93f3-1feca1d0bfde"
-        },
-        {
-          "year": "2023",
           "title": "Honours Degree",
           "organization": "HUST",
           "note": "荣誉学士学位 · Top 3%",
-          "sourceBlockId": "f8b7a9b1-6330-4bf7-ac0e-90e7aa8e9165"
-        },
-        {
-          "year": "2023",
-          "title": "Outstanding Graduate",
-          "organization": "HUST",
-          "note": "优秀毕业生 · Top 10%",
-          "sourceBlockId": "11fa59b4-bb47-80f2-9f6e-c4946f2d67b6"
+          "sourceBlockId": "f8b7a9b1-6330-4bf7-ac0e-90e7aa8e9165",
+          "displayTitle": "Honours Degree, HUST"
         },
         {
           "year": "2021",
@@ -3902,20 +3899,6 @@
           "organization": "Ministry of Education of PRC",
           "note": "国家奖学金 · Highest Honor · Top 0.2%",
           "sourceBlockId": "407ba0b2-5b04-490a-ac93-cdf61d56d2b2"
-        },
-        {
-          "year": "2021",
-          "title": "Outstanding Undergraduate Student",
-          "organization": "HUST",
-          "note": "本科特优生 · Top 1%",
-          "sourceBlockId": "1632c3cc-9504-48a9-bc16-8522bafee550"
-        },
-        {
-          "year": "2021",
-          "title": "Merit Undergraduate",
-          "organization": "HUST",
-          "note": "三好学生 · Top 7%",
-          "sourceBlockId": "cc75953c-cd72-4819-89f9-b6df5cc9348f"
         }
       ],
       "bioSource": "Author-provided role and verified publication history; updated 2026-11-11",

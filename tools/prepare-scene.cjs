@@ -10,6 +10,8 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
   if (!process.argv.includes('--preview-only')) execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i',
     path.join(root, 'assets/IMG_1183.PNG'), '-c:v', 'libwebp', '-quality', '86',
     '-compression_level', '6', path.join(root, 'assets/scene.webp')]);
+  execFileSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-i',path.join(root,'assets/scene.webp'),
+    '-vf','scale=192:128','-quality','72',path.join(root,'assets/scene-seed.webp')]);
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
   try {
     const page = await browser.newPage({ deviceScaleFactor: 1 });
@@ -60,7 +62,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
         ambience:ambience.toDataURL('image/webp',.8).split(',')[1]};
     });
     for(const [name,base64]of Object.entries(data))fs.writeFileSync(path.join(root,`assets/scene-${name}.webp`),Buffer.from(base64,'base64'));
-    for (const name of ['scene.webp', 'scene-preview.webp', 'scene-ambience.webp']) {
+    for (const name of ['scene.webp', 'scene-preview.webp', 'scene-ambience.webp', 'scene-seed.webp']) {
       console.log(`${name}: ${(fs.statSync(path.join(root, 'assets', name)).size / 1024).toFixed(0)} KiB`);
     }
   } finally { await browser.close(); }

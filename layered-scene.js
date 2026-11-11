@@ -1,7 +1,7 @@
 import { GlyphBatch } from './glyph-batch.js?v=20261111-flow28';
 import { waterSampleInterval } from './render-budget.js?v=20261111-flow28';
 import { paintScreen } from './screen-content.js?v=20261111-flow28';
-import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-flow28';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-scene32';
 import { glyphVariant } from './glyph-rhythm.js?v=20261111-flow28';
 
 function screenMatrix(quad,w,h,scale){

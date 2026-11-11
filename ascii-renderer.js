@@ -340,7 +340,7 @@ export class AsciiRenderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // Use one bounded sampling budget for the room. The display positions are
     // relaxed independently below, so letters do not occupy uniform slots.
-    this.columns = Math.min(300, Math.max(180, Math.round(width / 5.6)));
+    this.columns = Math.min(324, Math.max(194, Math.round(width / 5.2)));
     this.rows = Math.round(height / (width / this.columns * 1.42));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
     // Size and spacing are independent: opening the grid must not enlarge

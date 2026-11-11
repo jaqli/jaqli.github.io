@@ -1,4 +1,4 @@
-import { createParticles } from './page-particles.js?v=20261111-profile30';
+import { createParticles } from './page-particles.js?v=20261111-scene32';
 
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const routeKey='jaqli-route',homeKey='jaqli-home-focus';
@@ -27,9 +27,12 @@ function focusFor(link,event){
 function animate(phase,route,done){
   const incoming=phase==='enter',home=document.body.classList.contains('home');
   const focus=home?(incoming?(read(homeKey)||{x:.5,y:.5}):route.focus):{x:.5,y:.36};
-  const duration=incoming?540:420;
-  const startScale=incoming?(home?1.2:.92):1;
-  const endScale=incoming?1:(route.direction==='out'?.88:1.24);
+  const duration=incoming?640:560;
+  const homeShift={x:((.5-focus.x)*.9-.06)*innerWidth,y:((.42-focus.y)*.8-.08)*innerHeight};
+  const startScale=incoming?(home?1.95:.7):1;
+  const endScale=incoming?1:(route.direction==='out'?.58:1.95);
+  const startShift=incoming?(home?homeShift:{x:-innerWidth*.1,y:innerHeight*.1}):{x:0,y:0};
+  const endShift=incoming?{x:0,y:0}:(home?homeShift:{x:innerWidth*.1,y:innerHeight*.12});
   overlay=document.createElement('div');overlay.className=`page-transition ${incoming?'transition-enter':'transition-leave'}`;
   overlay.setAttribute('aria-hidden','true');overlay.dataset.phase=phase;
   const canvas=document.createElement('canvas');overlay.append(canvas);
@@ -41,10 +44,14 @@ function animate(phase,route,done){
   for(const element of roots){
     const bounds=element.getBoundingClientRect();
     const origin=`${focus.x*innerWidth-bounds.x}px ${focus.y*innerHeight-bounds.y}px`;
+    const base=getComputedStyle(element).transform;
+    const transform=t=>`translate(${startShift.x+(endShift.x-startShift.x)*t}px,${startShift.y+(endShift.y-startShift.y)*t}px) scale(${startScale+(endScale-startScale)*t}) ${base==='none'?'':base}`;
     const animation=element.animate([
-      {transform:`scale(${startScale})`,transformOrigin:origin,opacity:incoming?0:1},
-      {transform:`scale(${endScale})`,transformOrigin:origin,opacity:incoming?1:0},
-    ],{duration,easing:'cubic-bezier(.2,.65,.25,1)',fill:'both'});
+      {transform:transform(0),transformOrigin:origin,opacity:incoming?0:1,offset:0},
+      {transform:transform(.26),transformOrigin:origin,opacity:incoming?.5:1,offset:.26},
+      {transform:transform(.75),transformOrigin:origin,opacity:incoming?1:.6,offset:.75},
+      {transform:transform(1),transformOrigin:origin,opacity:incoming?1:0,offset:1},
+    ],{duration,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});
     camera.push({animation});
   }
   html.classList.remove('route-arriving');signal(true);
@@ -52,7 +59,7 @@ function animate(phase,route,done){
   const finish=()=>{if(incoming){reset();done?.();}else done();};
   function tick(now){
     const p=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-p,3);
-    particles?.draw(p,incoming,startScale+(endScale-startScale)*ease);
+    particles?.draw(p,incoming,startScale+(endScale-startScale)*ease,startShift.x+(endShift.x-startShift.x)*ease,startShift.y+(endShift.y-startShift.y)*ease);
     if(p<1)frame=requestAnimationFrame(tick);else finish();
   }
   frame=requestAnimationFrame(tick);
@@ -68,10 +75,12 @@ async function arrive(route){
   if(reducedMotion.matches){reset();return;}
   const current=revision;
   entering=true;
-  // Start with the lightweight poster; never wait for the ASCII worker or videos.
+  // Start with generated characters; never wait for the complete ASCII worker.
   if(document.body.classList.contains('home')){
-    const poster=document.querySelector('#scene-poster');
-    await Promise.race([poster?.decode().catch(()=>{}),new Promise(resolve=>setTimeout(resolve,300))]);
+    if(!document.body.classList.contains('scene-ready')&&!Number(document.querySelector('#scene-intro')?.dataset.revealed))await new Promise(resolve=>{
+      const ready=()=>{clearTimeout(timeout);document.removeEventListener('scene-intro-ready',ready);resolve();};
+      const timeout=setTimeout(ready,300);document.addEventListener('scene-intro-ready',ready,{once:true});
+    });
   }else if(!document.body.dataset.contentReady){
     await new Promise(resolve=>{
       const ready=()=>{clearTimeout(timeout);document.removeEventListener('site:content-ready',ready);resolve();};

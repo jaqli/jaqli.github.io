@@ -234,8 +234,8 @@ async function duckBodyPoint(page) {
     // absolute change and motion clearly above the stationary wall sample.
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key]>.03&&changes[key]>changes.wall*3, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
-    assert(changes.columns>=260&&changes.columns<=300&&changes.totalCells<40000,'open up the desktop lattice without losing the city silhouette');
-    assert(changes.cellW>=5.5&&changes.cellH>=7.8&&changes.letterGap>1.4,'typical letters need real horizontal and vertical breathing room');
+    assert(changes.columns>=280&&changes.columns<=324&&changes.totalCells<46000,'slightly denser desktop characters keep a bounded budget');
+    assert(changes.cellW>=5.1&&changes.cellH>=7.2&&changes.letterGap>1,'denser letters still need horizontal and vertical breathing room');
     assert(changes.middleShare>.45&&changes.middleShare<.65&&changes.largeShare>.2,'mix smaller letters among readable medium and large glyphs');
     assert(changes.localSizeMix.every(region=>region.bins>=7&&region.spread>.14),'sky and room must each mix sizes locally, rather than only across different regions');
     assert(changes.spriteSizeBins>=7,'papers and floating objects must also contain varied letter sizes');

@@ -1,10 +1,11 @@
 import { scenePixelRatio, sceneFrameInterval } from './render-budget.js?v=20261111-flow28';
 import { site } from './site.config.js?v=20261110-flight11';
-import { FlightLayer } from './flight-layer.js?v=20261111-flow28';
+import { FlightLayer } from './flight-layer.js?v=20261111-scene32';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-flow28';
-import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-flow28';
+import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-scene32';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import './navigation.js?v=20261111-profile30';
+import { sceneIntro } from './scene-intro.js?v=20261111-scene32';
+import './navigation.js?v=20261111-scene32';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
@@ -27,6 +28,7 @@ function reportProgress(value, label) {
   progressValue = Math.max(progressValue, Math.min(100, Math.round(value)));
   progress.value = progressValue;
   progressNumber.textContent = `${progressValue}%`;
+  sceneIntro.progress(progressValue);
 }
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
@@ -69,6 +71,7 @@ function layout() {
   world.style.width = `${width}px`;
   world.style.height = `${height}px`;
   world.style.top = `${(bounds.height - height) / 2}px`;
+  sceneIntro.resize(width,height);
   const pannable = width > bounds.width + 5;
   if (pannable && !wasPannable) oldCenter = .42;
   viewport.scrollLeft = Math.max(0, Math.min(width - bounds.width, oldCenter * width - bounds.width / 2));
@@ -154,7 +157,6 @@ new ResizeObserver(() => {
 }).observe(viewport);
 layout();
 syncMotion();
-poster.decode().then(() => performance.mark('scene-preview-ready')).catch(() => {});
 try {
   await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
@@ -165,6 +167,7 @@ try {
   await draw();
   ready = true;
   document.body.classList.add('scene-ready');
+  sceneIntro.finish();
   performance.mark('scene-ready');
   reportProgress(100, '就绪');
   setTimeout(() => { status.hidden = true; }, 200);
@@ -172,6 +175,9 @@ try {
 } catch {
   preparedRenderer?.dispose();
   status.textContent = '动态场景暂时无法载入，仍可点击画面入口。';
+  poster.src=poster.dataset.src;
+  await poster.decode().catch(()=>{});
   document.body.classList.add('scene-fallback');
+  sceneIntro.finish();
   pause.hidden = true;
 }
