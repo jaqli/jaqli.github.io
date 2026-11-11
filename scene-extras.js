@@ -1,6 +1,7 @@
-import { SceneFan } from './scene-fan.js?v=20261111-days42';
+import { leafShapes } from './scene-foliage.js?v=20261111-sky43';
+import { SceneFan } from './scene-fan.js?v=20261111-sky43';
 import { prepareWarp, drawWarp } from './scene-deform.js?v=20261111-days42';
-import { inside } from './scene-objects.js?v=20261111-surface37';
+import { inside } from './scene-objects.js?v=20261111-sky43';
 
 const TAU=Math.PI*2,W=1536;
 const clamp=n=>Math.max(0,Math.min(1,n));
@@ -13,21 +14,10 @@ const opening=(time,period,phase)=>1-.96*Math.exp(-((((time+phase)%period-period
 export class SceneExtras {
   *prepare(scene){
     this.tag=scene.cut([[309,80],[315,80],[320,85],[330,87],[332,111],[322,113],[319,110],[304,110],[300,107],[304,101],[305,87]],(r,g,b,x,y)=>y>=80,true,6,undefined,false,true);
-    this.leaves=[
-      {anchor:[1448,241],phase:.3,polygon:[[1417,228],[1430,230],[1437,222],[1441,230],[1449,235],[1448,241],[1434,241],[1423,237]]},
-      {anchor:[1457,240],phase:2.1,polygon:[[1434,215],[1443,217],[1447,223],[1455,220],[1462,228],[1458,237],[1457,241],[1450,238],[1444,230],[1438,227]]},
-      {anchor:[1468,242],phase:4.4,polygon:[[1462,232],[1474,231],[1481,224],[1487,221],[1486,230],[1491,231],[1497,235],[1497,240],[1481,240],[1475,244],[1467,244]]},
-      {anchor:[1304,105],phase:1.1,polygon:[[1248,92],[1255,87],[1273,87],[1287,93],[1306,101],[1304,108],[1281,108],[1276,101],[1250,102]]},
-      {anchor:[1319,113],phase:3.1,polygon:[[1274,72],[1292,77],[1291,68],[1303,67],[1312,75],[1319,102],[1320,114],[1310,113],[1298,100],[1285,98],[1280,87]]},
-      {anchor:[1324,119],phase:5,polygon:[[1322,97],[1326,84],[1335,77],[1343,67],[1358,69],[1355,83],[1352,96],[1340,107],[1329,120]]},
-      {anchor:[1317,121],phase:1.9,polygon:[[1263,114],[1285,110],[1290,105],[1302,108],[1318,116],[1318,123],[1299,123],[1293,129],[1278,127],[1274,121],[1262,120]]},
-      {anchor:[1341,119],phase:3.9,polygon:[[1341,112],[1355,94],[1367,81],[1384,81],[1384,88],[1394,96],[1394,106],[1369,109],[1362,114],[1343,122]]},
-      {anchor:[1348,123],phase:5.8,polygon:[[1349,117],[1372,109],[1388,112],[1386,122],[1379,128],[1379,137],[1370,141],[1366,130],[1356,129],[1348,125]]},
-      {anchor:[1300,126],phase:.8,polygon:[[1294,123],[1301,127],[1293,138],[1280,143],[1275,153],[1269,147],[1273,136],[1284,131]]},
-    ].map(leaf=>{
-      const sprite=scene.cut(leaf.polygon,(r,g,b)=>g>r*.91&&g>b*1.12,true,9,undefined,false,true);
+    this.leaves=leafShapes.map(leaf=>{
+      const sprite=scene.cut(leaf.polygon,(r,g,b)=>g>r*(leaf.warm?.78:.91)&&g>b*1.12,true,14,undefined,false,false);
       const length=Math.max(...leaf.polygon.map(([x,y])=>Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])));
-      return{...leaf,...prepareWarp(sprite,(x,y)=>{const free=clamp(Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])/length)**1.7;return[free,free*free];})};
+      return{...leaf,...prepareWarp(sprite,(x,y)=>{const free=clamp(Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])/length)**1.7;return[free,free*free];},8)};
     });
     yield;
     this.prepareFan(scene);
@@ -92,8 +82,8 @@ export class SceneExtras {
     const cycle=time%9.7,gust=Math.exp(-(((cycle-6.5)/.65)**2)),angle=.045*Math.sin(time*1.65)+.035*gust*Math.sin(time*4.2);
     ctx.save();ctx.beginPath();ctx.rect(294,80,48,42);ctx.clip();ctx.translate(313,81);ctx.rotate(angle);ctx.drawImage(this.tag.canvas,this.tag.x-313,this.tag.y-81);ctx.restore();
     for(const leaf of this.leaves){
-      const wind=2.9*(Math.sin(time*1.45+leaf.phase)-Math.sin(leaf.phase))*.6+1.15*Math.sin(time*2.9+leaf.phase)*Math.sin(time*.31);
-      const curl=1.15*(Math.sin(time*1.8+leaf.phase*.7)-Math.sin(leaf.phase*.7));
+      const wind=4.35*(Math.sin(time*2.1+leaf.phase)-Math.sin(leaf.phase))*.6+1.65*Math.sin(time*4.2+leaf.phase)*Math.sin(time*.45);
+      const curl=1.55*(Math.sin(time*2.6+leaf.phase*.7)-Math.sin(leaf.phase*.7));
       drawWarp(ctx,leaf,wind,curl);
     }
     this.drawCable(ctx,time);

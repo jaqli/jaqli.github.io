@@ -1,14 +1,15 @@
-import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea, distantCity } from './scene-objects.js?v=20261111-surface37';
+import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-sky43';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
-import { detailShapes, detailPoint, eyeOpening, cloudSpeed, emitters } from './scene-details.js?v=20261111-detail39';
+import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-detail39';
 import { screens, paintScreen } from './screen-content.js?v=20261111-detail39';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight, lampColor } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
-import { SceneExtras } from './scene-extras.js?v=20261111-days42';
+import { SceneExtras } from './scene-extras.js?v=20261111-sky43';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-days42';
-import { SceneTime } from './scene-time.js?v=20261111-days42';
+import { SceneTime } from './scene-time.js?v=20261111-sky43';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-sky43';
 
 const W=1536,H=1024;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -36,7 +37,7 @@ export class PixelScene {
     this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;
     this.base=surface(W,H);const ctx=this.base.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,W,H);
     this.original=ctx.getImageData(0,0,W,H);this.plate=new ImageData(this.original.data.slice(),W,H);
-    this.birds=[];this.details=[];this.clouds=[];this.lights=[];this.lastScreen=-1;this.lastCloud=-1;
+    this.birds=[];this.details=[];this.clouds=[];this.lights=[];this.lastScreen=-1;
     this.screenCanvas=screenCanvas;
     if(screenCanvas){
       screenCanvas.width=1260;screenCanvas.height=570;
@@ -159,72 +160,10 @@ export class PixelScene {
     // Pixel buffers are needed only for extraction, never read back each frame.
     this.original=null;this.plate=null;this.timeOfDay=new SceneTime(this);yield 1;
   }
-  *prepareSky(){
-    const x0=532,y0=68,w=W-x0,h=360,maskCanvas=surface(w,h),maskCtx=maskCanvas.getContext('2d');
-    maskCtx.translate(-x0,-y0);
-    const polygon=points=>{maskCtx.beginPath();points.forEach(([x,y],i)=>i?maskCtx.lineTo(x,y):maskCtx.moveTo(x,y));maskCtx.closePath();maskCtx.fill();};
-    maskCtx.fillStyle='#fff';
-    polygon([[532,70],[792,70],[792,393],[620,393],[619,378],[596,378],[593,349],[578,349],[574,210],[532,196]]);
-    maskCtx.fillRect(862,76,502,348);maskCtx.fillRect(1387,73,149,194);
-    maskCtx.fillStyle='#000';
-    maskCtx.strokeStyle='#000';maskCtx.lineWidth=6;maskCtx.lineJoin='round';
-    for(const city of distantCity){polygon(city);maskCtx.stroke();}
-    polygon(detailShapes.find(shape=>shape.id==='leaves').polygon);
-    polygon([[1272,111],[1381,111],[1381,191],[1268,191]]);
-    polygon([[1390,245],[1407,237],[1426,232],[1434,211],[1474,212],[1494,234],[1536,245],[1536,270],[1390,270]]);
-    maskCtx.fillRect(1030,68,142,16);
-    maskCtx.beginPath();maskCtx.arc(1100,375,30,0,Math.PI*2);maskCtx.fill();
-    maskCtx.strokeStyle='#000';maskCtx.lineWidth=9;maskCtx.lineCap='round';maskCtx.lineJoin='round';
-    for(const wire of [
-      [[551,68],[556,85],[569,97],[587,101],[604,97],[619,83],[625,68]],
-      [[654,68],[655,103],[661,119],[674,132]],[[729,68],[731,113]],
-      [[1469,68],[1469,166],[1478,198],[1488,209],[1501,207],[1513,199],[1524,181],[1533,157]]
-    ]){maskCtx.beginPath();wire.forEach(([x,y],i)=>i?maskCtx.lineTo(x,y):maskCtx.moveTo(x,y));maskCtx.stroke();}
-    const rgba=maskCtx.getImageData(0,0,w,h),holes=new Uint8Array(w*h),source=this.plate.data;
-    for(let y=0;y<h;y++){
-      for(let x=0;x<w;x++){
-        const i=((y+y0)*W+x+x0)*4,j=(y*w+x)*4;
-        const visible=rgba.data[j]>128&&source[i+1]>105&&source[i+2]>105;
-        holes[y*w+x]=visible?0:1;rgba.data[j]=rgba.data[j+1]=rgba.data[j+2]=255;rgba.data[j+3]=visible?255:0;
-      }
-      if(y%60===0)yield .44+.06*y/h;
-    }
-    maskCtx.setTransform(1,0,0,1,0,0);maskCtx.putImageData(rgba,0,0);
-    // Sample one opaque sky surface. Its motion smoothly stops at occluders,
-    // so no foreground or invented texture can enter the moving sky.
-    const visible=new Uint8Array(w*h);for(let i=0;i<visible.length;i++)visible[i]=1-holes[i];
-    const nearest=exteriorField(visible,w,h);yield .55;
-    const sourcePixels=new Uint32Array(w*h),destinations=[],weights=[];
-    const original32=new Uint32Array(source.buffer,source.byteOffset,source.byteLength/4);
-    for(let y=0;y<h;y++){
-      for(let x=0;x<w;x++){
-        const index=y*w+x;sourcePixels[index]=original32[(y+y0)*W+x+x0];
-        if(holes[index])continue;
-        const edge=nearest[index],distance=edge<0?0:Math.abs(x-edge%w)+Math.abs(y-Math.floor(edge/w));
-        destinations.push(index);weights.push(smooth((distance-3)/64));
-      }
-      if(y%40===0)yield .55+.22*y/h;
-    }
-    const layer=surface(w,h),ctx=layer.getContext('2d'),output=ctx.createImageData(w,h);
-    this.clouds=[{x:x0,y:y0,w,h,layer,ctx,output,pixels:new Uint32Array(output.data.buffer),sourcePixels,destinations:new Int32Array(destinations),weights:new Float32Array(weights)}];yield .79;
-  }
+  *prepareSky(){yield* prepareSky(this);}
   async setTimeOfDay(mode){await this.timeOfDay.apply(mode);}
   async resizeAsync(width,height,onProgress=()=>{}){this.width=width;this.height=height;onProgress(1);}
-  drawClouds(time){
-    const frame=Math.floor(time*30);
-    for(const c of this.clouds){
-      if(frame!==this.lastCloud){
-        const clock=time*cloudSpeed/45,dx=42*Math.sin(clock*.19)+6*Math.sin(clock*.37),dy=2*Math.sin(clock*.13);
-        for(let n=0;n<c.destinations.length;n++){
-          const index=c.destinations[n],weight=c.weights[n];
-          c.pixels[index]=c.sourcePixels[index-Math.round(dx*weight)-Math.round(dy*weight)*c.w];
-        }
-        c.ctx.putImageData(c.output,0,0);
-      }
-      this.ctx.drawImage(c.layer,c.x,c.y);
-    }
-    this.lastCloud=frame;
-  }
+  drawClouds(time){for(const cloud of this.clouds)drawSkyLayer(this.ctx,cloud,time);}
   drawWater(time){
     const ctx=this.waterCtx;ctx.clearRect(0,0,W/2,H/2);ctx.globalCompositeOperation='source-over';
     for(const [index,source] of rippleSources.entries()){
@@ -314,5 +253,5 @@ export class PixelScene {
     for(const sprite of this.details)this.drawDetail(sprite,time);
     this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
   }
-  dispose(){this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }

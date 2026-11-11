@@ -1,7 +1,5 @@
 import { refreshWarp } from './scene-deform.js?v=20261111-days42';
-const W=1536,H=1024,TAU=Math.PI*2;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
-const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 const yieldTask=()=>globalThis.scheduler?.yield?scheduler.yield():new Promise(resolve=>setTimeout(resolve,0));
 export const sceneTimes=['dawn','noon','dusk','night'];
 // Lighting is baked into the existing small textures only on a user selection.
@@ -19,12 +17,13 @@ export class SceneTime {
    this.assets.push({canvas,ctx,x,y,w:canvas.width,h:canvas.height,original:pixels,kind,position,warp:sprite.source instanceof Float32Array?sprite:null});
   };
   add({canvas:r.base},'room');this.room=this.assets[0];
+  add(r.sun,'sun');
   for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,...e.leaves,a.probe,a.aerial])add(sprite);
   add(e.cable);add(a.wire);
   for(const key of ['back','cage'])add({canvas:e.fan[key],x:1205,y:548});
   add({canvas:e.fan.blade},'object',(x,y)=>[1243+(x-44)*31/40-(y-44)*6/40,599+y-44]);
   this.sky=r.clouds[0];this.skySource=new Uint8ClampedArray(this.sky.sourcePixels.buffer.slice(0));
-  this.skyMask=new Uint8Array(this.sky.w*this.sky.h);for(const index of this.sky.destinations)this.skyMask[index]=1;
+  this.skyMask=this.sky.lightMask;
   this.lightField=new Float32Array(96*64);
   for(let y=0;y<64;y++)for(let x=0;x<96;x++){
    const wx=x*16,wy=y*16;
@@ -34,7 +33,8 @@ export class SceneTime {
  isSky(x,y){const c=this.sky,ix=Math.round(x)-c.x,iy=Math.round(y)-c.y;return ix>=0&&ix<c.w&&iy>=0&&iy<c.h&&this.skyMask[iy*c.w+ix];}
  color(r,g,b,x,y,kind,out,i,mode){
   const l=r*.2126+g*.7152+b*.0722;
-  const sky=kind==='sky'||this.isSky(x,y)||((x-1100)**2+(y-375)**2<31**2);
+  if(kind==='sun'){out[i]=r;out[i+1]=mode==='dawn'?g*.94:g;out[i+2]=mode==='dawn'?b*.92:b;return;}
+  const sky=kind==='sky'||this.isSky(x,y);
   if(sky){
    const cloud=clamp((r/Math.max(g,1)-.57)/.39);
    if(mode==='night'){
@@ -77,12 +77,6 @@ export class SceneTime {
     const px=i/4%asset.w,py=Math.floor(i/4/asset.w);
     const point=asset.position?asset.position(px,py):null,x=point?point[0]:px+asset.x,y=point?point[1]:py+asset.y;
     let rr=original[i],gg=original[i+1],bb=original[i+2];
-    // The low dusk sun is removed for noon/night, before placing a separate
-    // high sun/moon. Copy nearby sky through a feathered disk, not a second sun.
-    if((asset.kind==='room'||asset.kind==='sky')&&mode!=='dawn'&&Math.abs(x-1100)<26&&Math.abs(y-375)<26){
-     const distance=Math.hypot(x-1100,y-375),mix=smooth((26-distance)/5),j=i-40*4;
-     rr=rr*(1-mix)+original[j]*mix;gg=gg*(1-mix)+original[j+1]*mix;bb=bb*(1-mix)+original[j+2]*mix;
-    }
     this.color(rr,gg,bb,x,y,asset.kind,out,i,mode);
    }
    await yieldTask();
@@ -95,15 +89,15 @@ export class SceneTime {
   if(!this.assets)this.capture();
   const outputs=[];
   for(const asset of this.assets)outputs.push(await this.convert(asset,mode));
-  const c=this.sky,sky=await this.convert({w:c.w,h:c.h,x:c.x,y:c.y,kind:'sky',original:{data:this.skySource}},mode);
+  const c=this.sky,sky=await this.convert({w:c.sourceWidth,h:c.h,x:c.x,y:c.y,kind:'sky',original:{data:this.skySource}},mode);
   for(let n=0;n<this.assets.length;n++){
    const asset=this.assets[n];asset.ctx.putImageData(outputs[n],0,0);
    if(asset.warp)refreshWarp(asset.warp,outputs[n].data);
   }
-  c.sourcePixels.set(new Uint32Array(sky.data.buffer));this.scene.lastCloud=-1;this.mode=mode;
+  c.sourcePixels.set(new Uint32Array(sky.data.buffer));c.sourceCtx.putImageData(sky,0,0);c.pattern=c.ctx.createPattern(c.sourceCanvas,'repeat-x');this.mode=mode;
  }
  drawSky(ctx,time){
-  if(this.mode==='dusk'||this.mode==='dawn')return;
+  if(this.mode==='dusk'||this.mode==='dawn'){const sun=this.scene.sun;ctx.drawImage(sun.canvas,sun.x,sun.y);return;}
   const night=this.mode==='night',cx=1101,cy=151,r=night?18:23;
   ctx.save();
   if(night){

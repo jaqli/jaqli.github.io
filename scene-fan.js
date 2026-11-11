@@ -1,4 +1,4 @@
-import { inside } from './scene-objects.js?v=20261111-surface37';
+import { inside } from './scene-objects.js?v=20261111-sky43';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
 const TAU=Math.PI*2;
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};

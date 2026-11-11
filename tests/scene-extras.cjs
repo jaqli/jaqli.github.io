@@ -6,7 +6,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const result=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261111-days42'),canvas=document.createElement('canvas');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261111-sky43'),canvas=document.createElement('canvas');
   const r=await PixelScene.create(document.querySelector('#scene-image'),canvas),e=r.extras,ctx=r.ctx;
   const regions={steam:[628,475,26,39],fan:[1213,560,59,78],tag:[299,79,35,37],plant:[1415,213,86,33],
    greenRobot:[324,332,29,20],roundRobot:[1349,776,33,30],leftRack:[165,345,105,16],rightRack:[1447,541,65,12],cable:[611,885,124,78],dust:[900,250,162,81]};
@@ -43,7 +43,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
  for(const[k,v]of Object.entries(result.motion))assert(v>(k==='dust'?.002:.015),`${k} must animate (${v})`);
  for(const[k,v]of Object.entries(result.anchors))assert.equal(v,0,`${k} stays fixed`);
  assert(result.cableMaxStep<=32,`cable must not scan or split (${result.cableMaxStep})`);
- assert(result.extraCanvasPixels<100000,'additional caches stay smaller than 0.4 MB of RGBA');
+ assert(result.extraCanvasPixels<170000,'additional caches stay smaller than 0.65 MiB of RGBA with all three plants');
  assert(result.deterministic,'the shared scene clock fully determines the extra animations');
  assert.deepEqual(errors,[]);console.log('PASS ten new motions, anchored housings/roots/endpoints, smooth cable, bounded caches and no animation readback',JSON.stringify(result));
 }finally{await browser.close();}})().catch(error=>{console.error(error);process.exitCode=1;});
