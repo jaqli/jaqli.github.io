@@ -116,3 +116,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .is-leaving, .is-entering { overflow-x: clip; }
 .is-leaving .document-main, .is-entering .document-main, .is-leaving .scene-viewport, .is-entering .scene-viewport { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .route-arriving body > :not(script) { opacity: 1; } }
+
+.scene-time { position:fixed; top:max(25px,env(safe-area-inset-top)); right:max(25px,env(safe-area-inset-right)); display:flex; gap:2px; padding:3px; border:1px solid #a4c5cc55; border-radius:5px; background:#08121ad4; }
+.scene-time button { border:0; border-radius:2px; padding:8px 10px; background:transparent; color:#a3b5bd; font-size:11px; letter-spacing:1px; }
+.scene-time button:hover { color:#e1f2e7; background:#b5e7d517; }
+.scene-time button[aria-pressed="true"] { color:#d8f7e8; background:#45696585; }
+.scene-time button:disabled { cursor:wait; }
+.scene-time[aria-busy="true"] { border-color:#b5e7d5; }
+.home[data-scene-time="night"] #scene-intro { filter:brightness(.48) saturate(.75); }
+.home[data-scene-time="dawn"] #scene-intro { filter:saturate(.86); }
+@media(max-width:700px){ .scene-time { top:max(23px,env(safe-area-inset-top)); right:18px; } .scene-time button { padding:8px 7px; font-size:10px; } }

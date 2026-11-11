@@ -6,7 +6,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const result=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261111-extras41'),canvas=document.createElement('canvas');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261111-days42'),canvas=document.createElement('canvas');
   const r=await PixelScene.create(document.querySelector('#scene-image'),canvas),e=r.extras,ctx=r.ctx;
   const regions={steam:[628,475,26,39],fan:[1213,560,59,78],tag:[299,79,35,37],plant:[1415,213,86,33],
    greenRobot:[324,332,29,20],roundRobot:[1349,776,33,30],leftRack:[165,345,105,16],rightRack:[1447,541,65,12],cable:[611,885,124,78],dust:[900,250,162,81]};
@@ -34,7 +34,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   const readback=CanvasRenderingContext2D.prototype.getImageData;
   CanvasRenderingContext2D.prototype.getImageData=()=>{throw new Error('per-frame pixel readback');};
   const costs=[];try{for(let n=0;n<120;n++){const start=performance.now();e.draw(ctx,n/60);costs.push(performance.now()-start);}}finally{CanvasRenderingContext2D.prototype.getImageData=readback;}
-  const caches=new Set();function walk(v){if(v instanceof HTMLCanvasElement)caches.add(v);else if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'&&Object.getPrototypeOf(v)===Object.prototype)Object.values(v).forEach(walk);}
+  const caches=new Set();function walk(v){if(v instanceof HTMLCanvasElement)caches.add(v);else if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'&&(Object.getPrototypeOf(v)===Object.prototype||v.constructor?.name==='SceneFan'))Object.values(v).forEach(walk);}
   Object.values(e).forEach(walk);const canvasPixels=[...caches].reduce((n,c)=>n+c.width*c.height,0);
   draw(1.23);const a=canvas.toDataURL();draw(1.23);const deterministic=a===canvas.toDataURL();
   costs.sort((a,b)=>a-b);r.dispose();

@@ -1,4 +1,5 @@
-import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
+import { SceneFan } from './scene-fan.js?v=20261111-days42';
+import { prepareWarp, drawWarp } from './scene-deform.js?v=20261111-days42';
 import { inside } from './scene-objects.js?v=20261111-surface37';
 
 const TAU=Math.PI*2,W=1536;
@@ -16,7 +17,18 @@ export class SceneExtras {
       {anchor:[1448,241],phase:.3,polygon:[[1417,228],[1430,230],[1437,222],[1441,230],[1449,235],[1448,241],[1434,241],[1423,237]]},
       {anchor:[1457,240],phase:2.1,polygon:[[1434,215],[1443,217],[1447,223],[1455,220],[1462,228],[1458,237],[1457,241],[1450,238],[1444,230],[1438,227]]},
       {anchor:[1468,242],phase:4.4,polygon:[[1462,232],[1474,231],[1481,224],[1487,221],[1486,230],[1491,231],[1497,235],[1497,240],[1481,240],[1475,244],[1467,244]]},
-    ].map(leaf=>({...leaf,...scene.cut(leaf.polygon,(r,g,b)=>g>r*.95&&g>b*1.12,true,4,undefined,false,true)}));
+      {anchor:[1304,105],phase:1.1,polygon:[[1248,92],[1255,87],[1273,87],[1287,93],[1306,101],[1304,108],[1281,108],[1276,101],[1250,102]]},
+      {anchor:[1319,113],phase:3.1,polygon:[[1274,72],[1292,77],[1291,68],[1303,67],[1312,75],[1319,102],[1320,114],[1310,113],[1298,100],[1285,98],[1280,87]]},
+      {anchor:[1324,119],phase:5,polygon:[[1322,97],[1326,84],[1335,77],[1343,67],[1358,69],[1355,83],[1352,96],[1340,107],[1329,120]]},
+      {anchor:[1317,121],phase:1.9,polygon:[[1263,114],[1285,110],[1290,105],[1302,108],[1318,116],[1318,123],[1299,123],[1293,129],[1278,127],[1274,121],[1262,120]]},
+      {anchor:[1341,119],phase:3.9,polygon:[[1341,112],[1355,94],[1367,81],[1384,81],[1384,88],[1394,96],[1394,106],[1369,109],[1362,114],[1343,122]]},
+      {anchor:[1348,123],phase:5.8,polygon:[[1349,117],[1372,109],[1388,112],[1386,122],[1379,128],[1379,137],[1370,141],[1366,130],[1356,129],[1348,125]]},
+      {anchor:[1300,126],phase:.8,polygon:[[1294,123],[1301,127],[1293,138],[1280,143],[1275,153],[1269,147],[1273,136],[1284,131]]},
+    ].map(leaf=>{
+      const sprite=scene.cut(leaf.polygon,(r,g,b)=>g>r*.91&&g>b*1.12,true,9,undefined,false,true);
+      const length=Math.max(...leaf.polygon.map(([x,y])=>Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])));
+      return{...leaf,...prepareWarp(sprite,(x,y)=>{const free=clamp(Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])/length)**1.7;return[free,free*free];})};
+    });
     yield;
     this.prepareFan(scene);
     yield;
@@ -43,33 +55,7 @@ export class SceneExtras {
     this.prepareCable(scene);
     yield;
   }
-  prepareFan(scene){
-    // Replace the inner rotor once. Keep the real housing and original cage
-    // pixels above it, so stationary blades cannot show through a moving copy.
-    this.fan=surface(76,102);this.fanCtx=this.fan.getContext('2d');
-    this.fanCage=surface(76,102);const ctx=this.fanCage.getContext('2d'),out=ctx.createImageData(76,102),src=scene.original.data;
-    for(let y=0;y<102;y++)for(let x=0;x<76;x++){
-      const gx=x+1205,gy=y+548,v=(gy-599)/40,u=(gx-1243+v*6)/31,r=Math.hypot(u,v);
-      if(r>1.07)continue;
-      const cage=r<.29||r>.91||Math.abs(u)<.043||Math.abs(v)<.032||Math.abs(u-v)<.044||Math.abs(u+v)<.044;
-      if(!cage)continue;const i=(gy*W+gx)*4,j=(y*76+x)*4;
-      for(let c=0;c<3;c++)out.data[j+c]=src[i+c];out.data[j+3]=255;
-    }
-    ctx.putImageData(out,0,0);
-    this.fanBlades=surface(88,88);const b=this.fanBlades.getContext('2d'),rotor=b.createImageData(88,88),mask=new Uint8Array(88*88);
-    for(let y=0;y<88;y++)for(let x=0;x<88;x++){
-      const u=(x-44)/40,v=(y-44)/40,r=Math.hypot(u,v),gx=Math.round(1243+u*31-v*6),gy=Math.round(599+v*40),i=(gy*W+gx)*4,j=(y*88+x)*4;
-      for(let c=0;c<3;c++)rotor.data[j+c]=src[i+c];rotor.data[j+3]=255;
-      mask[y*88+x]=r>.89||Math.abs(u)<.055||Math.abs(v)<.045||Math.abs(u-v)<.06||Math.abs(u+v)<.06?1:0;
-    }
-    // Retain the artwork's colored, textured blades. Remove the fixed cage
-    // from the rotor texture before rotating, then lay its original pixels back.
-    const field=exteriorField(mask,88,88),copy=rotor.data.slice();
-    for(let i=0;i<mask.length;i++)if(mask[i]){
-      const donor=reflectedSample(i,field,mask,88,88);for(let c=0;c<3;c++)rotor.data[i*4+c]=copy[donor*4+c];
-    }
-    b.putImageData(rotor,0,0);
-  }
+  prepareFan(scene){this.fan=new SceneFan(scene);}
 
   prepareCable(scene){
     const outer=[[619,891],[640,885],[651,886],[669,889],[691,891],[709,897],[722,902],[731,916],[732,940],[725,950],[705,962],[679,965],[659,956],[637,943],[619,928],[611,914],[614,901]];
@@ -85,13 +71,8 @@ export class SceneExtras {
     }
     this.cable={...sprite,ctx,source,weight,active:new Int32Array(active),output:ctx.createImageData(w,h)};
   }
-  drawFan(ctx,time){
-    const c=this.fanCtx;c.clearRect(0,0,76,102);c.save();c.translate(38,51);c.transform(1,0,-6/40,1,0,0);c.scale(31/40,1);
-    c.beginPath();c.arc(0,0,40,0,TAU);c.clip();
-    c.rotate(time*4.1+.12*Math.sin(time*.7));c.drawImage(this.fanBlades,-44,-44);c.restore();
-    c.drawImage(this.fanCage,0,0);
-    ctx.drawImage(this.fan,1205,548);
-  }
+  drawFan(ctx,time){this.fan.draw(ctx,time);}
+
   drawCable(ctx,time){
     const s=this.cable,{w,source,weight,active,output}=s,out=output.data,dx=.9*Math.sin(time*1.03),dy=1.9*Math.sin(time*1.37);
     // Continuous inverse sampling of one connected texture. Premultiplied
@@ -111,8 +92,9 @@ export class SceneExtras {
     const cycle=time%9.7,gust=Math.exp(-(((cycle-6.5)/.65)**2)),angle=.045*Math.sin(time*1.65)+.035*gust*Math.sin(time*4.2);
     ctx.save();ctx.beginPath();ctx.rect(294,80,48,42);ctx.clip();ctx.translate(313,81);ctx.rotate(angle);ctx.drawImage(this.tag.canvas,this.tag.x-313,this.tag.y-81);ctx.restore();
     for(const leaf of this.leaves){
-      const [ax,ay]=leaf.anchor,wind=.023*(Math.sin(time*1.7+leaf.phase)-Math.sin(leaf.phase))+.009*Math.sin(time*3.2+leaf.phase)*Math.sin(time*.4);
-      ctx.save();ctx.translate(ax,ay);ctx.rotate(wind);ctx.drawImage(leaf.canvas,leaf.x-ax,leaf.y-ay);ctx.restore();
+      const wind=2.9*(Math.sin(time*1.45+leaf.phase)-Math.sin(leaf.phase))*.6+1.15*Math.sin(time*2.9+leaf.phase)*Math.sin(time*.31);
+      const curl=1.15*(Math.sin(time*1.8+leaf.phase*.7)-Math.sin(leaf.phase*.7));
+      drawWarp(ctx,leaf,wind,curl);
     }
     this.drawCable(ctx,time);
     this.drawFaces(ctx,time);
@@ -158,7 +140,7 @@ export class SceneExtras {
   }
   dispose(){
     for(const item of [this.tag,this.roundEye,this.cable,...this.leaves,...this.leftLeds,...this.rightLeds])item.canvas.width=item.canvas.height=1;
-    for(const canvas of [this.fan,this.fanCage,this.fanBlades])canvas.width=canvas.height=1;
+    this.fan.dispose();
     this.cable=null;this.leaves=[];this.leftLeds=[];this.rightLeds=[];
   }
 }

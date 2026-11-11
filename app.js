@@ -1,6 +1,6 @@
 import { site } from './site.config.js?v=20261110-flight11';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-detail39';
-import { PixelScene } from './pixel-scene.js?v=20261111-extras41';
+import { PixelScene } from './pixel-scene.js?v=20261111-days42';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import { sceneIntro } from './scene-intro.js?v=20261111-motion38';
 import './navigation.js?v=20261111-detail39';
@@ -11,6 +11,22 @@ const image = document.querySelector('#scene-image');
 const poster = document.querySelector('#scene-poster');
 const canvas = document.querySelector('#ascii-canvas');
 const sceneFrameInterval=1000/60;
+const timeControl=document.querySelector('.scene-time'),timeButtons=[...document.querySelectorAll('[data-time]')];
+let sceneTime='dusk',changingTime=false;
+try{const saved=localStorage.getItem('jaqli.scene-time');if(['dawn','noon','dusk','night'].includes(saved))sceneTime=saved;}catch{}
+document.body.dataset.sceneTime=sceneTime;
+function syncTimeButtons(){for(const button of timeButtons)button.setAttribute('aria-pressed',String(button.dataset.time===sceneTime));}
+syncTimeButtons();
+async function changeTime(mode){
+  if(!ready||changingTime||mode===sceneTime)return;
+  changingTime=true;syncMotion();timeControl.setAttribute('aria-busy','true');for(const b of timeButtons)b.disabled=true;
+  try{
+    await renderer.setTimeOfDay(mode);sceneTime=mode;document.body.dataset.sceneTime=mode;syncTimeButtons();draw();
+    try{localStorage.setItem('jaqli.scene-time',mode);}catch{}
+    document.querySelector('#time-status').textContent=`已切换为${timeButtons.find(b=>b.dataset.time===mode).textContent}场景`;
+  }finally{changingTime=false;timeControl.removeAttribute('aria-busy');for(const b of timeButtons)b.disabled=false;syncMotion();}
+}
+for(const button of timeButtons)button.addEventListener('click',()=>{changeTime(button.dataset.time).catch(()=>{document.querySelector('#time-status').textContent='时段切换未完成，请重试。';});});
 const duck = detailShapes.find(shape=>shape.id==='duck');
 
 const pause = document.querySelector('#pause');
@@ -93,7 +109,7 @@ function draw() {
 }
 function tick(now) {
   frame = null;
-  if (!ready || paused || transitioning || document.hidden) return;
+  if (!ready || paused || transitioning || changingTime || document.hidden) return;
   const current=Math.max(now,previousFrame);
   const delta = previousFrame ? current - previousFrame : 0;
   previousFrame = current;
@@ -115,7 +131,7 @@ function syncMotion() {
   pause.setAttribute('aria-pressed', String(paused));
   pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
   pause.title = paused ? (motion.matches ? '系统已启用减少动态效果，点击播放场景动效' : '播放动效') : '暂停动效';
-  if (ready && !paused && !transitioning && !document.hidden) frame = requestAnimationFrame(tick);
+  if (ready && !paused && !transitioning && !changingTime && !document.hidden) frame = requestAnimationFrame(tick);
 }
 pause.addEventListener('click', () => { paused = !paused; syncMotion(); });
 motion.addEventListener('change', event => { paused = event.matches; syncMotion(); });
@@ -133,8 +149,9 @@ try {
   renderer = await PixelScene.create(image, canvas, value => reportProgress(35 + value * 60, '准备像素场景'), document.querySelector('#screen-canvas'));
   do { await renderer.resizeAsync(width, height, value => reportProgress(95 + value * 4, '点亮屏幕')); }
   while (renderer.width !== width || renderer.height !== height);
+  if(sceneTime!=='dusk')await renderer.setTimeOfDay(sceneTime);
   await draw();
-  ready = true;
+  ready = true;timeControl.hidden=false;
   document.body.classList.add('scene-ready');
   sceneIntro.finish();
   performance.mark('scene-ready');

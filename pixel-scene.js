@@ -6,7 +6,9 @@ import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight, lampColor } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
-import { SceneExtras } from './scene-extras.js?v=20261111-extras41';
+import { SceneExtras } from './scene-extras.js?v=20261111-days42';
+import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-days42';
+import { SceneTime } from './scene-time.js?v=20261111-days42';
 
 const W=1536,H=1024;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -108,11 +110,11 @@ export class PixelScene {
     }
     yield .12;
     const hem={id:'hem',kind:'paper',anchor:[830,615],length:24,phase:0,polygon:hemArea};
-    for(const shape of [...detailShapes,hem]){
+    for(const shape of [...detailShapes.filter(shape=>shape.id!=='leaves'),...additionalShapes,hem]){
       const accept=(r,g,b)=>shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
-      const soft=shape.kind==='float'||shape.kind==='paper';
+      const soft=shape.kind==='float'||shape.kind==='paper'||shape.kind==='hinge';
       this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft),shape});
-      yield .12+.28*this.details.length/(detailShapes.length+1);
+      yield .12+.28*this.details.length/(detailShapes.length+additionalShapes.length);
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
     for(const emitter of emitters){
@@ -130,7 +132,9 @@ export class PixelScene {
     const bulb=this.ceilingLamp.canvas.getContext('2d');bulb.globalCompositeOperation='source-atop';
     bulb.fillStyle='#000';bulb.fillRect(0,0,this.ceilingLamp.w,this.ceilingLamp.h);bulb.globalCompositeOperation='source-over';
     this.extras=new SceneExtras();let extraStep=0;
-    for(const _ of this.extras.prepare(this))yield .4+.01*++extraStep;
+    for(const _ of this.extras.prepare(this))yield .4+.004*++extraStep;
+    this.additions=new SceneAdditions();let additionStep=0;
+    for(const _ of this.additions.prepare(this))yield .416+.024*++additionStep/3;
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
     yield* this.prepareSky();
     this.screenLayer=surface(1260,570);this.screenCtx=this.screenLayer.getContext('2d');this.screenCtx.scale(3,3);
@@ -153,7 +157,7 @@ export class PixelScene {
     }
     mask.putImageData(bitmap,0,0);
     // Pixel buffers are needed only for extraction, never read back each frame.
-    this.original=null;this.plate=null;yield 1;
+    this.original=null;this.plate=null;this.timeOfDay=new SceneTime(this);yield 1;
   }
   *prepareSky(){
     const x0=532,y0=68,w=W-x0,h=360,maskCanvas=surface(w,h),maskCtx=maskCanvas.getContext('2d');
@@ -204,6 +208,7 @@ export class PixelScene {
     const layer=surface(w,h),ctx=layer.getContext('2d'),output=ctx.createImageData(w,h);
     this.clouds=[{x:x0,y:y0,w,h,layer,ctx,output,pixels:new Uint32Array(output.data.buffer),sourcePixels,destinations:new Int32Array(destinations),weights:new Float32Array(weights)}];yield .79;
   }
+  async setTimeOfDay(mode){await this.timeOfDay.apply(mode);}
   async resizeAsync(width,height,onProgress=()=>{}){this.width=width;this.height=height;onProgress(1);}
   drawClouds(time){
     const frame=Math.floor(time*30);
@@ -228,12 +233,12 @@ export class PixelScene {
         const age=clock-(latest-n)*source.period;if(age<0||age>=source.life)continue;
         const fade=smooth(age/.5)*(1-smooth((age/source.life-.45)/.55)),r=age*source.speed/2;
         if(fade<.01)continue;
-        ctx.strokeStyle=`rgba(255,243,181,${fade*.27})`;ctx.lineWidth=1;
+        ctx.strokeStyle=this.timeOfDay?.mode==='night'?`rgba(139,194,224,${fade*.23})`:`rgba(255,243,181,${fade*.27})`;ctx.lineWidth=1;
         ctx.beginPath();ctx.ellipse(source.x/2,source.y/2,r*source.aspect[0],r/source.aspect[1],0,0,Math.PI*2);ctx.stroke();
         if(r>8){ctx.strokeStyle=`rgba(38,105,128,${fade*.16})`;ctx.beginPath();ctx.ellipse(source.x/2,source.y/2,(r-4)*source.aspect[0],(r-4)/source.aspect[1],0,index*.7,index*.7+Math.PI*1.7);ctx.stroke();}
       }
     }
-    for(const p of this.glints){const strength=Math.max(0,Math.sin(time*2+p.phase))**8*.3;if(strength<.02)continue;ctx.fillStyle=`rgba(255,249,203,${strength})`;ctx.fillRect(p.x,p.y,p.w,1);}
+    for(const p of this.glints){const strength=Math.max(0,Math.sin(time*2+p.phase))**8*.3;if(strength<.02)continue;ctx.fillStyle=this.timeOfDay?.mode==='night'?`rgba(165,210,235,${strength*.75})`:`rgba(255,249,203,${strength})`;ctx.fillRect(p.x,p.y,p.w,1);}
     ctx.globalCompositeOperation='destination-in';ctx.drawImage(this.waterMask,0,0);ctx.globalCompositeOperation='source-over';
     this.ctx.drawImage(this.water,0,0,W,H);
   }
@@ -265,6 +270,10 @@ export class PixelScene {
     // Interpolate only these moving cutouts at subpixel positions. The room
     // keeps its original raster, colors and nearest-neighbor display scaling.
     ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
+    if(shape.kind==='hinge'){
+      const [ax,ay]=shape.anchor,angle=shape.angle*(Math.sin(time*shape.speed+shape.phase)-Math.sin(shape.phase));
+      ctx.translate(ax,ay);ctx.rotate(angle);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();return;
+    }
     if(shape.kind==='paper'||shape.kind==='leaves'){
       const [ax,ay]=shape.anchor,endY=shape.kind==='paper'?ay+shape.length:ay-63;
       const end=detailPoint(shape,ax,endY,time),dy=endY-ay;
@@ -301,9 +310,9 @@ export class PixelScene {
     }
   }
   draw(time){
-    const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.drawWater(time);this.drawScreens(time);
+    const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.timeOfDay.drawSky(ctx,time);this.drawWater(time);this.drawScreens(time);
     for(const sprite of this.details)this.drawDetail(sprite,time);
-    this.drawLights(time);this.extras.draw(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
+    this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
   }
-  dispose(){this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }
