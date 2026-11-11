@@ -1,9 +1,9 @@
 import { site } from './site.config.js?v=20261110-flight11';
-import { detailShapes, detailPoint } from './scene-details.js?v=20261111-flow28';
-import { PixelScene } from './pixel-scene.js?v=20261111-motion38';
+import { detailShapes, detailPoint } from './scene-details.js?v=20261111-detail39';
+import { PixelScene } from './pixel-scene.js?v=20261111-detail39';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import { sceneIntro } from './scene-intro.js?v=20261111-motion38';
-import './navigation.js?v=20261111-hybrid36';
+import './navigation.js?v=20261111-detail39';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
@@ -130,7 +130,7 @@ syncMotion();
 try {
   await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
-  renderer = await PixelScene.create(image, canvas, value => reportProgress(35 + value * 60, '准备像素场景'));
+  renderer = await PixelScene.create(image, canvas, value => reportProgress(35 + value * 60, '准备像素场景'), document.querySelector('#screen-canvas'));
   do { await renderer.resizeAsync(width, height, value => reportProgress(95 + value * 4, '点亮屏幕')); }
   while (renderer.width !== width || renderer.height !== height);
   await draw();

@@ -1,4 +1,4 @@
-import { createParticles } from './page-particles.js?v=20261111-hybrid36';
+import { createParticles } from './page-particles.js?v=20261111-detail39';
 
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const routeKey='jaqli-route',homeKey='jaqli-home-focus';

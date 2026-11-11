@@ -10,6 +10,10 @@ export function drawSceneAmbience(ctx,rect=document.querySelector('#scene-world'
 }
 
 export function drawSceneLayers(ctx){
+  const displays=document.querySelector('#screen-canvas');
+  if(displays&&document.body.classList.contains('scene-ready')){
+    const rect=displays.getBoundingClientRect();ctx.drawImage(displays,rect.x,rect.y,rect.width,rect.height);
+  }
   for(const root of document.querySelectorAll('#motion-layers, #flight-layer')){
     const origin=root.getBoundingClientRect();
     for(const group of root.querySelectorAll('.water-blend')){

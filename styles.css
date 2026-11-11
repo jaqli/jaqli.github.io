@@ -18,6 +18,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .scene-art { isolation: isolate; mix-blend-mode: screen; pointer-events: none; }
 .pixel-home .scene-art { mix-blend-mode: normal; }
 .pixel-home #ascii-canvas, .pixel-home .scene-poster { image-rendering: pixelated; }
+#screen-canvas { position: absolute; pointer-events: none; image-rendering: auto; opacity: 0; transition: opacity .18s ease; }
+.scene-ready #screen-canvas { opacity: 1; }
 .scene-image { object-fit: fill; opacity: 0; }
 .scene-poster { object-fit: fill; display: none; }
 #scene-intro { transition: opacity .16s ease; }

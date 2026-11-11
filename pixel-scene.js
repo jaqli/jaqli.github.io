@@ -1,7 +1,7 @@
 import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea, distantCity } from './scene-objects.js?v=20261111-surface37';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
-import { detailShapes, detailPoint, eyeOpening, cloudSpeed, emitters } from './scene-details.js?v=20261111-flow28';
-import { screens, paintScreen } from './screen-content.js?v=20261111-hybrid36';
+import { detailShapes, detailPoint, eyeOpening, cloudSpeed, emitters } from './scene-details.js?v=20261111-detail39';
+import { screens, paintScreen } from './screen-content.js?v=20261111-detail39';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight, lampColor } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
@@ -21,26 +21,47 @@ const sky=(r,g,b)=>g-r>26&&b-r>33;
 // Original pixel artwork is the room. ASCII is confined to the three displays.
 // Native-size textures stay fixed through resize; no room-sized glyph atlases.
 export class PixelScene {
-  static async create(image,canvas,onProgress=()=>{}){
-    const scene=new PixelScene(image,canvas);
+  static async create(image,canvas,onProgress=()=>{},screenCanvas=null){
+    const scene=new PixelScene(image,canvas,screenCanvas);
     for(const progress of scene.prepare()){onProgress(progress);await yieldFrame();}
     return scene;
   }
-  constructor(image,canvas){
+  constructor(image,canvas,screenCanvas=null){
     this.image=image;this.canvas=canvas;canvas.width=W;canvas.height=H;
     canvas.dataset.renderer='pixel';canvas.dataset.raster='native';
     this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;
     this.base=surface(W,H);const ctx=this.base.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,W,H);
     this.original=ctx.getImageData(0,0,W,H);this.plate=new ImageData(this.original.data.slice(),W,H);
     this.birds=[];this.details=[];this.clouds=[];this.lights=[];this.lastScreen=-1;this.lastCloud=-1;
+    this.screenCanvas=screenCanvas;
+    if(screenCanvas){
+      screenCanvas.width=1260;screenCanvas.height=570;
+      Object.assign(screenCanvas.style,{left:`${325/W*100}%`,top:`${335/H*100}%`,width:`${420/W*100}%`,height:`${190/H*100}%`});
+      this.displayCtx=screenCanvas.getContext('2d');
+    }
   }
-  cut(polygon,accept,erase=true,pad=0,background){
+  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false){
     const [x,y,w,h]=bounds(polygon,pad),canvas=surface(w,h),ctx=canvas.getContext('2d'),bitmap=ctx.createImageData(w,h);
     const source=this.original.data,plate=this.plate.data;
+    let coverage;
+    if(softEdge){
+      // Rasterize once, then use a linear-time distance field. Rechecking every
+      // polygon edge for every margin pixel noticeably delayed startup.
+      ctx.fillStyle='#fff';ctx.beginPath();polygon.forEach(([sx,sy],i)=>i?ctx.lineTo(sx-x+.5,sy-y+.5):ctx.moveTo(sx-x+.5,sy-y+.5));ctx.closePath();ctx.fill();
+      const core=ctx.getImageData(0,0,w,h).data,outside=new Uint8Array(w*h);
+      for(let i=0;i<outside.length;i++)outside[i]=core[i*4+3]<128?1:0;
+      const nearest=exteriorField(outside,w,h);coverage=new Uint8Array(w*h);
+      for(let i=0;i<coverage.length;i++){
+        const edge=nearest[i],distance=outside[i]?Math.hypot(i%w-edge%w,Math.floor(i/w)-Math.floor(edge/w)):0;
+        // The real rim stays opaque; only its surrounding margin is softened.
+        coverage[i]=Math.round(255*(1-smooth((distance-2)/(pad-2))));
+      }
+    }
     for(let py=0;py<h;py++)for(let px=0;px<w;px++){
       const sx=x+px,sy=y+py,i=(sy*W+sx)*4,j=(py*w+px)*4;
-      if(!(pad?near(sx,sy,polygon):inside(sx,sy,polygon))||!accept(source[i],source[i+1],source[i+2],sx,sy))continue;
-      for(let c=0;c<3;c++)bitmap.data[j+c]=source[i+c];bitmap.data[j+3]=255;
+      const alpha=coverage?coverage[py*w+px]:(pad?near(sx,sy,polygon):inside(sx,sy,polygon))?255:0;
+      if(!alpha||!accept(source[i],source[i+1],source[i+2],sx,sy))continue;
+      for(let c=0;c<3;c++)bitmap.data[j+c]=source[i+c];bitmap.data[j+3]=alpha;
       if(erase){
         if(background)for(let c=0;c<3;c++)plate[i+c]=source[(background[1]*W+background[0])*4+c];
       }
@@ -48,11 +69,19 @@ export class PixelScene {
     if(erase&&!background){
       const margin=12,pw=w+margin*2,ph=h+margin*2,mask=new Uint8Array(pw*ph);
       for(let py=0;py<h;py++)for(let px=0;px<w;px++)mask[(py+margin)*pw+px+margin]=bitmap.data[(py*w+px)*4+3]?1:0;
-      const field=exteriorField(mask,pw,ph);
+      // Exclude bezel highlights and dark reflections from replacement water.
+      // This changes repair donors only, never the original scenery outside it.
+      const donors=waterRepair?mask.slice():mask;
+      if(waterRepair)for(let py=0;py<ph;py++)for(let px=0;px<pw;px++){
+        const sx=clamp(x+px-margin,0,W-1),sy=clamp(y+py-margin,0,H-1),i=(sy*W+sx)*4,r=source[i],g=source[i+1],b=source[i+2];
+        if(!(g>105&&b>105&&g-r>15&&b-r>20&&b<g*1.2))donors[py*pw+px]=1;
+      }
+      const field=exteriorField(donors,pw,ph);
       for(let py=0;py<h;py++)for(let px=0;px<w;px++){
         const index=(py+margin)*pw+px+margin;if(!mask[index])continue;
-        const sample=reflectedSample(index,field,mask,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
-        for(let c=0;c<3;c++)plate[i+c]=source[j+c];
+        const sample=reflectedSample(index,field,donors,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
+        const alpha=bitmap.data[(py*w+px)*4+3]/255;
+        for(let c=0;c<3;c++)plate[i+c]=source[i+c]*(1-alpha)+source[j+c]*alpha;
       }
     }
     ctx.putImageData(bitmap,0,0);return {canvas,x,y,w,h};
@@ -79,7 +108,8 @@ export class PixelScene {
     const hem={id:'hem',kind:'paper',anchor:[830,615],length:24,phase:0,polygon:hemArea};
     for(const shape of [...detailShapes,hem]){
       const accept=(r,g,b)=>shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
-      this.details.push({...this.cut(shape.polygon,accept,true,0,shape.background),shape});
+      const soft=shape.kind==='float'||shape.kind==='paper';
+      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft),shape});
       yield .12+.28*this.details.length/(detailShapes.length+1);
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
@@ -93,9 +123,11 @@ export class PixelScene {
     }
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
     yield* this.prepareSky();
-    this.screenLayer=surface(420,190);this.screenCtx=this.screenLayer.getContext('2d');
+    this.screenLayer=surface(1260,570);this.screenCtx=this.screenLayer.getContext('2d');this.screenCtx.scale(3,3);
     const quads=[screens[0].quad,[[335,407],[438,413],[440,481],[336,480]],[[640,435],[730,441],[734,501],[644,495]]];
-    this.screens=screens.map((screen,i)=>{const canvas=surface(screen.width*3,screen.height*3),ctx=canvas.getContext('2d');ctx.scale(3,3);return {...screen,quad:quads[i],fontSize:4,fontWeight:700,canvas,ctx};});
+    this.screens=screens.map((screen,i)=>{const canvas=surface(screen.width*3,screen.height*3),ctx=canvas.getContext('2d');ctx.scale(3,3);return {...screen,quad:quads[i],fontSize:[5.6,6.2,5.8][i],fontWeight:500,canvas,ctx};});
+    this.monitorPaper=this.details.find(sprite=>sprite.shape.id==='paper-monitor');
+    this.monitorPaperOccluder={...this.cut(this.monitorPaper.shape.polygon,()=>true,false),shape:this.monitorPaper.shape};
     this.water=surface(W/2,H/2);this.waterCtx=this.water.getContext('2d');
     this.waterMask=surface(W/2,H/2);const mask=this.waterMask.getContext('2d'),bitmap=mask.createImageData(W/2,H/2),source=this.original.data;
     this.glints=[];
@@ -202,11 +234,22 @@ export class PixelScene {
       for(const screen of this.screens){paintScreen(screen,time);drawQuad(ctx,screen.canvas,screen.quad,screen.width,screen.height);}
       ctx.restore();this.lastScreen=frame;
     }
-    this.ctx.drawImage(this.screenLayer,325,335);
-    this.ctx.drawImage(this.head.canvas,this.head.x,this.head.y);
+    if(this.screenCanvas){
+      // Keep glyphs at 3× all the way to the browser compositor. Flattening
+      // them into the native pixel-art canvas throws that detail away.
+      const ctx=this.displayCtx;ctx.setTransform(3,0,0,3,-325*3,-335*3);ctx.clearRect(325,335,420,190);
+      ctx.drawImage(this.screenLayer,325,335,420,190);
+      ctx.globalCompositeOperation='destination-out';
+      ctx.drawImage(this.head.canvas,this.head.x,this.head.y);
+      this.drawDetail(this.monitorPaperOccluder,time,ctx);
+      ctx.globalCompositeOperation='source-over';
+    }else{
+      this.ctx.drawImage(this.screenLayer,325,335,420,190);
+      this.ctx.drawImage(this.head.canvas,this.head.x,this.head.y);
+    }
   }
-  drawDetail(sprite,time){
-    const {canvas,x,y,w,h,shape}=sprite,ctx=this.ctx;
+  drawDetail(sprite,time,ctx=this.ctx){
+    const {canvas,x,y,w,h,shape}=sprite;
     // Tiny rotations with nearest-neighbor sampling make whole columns jump
     // between source rows, producing a line that sweeps across a floating prop.
     // Interpolate only these moving cutouts at subpixel positions. The room

@@ -1,7 +1,7 @@
-import { floatingShapes } from './scene-floats.js?v=20261110-depth6';
+import { floatingShapes } from './scene-floats.js?v=20261111-detail39';
 // Coordinates and attachment points measured against the original 1536 × 1024 art.
 export const detailShapes = [
-  { id: 'duck', kind: 'float', anchor: [352,850],
+  { id: 'duck', kind: 'float', anchor: [352,850], waterRepair:true,
     polygon: [[294,834],[305,829],[306,807],[314,790],[326,785],[343,787],[352,797],[353,814],[377,809],[392,814],[401,823],[404,835],[417,839],[419,853],[402,863],[370,873],[333,871],[308,861],[288,855],[290,842]] },
   ...floatingShapes,
   { id: 'paper-yellow', kind: 'paper', anchor: [412,253], length: 44, phase: 0,
@@ -21,7 +21,7 @@ export const detailShapes = [
   { id: 'paper-board-bottom', kind: 'paper', anchor: [374,299], length: 37, phase: 5.3,
     polygon: [[358,296],[386,299],[391,333],[361,331]] },
   { id: 'paper-monitor', kind: 'paper', anchor: [476,468], length: 48, phase: 1.9,
-    polygon: [[458,467],[493,474],[501,514],[457,517]] },
+    polygon: [[457,466],[491,471],[495,488],[503,508],[494,511],[492,521],[457,526]] },
   { id: 'eye-left', kind: 'eye', anchor: [149,440], phase: 0, background: [159,451],
     polygon: [[141,429],[157,429],[157,450],[141,450]] },
   { id: 'eye-right', kind: 'eye', anchor: [172,438], phase: .055, background: [159,451],

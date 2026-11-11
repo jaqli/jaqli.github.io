@@ -1,4 +1,4 @@
-import { drawSceneLayers, drawSceneAmbience } from './scene-snapshot.js?v=20261111-flow28';
+import { drawSceneLayers, drawSceneAmbience } from './scene-snapshot.js?v=20261111-detail39';
 
 const glyphs=Array.from({length:94},(_,i)=>String.fromCharCode(i+33)).join('');
 const limit=1400;
