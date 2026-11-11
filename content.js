@@ -1,4 +1,4 @@
-import './navigation.js?v=20261111-scene32';
+import './navigation.js?v=20261111-hybrid36';
 
 // Content is a reviewed local snapshot. No browser tokens or third-party scripts.
 const root = document.querySelector('#content');

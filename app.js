@@ -1,19 +1,16 @@
-import { scenePixelRatio, sceneFrameInterval } from './render-budget.js?v=20261111-flow28';
 import { site } from './site.config.js?v=20261110-flight11';
-import { FlightLayer } from './flight-layer.js?v=20261111-scene32';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-flow28';
-import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-scene32';
+import { PixelScene } from './pixel-scene.js?v=20261111-hybrid36';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
 import { sceneIntro } from './scene-intro.js?v=20261111-scene32';
-import './navigation.js?v=20261111-scene32';
+import './navigation.js?v=20261111-hybrid36';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
 const image = document.querySelector('#scene-image');
 const poster = document.querySelector('#scene-poster');
 const canvas = document.querySelector('#ascii-canvas');
-const preparedRenderer=prepareSceneRenderer(canvas);
-const flightLayer = new FlightLayer(document.querySelector('#flight-layer'));
+const sceneFrameInterval=1000/60;
 const duck = detailShapes.find(shape=>shape.id==='duck');
 
 const pause = document.querySelector('#pause');
@@ -34,7 +31,7 @@ const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
 let frame = null, elapsed = 0, previousFrame = 0, nextVisualAt = 0;
-let drawTask=null, resizeTask=null, drawTimer=null;
+let resizeTask=null;
 let paused = motion.matches, ready = false, resizeFrame = null, transitioning = false;
 
 
@@ -80,13 +77,10 @@ function layout() {
   document.querySelector('#pan-hint').hidden = !pannable;
   viewport.classList.toggle('is-pannable', pannable);
   if (!ready) return;
-  if (renderer.width === width && renderer.height === height && renderer.pixelRatio === scenePixelRatio(width,height)) return;
+  if (renderer.width === width && renderer.height === height) return;
   if (!resizeTask) resizeTask=(async()=>{
-    renderer.cancelFrame?.();
-    await drawTask;
     do { await renderer.resizeAsync(width,height); }
-    while (renderer.width!==width || renderer.height!==height || renderer.pixelRatio!==scenePixelRatio(width,height));
-    flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed); renderer.animate?.(elapsed);
+    while (renderer.width!==width || renderer.height!==height);
     await draw();
   })().finally(()=>{resizeTask=null;});
 }
@@ -95,26 +89,7 @@ function updateLife(time) {
   document.querySelector('[data-hotspot="life"] polygon').setAttribute('points', points);
 }
 function draw() {
-  if (drawTask) return drawTask;
-  const time=elapsed, requestedAt=performance.now();
-  const result=renderer.draw(time);
-  if (!result?.then) { updateLife(time); return; }
-  drawTask=result.then(painted=>{if(painted!==false && !renderer.animate) updateLife(time);}).catch(error=>{
-    if (!ready) throw error;
-    paused=true; syncMotion();
-    status.hidden=false; status.textContent='动效已暂停，刷新页面可重试。';
-  }).finally(()=>{
-    drawTask=null;
-    if (ready && !paused && !transitioning && !document.hidden && !resizeTask) {
-      drawTimer=setTimeout(()=>{
-        drawTimer=null;
-        if(paused || transitioning || document.hidden || resizeTask)return;
-        const now=performance.now();elapsed+=previousFrame?(now-previousFrame)/1000:0;previousFrame=now;
-        draw();
-      },Math.max(0,sceneFrameInterval-(performance.now()-requestedAt)));
-    }
-  });
-  return drawTask;
+  renderer.draw(elapsed);updateLife(elapsed);
 }
 function tick(now) {
   frame = null;
@@ -128,19 +103,14 @@ function tick(now) {
   if (!resizeTask && now>=nextVisualAt-.5) {
     if(nextVisualAt<now-sceneFrameInterval)nextVisualAt=now;
     nextVisualAt+=sceneFrameInterval;
-    flightLayer.draw(elapsed);renderer.animate?.(elapsed);updateLife(elapsed);
+    draw();
   }
-  // One frame in flight: never queue expensive work behind input or display
-  // stale worker frames. The clock still advances when a device misses a frame.
-  if (!drawTask && !resizeTask && drawTimer===null) draw();
   frame = requestAnimationFrame(tick);
 }
 function syncMotion() {
-  if(drawTimer!==null){clearTimeout(drawTimer);drawTimer=null;}
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
   previousFrame = 0; nextVisualAt = 0;
-  if (paused || transitioning || document.hidden) renderer?.cancelFrame?.();
   pause.textContent = paused ? '▷ 播放动效' : 'Ⅱ';
   pause.setAttribute('aria-pressed', String(paused));
   pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
@@ -160,10 +130,9 @@ syncMotion();
 try {
   await loadSceneImage(image, site.image, value => reportProgress(value === null ? null : value * 35, '加载场景'));
   performance.mark('scene-source-ready');
-  renderer = await createSceneRenderer(image, canvas, value => reportProgress(35 + value * 20, '准备动效'),preparedRenderer);
-  do { await renderer.resizeAsync(width, height, value => reportProgress(55 + value * 44, '绘制字符')); }
-  while (renderer.width !== width || renderer.height !== height || renderer.pixelRatio !== scenePixelRatio(width,height));
-  flightLayer.configure(renderer.getFlightData()); flightLayer.draw(elapsed); renderer.animate?.(elapsed);
+  renderer = await PixelScene.create(image, canvas, value => reportProgress(35 + value * 60, '准备像素场景'));
+  do { await renderer.resizeAsync(width, height, value => reportProgress(95 + value * 4, '点亮屏幕')); }
+  while (renderer.width !== width || renderer.height !== height);
   await draw();
   ready = true;
   document.body.classList.add('scene-ready');
@@ -173,7 +142,7 @@ try {
   setTimeout(() => { status.hidden = true; }, 200);
   syncMotion();
 } catch {
-  preparedRenderer?.dispose();
+  renderer?.dispose();
   status.textContent = '动态场景暂时无法载入，仍可点击画面入口。';
   poster.src=poster.dataset.src;
   await poster.decode().catch(()=>{});

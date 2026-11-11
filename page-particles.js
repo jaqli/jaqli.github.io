@@ -19,8 +19,11 @@ function sceneParticles(){
   const bounds=source.getBoundingClientRect();ctx.drawImage(source,bounds.x,bounds.y,bounds.width,bounds.height);
   if(document.body.classList.contains('scene-ready')){drawSceneLayers(ctx);drawSceneAmbience(ctx);}
   let pixels;try{pixels=ctx.getImageData(0,0,sample.width,sample.height).data;}catch{return [];}
-  const result=[],step=Math.max(15,Math.sqrt(innerWidth*innerHeight/limit));
-  for(let y=step/2;y<innerHeight;y+=step)for(let x=step/2;x<innerWidth;x+=step){
+  const preview=!document.body.classList.contains('scene-ready')&&!document.body.classList.contains('scene-fallback');
+  // The first loading glyphs occupy little area. A finer one-time sampling
+  // pass still finds them when someone opens an entrance immediately.
+  const result=[],step=preview?8:Math.max(15,Math.sqrt(innerWidth*innerHeight/limit));
+  for(let y=step/2;y<innerHeight&&result.length<limit;y+=step)for(let x=step/2;x<innerWidth&&result.length<limit;x+=step){
     const i=(Math.floor(y*scale)*sample.width+Math.floor(x*scale))*4;
     if(pixels[i]+pixels[i+1]+pixels[i+2]<35)continue;
     const color=`rgb(${[0,1,2].map(c=>clamp(Math.round(pixels[i+c]*1.5),0,255)).join(' ')})`;

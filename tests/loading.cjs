@@ -25,11 +25,11 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     // The camera now transforms the live preview under a transparent particle
     // canvas. Verify both layers rather than expecting a full snapshot in it.
     const visibleTransition = await page.waitForFunction(() => {
-      const canvas=document.querySelector('.page-transition canvas');if(!canvas)return false;
+      const canvas=document.querySelector('.page-transition canvas'),viewport=document.querySelector('#scene-viewport');if(!canvas||!viewport)return false;
       const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
       let colored=0;
       for(let i=0;i<pixels.length;i+=16)if(pixels[i+3]>15&&Math.max(pixels[i],pixels[i+1],pixels[i+2])-Math.min(pixels[i],pixels[i+1],pixels[i+2])>15)colored++;
-      const style=getComputedStyle(document.querySelector('#scene-viewport'));
+      const style=getComputedStyle(viewport);
       return colored>10&&Number(style.opacity)>0&&Number(style.opacity)<1&&new DOMMatrix(style.transform).a>1;
     });
     assert(await visibleTransition.jsonValue(), 'early navigation should scatter colored characters while zooming the visible preview');
@@ -41,10 +41,6 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     const resized = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
     // Exercise the scheduler fallback used by browsers without scheduler.yield.
     await resized.addInitScript(() => Object.defineProperty(globalThis, 'scheduler', { value: undefined }));
-    await resized.route('**/scene-worker.js*',async route=>{
-      const response=await route.fetch();
-      await route.fulfill({response,body:"Object.defineProperty(globalThis,'scheduler',{value:undefined});\n"+await response.text()});
-    });
     await resized.goto(origin, { waitUntil: 'commit' });
     await resized.waitForFunction(() => performance.getEntriesByName('scene-source-ready').length > 0);
     await resized.setViewportSize({ width: 390, height: 844 });
@@ -54,7 +50,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
       const rect = canvas.getBoundingClientRect();
       return { raster: [canvas.width, canvas.height], view: [Math.round(rect.width), Math.round(rect.height)], height: innerHeight };
     });
-    assert.deepEqual(dimensions.raster, dimensions.view, 'resizing during setup must use the final viewport');
+    assert.deepEqual(dimensions.raster, [1536,1024], 'pixel artwork keeps its native raster through rotation');
     assert(dimensions.view[1] >= dimensions.height);
     await resized.screenshot({ path: '/tmp/jaqli-load-mobile.png' });
     await resized.close();
@@ -86,12 +82,11 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
         sourceImages: performance.getEntriesByType('resource').filter(r => /scene.*webp|IMG_1183/.test(r.name)).map(r => ({ file: r.name.split('/').pop(), bytes: r.encodedBodySize })) };
     });
     assert(timing.previewMs < timing.sourceMs && timing.sourceMs < timing.animatedMs);
-    assert.equal(timing.sourceImages.length, 3, 'load the tiny character color map, backing and compressed animation source');
+    assert.equal(timing.sourceImages.length, 2, 'load only the tiny character color map and original pixel scene');
     assert(timing.sourceImages.find(image=>image.file.startsWith('scene-seed.')).bytes<12000);
     assert(!timing.sourceImages.some(image=>image.file.startsWith('scene-preview.')));
     await slow.waitForFunction(()=>document.querySelector('#scene-intro').width===1);
     assert.equal(await slow.locator('#scene-intro').evaluate(c=>c.width*c.height),1,'release the generation canvas after handoff');
-    assert(timing.sourceImages.find(image=>image.file.startsWith('scene-ambience.')).bytes<12000,'the static color backing should remain small');
     assert(timing.progressSteps.length>10 && timing.progressSteps.at(-1)===100);
     assert(timing.progressSteps.every((value,i,array)=>i===0 || value>=array[i-1]), 'progress should reflect completed work and never move backwards');
     await slow.locator('#pause').click();

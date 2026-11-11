@@ -49,7 +49,7 @@ function wave(ctx, time, x, y, width, amplitude, phase = 0, color = '#56dfd5') {
 }
 export function paintScreen(screen, time) {
   const { ctx, width: w, height: h, kind } = screen;
-  ctx.font = `500 ${screen.fontSize}px monospace`; ctx.textBaseline = 'top';
+  ctx.font = `${screen.fontWeight||500} ${screen.fontSize}px monospace`; ctx.textBaseline = 'top';
   // The dim changing character bed is cached separately. Its long rows must
   // not evict live code and waveforms from the small text cache every frame.
   const bedFrame=`${screen.fontSize}:${Math.floor(time*2)}`;
