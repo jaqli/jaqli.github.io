@@ -18,6 +18,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
       const image = document.querySelector('img');
       await image.decode();
       const { AsciiRenderer } = await import('/ascii-renderer.js');
+      const { screens } = await import('/screen-content.js');
       const canvas = document.createElement('canvas');
       const renderer = await AsciiRenderer.create(image, canvas);
       await renderer.resizeAsync(1536, 1024);
@@ -35,10 +36,22 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
       ambient.filter='blur(1.2px)';
       ambient.drawImage(plate,0,0,384,256);ambient.filter='none';
       const pixels=ambient.getImageData(0,0,384,256);
+      const dimmedScreens=screens.filter(screen=>screen.ambientGain<1).map(screen=>({
+        gain:screen.ambientGain,edges:screen.quad.map(([x,y],i)=>{
+          const next=screen.quad[(i+1)%4],dx=next[0]-x,dy=next[1]-y;
+          return{x,y,dx,dy,length:Math.hypot(dx,dy)};
+        })
+      }));
       for(let i=0;i<pixels.data.length;i+=4){
         const light=(.2126*pixels.data[i]+.7152*pixels.data[i+1]+.0722*pixels.data[i+2])/255;
         const t=Math.max(0,Math.min(1,(light-.16)/.68));
-        const gain=.32*t*t*(3-2*t);
+        let gain=.32*t*t*(3-2*t);
+        const sx=(i/4%384+.5)*plate.width/384,sy=(Math.floor(i/4/384)+.5)*plate.height/256;
+        for(const screen of dimmedScreens){
+          const distance=Math.min(...screen.edges.map(e=>(e.dx*(sy-e.y)-e.dy*(sx-e.x))/e.length));
+          const edge=Math.max(0,Math.min(1,distance/6));
+          gain*=1-(1-screen.gain)*edge*edge*(3-2*edge);
+        }
         for(let c=0;c<3;c++)pixels.data[i+c]*=gain;
         pixels.data[i+3]=255;
       }

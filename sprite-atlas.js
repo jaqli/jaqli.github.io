@@ -1,6 +1,6 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { prepareGlyph } from './glyph-rhythm.js?v=20261111-type26';
-import { glyphWeight } from './scene-style.js?v=20261111-type26';
+import { prepareGlyph } from './glyph-rhythm.js?v=20261111-detail27';
+import { glyphWeight } from './scene-style.js?v=20261111-detail27';
 
 // Pack just the ink and one transparent border pixel. Deduplicating by actual
 // symbol/color keeps a richer alphabet close to the old two-letter atlas size.

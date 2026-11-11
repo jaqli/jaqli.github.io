@@ -7,7 +7,7 @@ export const screens = [
   { kind: 'wave', quad: [[333,395],[439,401],[442,481],[335,482]], width: 108, height: 86 },
   // A complete parallelogram continues down/right behind the head. Occlusion
   // belongs to the foreground hair, not to the display's four-corner geometry.
-  { kind: 'plot', quad: [[633,431],[733,438],[737,507],[637,500]], width: 100, height: 69 },
+  { kind: 'plot', quad: [[633,431],[733,438],[737,507],[637,500]], width: 100, height: 69, brightness: .85, ambientGain: .4 },
 ];
 const lines = [
   'import { field } from "./sim";', 'const state = new Map();', '',
@@ -103,6 +103,11 @@ export function paintScreen(screen, time) {
       for (let y = 0; y < level; y++) text(ctx, Math.floor(time*1.5+col*.37+y*.17)%2?'+':'=', 3 + col * 6, h-9 - y * 2.8, '#90c8b1');
     }
     text(ctx, 'FFT  /  live', 2, h-5, '#edca86');
+  }
+  // Dim the texture without weakening its occlusion or losing waveform detail.
+  if(screen.brightness<1){
+    ctx.globalCompositeOperation='source-atop';ctx.fillStyle=`rgb(0 0 0 / ${1-screen.brightness})`;
+    ctx.fillRect(0,0,w,h);ctx.globalCompositeOperation='source-over';
   }
   // Alpha ramps at all four edges retain the original edge pixels/reflections.
   ctx.globalCompositeOperation = 'destination-in';

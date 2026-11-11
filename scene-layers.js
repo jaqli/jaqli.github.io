@@ -1,5 +1,5 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-type26';
-import { detailPoint } from './scene-details.js?v=20261111-type26';
+import { waterSampleInterval } from './render-budget.js?v=20261111-detail27';
+import { detailPoint } from './scene-details.js?v=20261111-detail27';
 
 // The browser composites small canvases in their original image coordinates.
 // Rigid floats use CSS transforms; only sampled water frames are transferred.

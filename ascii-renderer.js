@@ -1,15 +1,15 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-type26';
+import { scenePixelRatio } from './render-budget.js?v=20261111-detail27';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261111-type26';
-import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-type26';
-import { screens, paintScreen } from './screen-content.js?v=20261111-type26';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-type26';
+import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261111-detail27';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-detail27';
+import { screens, paintScreen } from './screen-content.js?v=20261111-detail27';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-detail27';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-type26';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-type26';
-import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-type26';
-import { glyphLayout } from './glyph-layout.js?v=20261111-type26';
-import { glyphWeight, sceneColor, sceneRGB } from './scene-style.js?v=20261111-type26';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-detail27';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-detail27';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-detail27';
+import { glyphLayout } from './glyph-layout.js?v=20261111-detail27';
+import { glyphWeight, sceneColor, sceneRGB } from './scene-style.js?v=20261111-detail27';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -110,9 +110,9 @@ const waterAreas = [
   [[716,697],[1007,686],[1114,652],[1200,696],[1126,775],[1010,800],[966,854],[865,908],[725,900],[630,836],[555,827]],
   [[255,804],[428,815],[605,863],[725,902],[866,902],[948,884],[1074,929],[1234,931],[1349,986],[1069,1023],[694,1023],[535,948],[372,938],[242,899],[154,850]],
 ];
-// Trace the distant buildings in source coordinates. Keep the common sampling
-// grid and colors; only their glyph size is fixed. Window frames and the nearer
-// monitor, shelving and plant remain outside these silhouettes.
+// Trace the distant buildings in source coordinates. Their small letters get
+// extra samples between the room's original points. Window frames and nearer
+// monitors, shelving and plants remain outside these silhouettes.
 const distantCity = [
   [[1114,447],[1134,437],[1143,437],[1143,416],[1152,415],[1152,404],[1162,404],[1163,420],[1171,419],
    [1171,376],[1178,373],[1179,357],[1186,356],[1187,345],[1191,345],[1191,359],[1197,359],[1198,376],
@@ -371,10 +371,18 @@ export class AsciiRenderer {
     let placement=layout.next();
     while(!placement.done){yield placement.value*.08;placement=layout.next();}
     const points=placement.value;
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.columns; col++) {
-      const point=points[row*this.columns+col],sx=point.x,sy=point.y;
-      const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*.34,syStep*.34), seed = hash(col, row);
+    // Interleave a second, half-offset lattice only inside building outlines.
+    // Keep the room's existing positions and its sparse shadows unchanged.
+    const cityPoints=[];
+    for(let row=1;row<this.rows;row++)for(let col=1;col<this.columns;col++){
+      const x=col*sxStep,y=row*syStep;
+      if(distantCity.some(poly=>inside(x,y,poly)))cityPoints.push({x,y,size:detailFontSize,citySample:true});
+    }
+    const scenePoints=points.concat(cityPoints);
+    for (let index=0;index<scenePoints.length;index++) {
+      const row=Math.floor(index/this.columns),col=index%this.columns;
+      const point=scenePoints[index],sx=point.x,sy=point.y,footprint=point.citySample?.24:.34;
+      const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*footprint,syStep*footprint), seed = hash(col, row);
       const isCity=distantCity.some(polygon=>inside(sx,sy,polygon));
       const isWater = !isCity && waterAreas.some(poly => inside(sx, sy, poly)) &&
         ((rgb[2] > rgb[0] * 1.1 && rgb[1] > rgb[0] * 1.13) || (light(rgb) > .57 && rgb[0] > 150));
@@ -426,13 +434,17 @@ export class AsciiRenderer {
       if (isWater) {
         // Reflections share the retained water cells and leave the intentional
         // spaces empty. Their layout never shifts with the ripple animation.
-        this.water.push({ ...cell, glyphSource:cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
+        const reflection={ ...cell, glyphSource:cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
           sinA:Math.sin(sx*.052+sy*.083), cosA:Math.cos(sx*.052+sy*.083),
           sinB:Math.sin(sx*.023-sy*.037), cosB:Math.cos(sx*.023-sy*.037),
-          rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) });
+          rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) };
+        // A shared dark ink atlas dims the original colored strokes at troughs.
+        // Reuse the same character clock and leave the color backing untouched;
+        // one ink color avoids a second per-color palette for the whole water.
+        if(reflection.rings.length)reflection.trough={...cell,glyphSource:cell,color:'#080d13'};
+        this.water.push(reflection);
       }
-      }
-      if (!(row%4)) yield .08+row / this.rows * .52;
+      if (!(index%(this.columns*4))) yield .08+index/scenePoints.length*.52;
     }
     for(const progress of this.palette.prepare([...staticCells,...this.cloudCells],c=>glyphColor(c.rgb)))yield .6+progress*.02;
     for (let i=0;i<staticCells.length;i++) {
@@ -477,7 +489,7 @@ export class AsciiRenderer {
       return cells;
     };
     this.sprites = [];
-    for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region)}); yield .75; }
+    for (const region of this.birdMasks) { this.sprites.push({bird:region.bird,cells:spriteCells(region,.75)}); yield .75; }
     this.details = [];
     for (const region of this.detailMasks) { this.details.push({shape:region.shape,cells:spriteCells(region,region.shape.kind==='eye'?.6:1)}); yield .78; }
     this.lights = emitters.map(emitter => {
@@ -516,7 +528,7 @@ export class AsciiRenderer {
     }
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
-    const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
+    const movingCells = [...this.dynamic, ...this.water.flatMap(cell=>cell.trough?[cell,cell.trough]:[cell]), ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
     this.spriteAtlas=new SpriteAtlas(this.fontSize,dpr);
     for(const progress of this.spriteAtlas.prepare(movingCells))yield .8+.12*progress;
     this.atlas=this.spriteAtlas.canvas;
@@ -718,17 +730,18 @@ export class AsciiRenderer {
   }
   drawWater(time,ctx=this.ctx) {
     const sinA=Math.sin(time*1.8),cosA=Math.cos(time*1.8),sinB=Math.sin(time*.9),cosB=Math.cos(time*.9);
-    const rings=rippleSources.map(([, ,phase])=>{const age=(time+phase)%7.5; return {radius:age*20,strength:Math.sin(Math.PI*age/7.5)*.65};});
+    const rings=rippleSources.map(([, ,phase])=>{const age=(time+phase)%7.5; return {radius:age*20,strength:Math.sin(Math.PI*age/7.5)*1.05};});
+    const band=(distance,width)=>{const t=Math.max(0,1-Math.abs(distance)/width);return t*t*(3-2*t);};
     for (const cell of this.water) {
       const interference=Math.max(0,.62*(cell.sinA*cosA-cell.cosA*sinA)+.38*(cell.sinB*cosB+cell.cosB*sinB));
-      let shine = interference*interference*interference*interference*interference*.65;
+      let shine = interference*interference*interference*interference*.55;
       for (const ring of cell.rings) {
-        const wave=rings[ring.index], edge=Math.abs(ring.distance-wave.radius);
-        if (edge<9) shine+=(1-edge/9)**2*wave.strength;
+        const wave=rings[ring.index],edge=ring.distance-wave.radius;
+        if(edge<11&&edge>-35)shine+=(band(edge,11)+.4*band(edge+26,9)-.6*band(edge+13,10))*wave.strength;
       }
-      if (shine < .035) continue;
-      ctx.globalAlpha = Math.min(.85, shine);
-      this.stamp(cell, cell.x, cell.y, cell.size,ctx);
+      if (Math.abs(shine) < .035) continue;
+      ctx.globalAlpha = Math.min(shine<0?.32:.95, Math.abs(shine));
+      this.stamp(shine<0?cell.trough:cell, cell.x, cell.y, cell.size,ctx);
     }
     ctx.globalAlpha = 1;
   }
