@@ -7,7 +7,7 @@ export const detailShapes = [
   { id: 'paper-yellow', kind: 'paper', anchor: [412,253], length: 44, phase: 0,
     polygon: [[398,250],[434,256],[434,296],[394,292]] },
   { id: 'paper-cream', kind: 'paper', anchor: [513,232], length: 49, phase: 1.4,
-    polygon: [[505,228],[540,237],[535,281],[499,274]] },
+    polygon: [[505,228],[529,234],[528,251],[530,253],[540,257],[540,273],[536,274],[532,280],[530,282],[526,279],[502,273],[499,272],[502,247],[503,235]] },
   { id: 'paper-loose', kind: 'paper', anchor: [530,308], length: 36, phase: 2.7,
     polygon: [[513,303],[540,307],[556,316],[550,337],[526,344],[496,330]] },
   { id: 'paper-wall-blue', kind: 'paper', anchor: [132,154], length: 70, phase: .8,

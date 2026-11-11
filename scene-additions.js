@@ -4,7 +4,7 @@ const clamp=n=>Math.max(0,Math.min(1,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export const additionalShapes=[
  {id:'robot-aerial-left',kind:'hinge',anchor:[117,407],angle:.055,speed:1.7,phase:.3,polygon:[[74,375],[80,375],[85,383],[90,385],[117,403],[120,409],[112,406],[83,389],[76,387]]},
- {id:'robot-aerial-right',kind:'hinge',anchor:[180,419],angle:.065,speed:1.4,phase:2,polygon:[[136,373],[147,374],[155,385],[153,391],[173,408],[183,418],[179,422],[168,411],[147,393],[142,386],[135,384]]},
+ {id:'robot-aerial-right',kind:'hinge',anchor:[135,405],angle:.065,speed:1.4,phase:2,polygon:[[114,373],[124,373],[124,376],[127,378],[127,385],[126,386],[130,391],[133,396],[136,402],[136,406],[133,406],[132,401],[128,397],[125,391],[121,387],[117,387],[113,385],[111,382],[113,379]]},
  {id:'robot-hand',kind:'hinge',anchor:[187,495],angle:.085,speed:1.3,phase:4,polygon:[[183,487],[190,484],[196,485],[199,490],[209,490],[214,497],[218,499],[220,506],[211,511],[202,508],[190,504],[183,498]]},
  {id:'blue-book',anchor:[132,904],amplitude:1.5,period:5.4,phase:1.8,roll:.009,polygon:[[73,884],[88,875],[111,872],[131,877],[161,884],[184,893],[189,901],[175,909],[153,914],[116,909],[89,903],[72,896]]},
  {id:'purple-book',anchor:[107,979],amplitude:1.7,period:7.9,phase:3.2,roll:.008,polygon:[[25,946],[39,936],[74,925],[103,924],[146,936],[174,947],[180,956],[167,970],[143,982],[117,991],[82,984],[53,972],[30,960]]},
@@ -12,7 +12,7 @@ export const additionalShapes=[
  {id:'foreground-gamepad',anchor:[1007,975],amplitude:1.8,period:7.2,phase:.8,roll:.009,polygon:[[965,931],[991,929],[995,923],[1014,925],[1015,932],[1030,933],[1041,938],[1058,937],[1063,943],[1062,955],[1076,959],[1085,972],[1082,985],[1076,996],[1060,997],[1044,991],[1033,982],[997,981],[985,978],[979,984],[959,994],[943,993],[928,985],[924,974],[932,960],[945,943]]},
 ].map(s=>s.kind?s:{...s,kind:'float',drift:.35,waterRepair:true});
 export const additionalMotionRegions={
- 'robot-aerial-left':[72,373,50,40],'robot-aerial-right':[133,369,53,54],'robot-hand':[182,482,41,32],
+ 'robot-aerial-left':[72,373,50,40],'robot-aerial-right':[108,369,32,40],'robot-hand':[182,482,41,32],
  'hanging-wire':[270,0,85,77],'desk-terminal':[477,516,45,34],'underdesk-top':[350,600,67,14],
  'underdesk-bottom':[361,642,64,20],'right-orange-drive':[1434,511,63,14],'right-lower-led':[1441,573,64,14],
  'right-cup-steam':[1466,324,29,37],'blue-book':[68,868,125,53],'purple-book':[20,920,165,77],

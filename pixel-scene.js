@@ -1,15 +1,15 @@
 import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-sky43';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
-import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-detail39';
+import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-edge45';
 import { screens, paintScreen } from './screen-content.js?v=20261111-detail39';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
 import { SceneExtras } from './scene-extras.js?v=20261111-layer44';
-import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-layer44';
+import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge45';
 import { SceneTime } from './scene-time.js?v=20261111-layer44';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-layer44';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-edge45';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 
 const W=1536,H=1024;
@@ -46,22 +46,29 @@ export class PixelScene {
       this.displayCtx=screenCanvas.getContext('2d');
     }
   }
-  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false){
+  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false,backgroundKey=null){
     const [x,y,w,h]=bounds(polygon,pad),canvas=surface(w,h),ctx=canvas.getContext('2d'),bitmap=ctx.createImageData(w,h);
     const source=this.original.data,plate=this.plate.data;
-    let coverage;
+    let coverage,repairCoverage;
     if(softEdge){
-      // Rasterize once, then use a linear-time distance field. Rechecking every
-      // polygon edge for every margin pixel noticeably delayed startup.
-      ctx.fillStyle='#fff';ctx.beginPath();polygon.forEach(([sx,sy],i)=>i?ctx.lineTo(sx-x+.5,sy-y+.5):ctx.moveTo(sx-x+.5,sy-y+.5));ctx.closePath();ctx.fill();
-      const core=ctx.getImageData(0,0,w,h).data,outside=new Uint8Array(w*h);
-      for(let i=0;i<outside.length;i++)outside[i]=core[i*4+3]<128?1:0;
-      const nearest=exteriorField(outside,w,h);coverage=new Uint8Array(w*h);
-      for(let i=0;i<coverage.length;i++){
-        const edge=nearest[i],distance=outside[i]?Math.hypot(i%w-edge%w,Math.floor(i/w)-Math.floor(edge/w)):0;
-        // The real rim stays opaque; only its surrounding margin is softened.
-        coverage[i]=Math.round(255*(1-smooth((distance-2)/(pad-2))));
-      }
+      // A moving sprite contains only the object's silhouette. Do not attach
+      // an eight-pixel feather of surrounding water/paper to its texture.
+      // One native pixel protects the traced rim; subpixel motion is sampled
+      // later, when drawing the whole object.
+      ctx.fillStyle=ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.lineJoin='round';ctx.beginPath();
+      polygon.forEach(([sx,sy],i)=>i?ctx.lineTo(sx-x+.5,sy-y+.5):ctx.moveTo(sx-x+.5,sy-y+.5));ctx.closePath();ctx.fill();ctx.stroke();
+      const core=ctx.getImageData(0,0,w,h).data;coverage=new Uint8Array(w*h);
+      for(let i=0;i<coverage.length;i++)coverage[i]=core[i*4+3]>32?255:0;
+
+    }
+    if(coverage&&backgroundKey){
+      // Trim only background connected to the exterior. Opaque inner details
+      // (such as the duck's dark pupil and gray float) cannot become holes.
+      const outside=new Uint8Array(w*h),queue=[];
+      const visit=n=>{if(n<0||n>=outside.length||outside[n])return;const sx=x+n%w,sy=y+Math.floor(n/w),i=(sy*W+sx)*4;if(!coverage[n]||backgroundKey(source[i],source[i+1],source[i+2],sx,sy)){outside[n]=1;queue.push(n);}};
+      for(let px=0;px<w;px++){visit(px);visit((h-1)*w+px);}for(let py=0;py<h;py++){visit(py*w);visit(py*w+w-1);}
+      for(let q=0;q<queue.length;q++){const n=queue[q];if(n%w)visit(n-1);if(n%w<w-1)visit(n+1);visit(n-w);visit(n+w);}
+      for(let n=0;n<coverage.length;n++)if(outside[n])coverage[n]=0;
     }
     for(let py=0;py<h;py++)for(let px=0;px<w;px++){
       const sx=x+px,sy=y+py,i=(sy*W+sx)*4,j=(py*w+px)*4;
@@ -72,27 +79,49 @@ export class PixelScene {
         if(background)for(let c=0;c<3;c++)plate[i+c]=source[(background[1]*W+background[0])*4+c];
       }
     }
+    if(erase&&waterRepair&&softEdge){
+      // Repair only a narrow rim around the final extracted alpha. Preserve
+      // holes (e.g. the cable loop) and any background excluded by its matte.
+      const empty=new Uint8Array(w*h);for(let n=0;n<empty.length;n++)empty[n]=bitmap.data[n*4+3]?0:1;
+      const nearest=exteriorField(empty,w,h);repairCoverage=new Uint8Array(w*h);
+      for(let n=0;n<empty.length;n++){
+        const edge=nearest[n];if(edge<0)continue;
+        const distance=Math.hypot(n%w-edge%w,Math.floor(n/w)-Math.floor(edge/w));
+        repairCoverage[n]=Math.round(255*clamp(3-distance));
+      }
+    }
     if(erase&&!background){
       const margin=12,pw=w+margin*2,ph=h+margin*2,mask=new Uint8Array(pw*ph);
-      for(let py=0;py<h;py++)for(let px=0;px<w;px++)mask[(py+margin)*pw+px+margin]=bitmap.data[(py*w+px)*4+3]?1:0;
-      // Exclude bezel highlights and dark reflections from replacement water.
+      for(let py=0;py<h;py++)for(let px=0;px<w;px++)mask[(py+margin)*pw+px+margin]=(repairCoverage?repairCoverage[py*w+px]:bitmap.data[(py*w+px)*4+3])?1:0;
+      // Exclude neighboring prop frames from replacement water.
       // This changes repair donors only, never the original scenery outside it.
       const donors=waterRepair?mask.slice():mask;
       if(waterRepair)for(let py=0;py<ph;py++)for(let px=0;px<pw;px++){
         const sx=clamp(x+px-margin,0,W-1),sy=clamp(y+py-margin,0,H-1),i=(sy*W+sx)*4,r=source[i],g=source[i+1],b=source[i+2];
-        if(!(g>105&&b>105&&g-r>15&&b-r>20&&b<g*1.2))donors[py*pw+px]=1;
+        const kind=this.waterDonorField?.[sy*W+sx]||0,coolWater=g>30&&b>40&&g-r>8&&b-r>14&&b<g*2;
+        if(kind===1||!(kind===2||coolWater))donors[py*pw+px]=1;
       }
       const field=exteriorField(donors,pw,ph);
       for(let py=0;py<h;py++)for(let px=0;px<w;px++){
         const index=(py+margin)*pw+px+margin;if(!mask[index])continue;
-        const sample=reflectedSample(index,field,donors,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
-        const alpha=bitmap.data[(py*w+px)*4+3]/255;
+        const sample=waterRepair&&field[index]>=0?field[index]:reflectedSample(index,field,donors,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
+        const alpha=(repairCoverage?repairCoverage[py*w+px]:bitmap.data[(py*w+px)*4+3])/255;
         for(let c=0;c<3;c++)plate[i+c]=source[i+c]*(1-alpha)+source[j+c]*alpha;
       }
     }
     ctx.putImageData(bitmap,0,0);return {canvas,x,y,w,h};
   }
   *prepare(){
+    // Water repair may use dark water and pale reflections, but never another
+    // object's frame. Cache spatial donor classes once, before any extraction.
+    const donors=surface(W,H),dc=donors.getContext('2d');
+    const fill=p=>{dc.beginPath();p.forEach(([x,y],i)=>i?dc.lineTo(x,y):dc.moveTo(x,y));dc.closePath();dc.fill();};
+    dc.fillStyle='#fff';for(const p of waterAreas)fill(p);
+    dc.fillStyle=dc.strokeStyle='#f00';dc.lineWidth=4;dc.lineJoin='round';
+    for(const shape of [...detailShapes,...additionalShapes].filter(s=>s.kind==='float')){fill(shape.polygon);dc.stroke();}
+    const classes=dc.getImageData(0,0,W,H).data;this.waterDonorField=new Uint8Array(W*H);
+    for(let n=0;n<this.waterDonorField.length;n++)this.waterDonorField[n]=classes[n*4]>127?(classes[n*4+1]>127?2:1):0;
+    donors.width=donors.height=1;
     for(const bird of birds){
       // Remove the entire old silhouette, including blue shaded feathers and
       // antialiased outlines which the ASCII color threshold used to miss.
@@ -113,9 +142,10 @@ export class PixelScene {
     yield .12;
     const hem={id:'hem',kind:'paper',anchor:[830,615],length:24,phase:0,polygon:hemArea};
     for(const shape of [...detailShapes.filter(shape=>shape.id!=='leaves'),...additionalShapes,hem]){
-      const accept=(r,g,b)=>shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
+      const accept=(r,g,b)=>shape.id==='paper-cream'?!(g-r>15&&b-r>20):shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
       const soft=shape.kind==='float'||shape.kind==='paper'||shape.kind==='hinge';
-      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft),shape});
+      const backgroundKey=shape.id==='duck'?(r,g,b,x,y)=>y<834?g>45&&g-r>15&&b-r>25:g>125&&g-r>24&&b-r>32:null;
+      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft,backgroundKey),shape});
       yield .12+.28*this.details.length/(detailShapes.length+additionalShapes.length);
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
@@ -157,7 +187,7 @@ export class PixelScene {
     }
     mask.putImageData(bitmap,0,0);
     // Pixel buffers are needed only for extraction, never read back each frame.
-    this.original=null;this.plate=null;this.timeOfDay=new SceneTime(this);yield 1;
+    this.original=null;this.plate=null;this.waterDonorField=null;this.timeOfDay=new SceneTime(this);yield 1;
   }
   *prepareSky(){yield* prepareSky(this);}
   async setTimeOfDay(mode){await this.timeOfDay.apply(mode);}
@@ -249,5 +279,5 @@ export class PixelScene {
     for(const sprite of this.details)this.drawDetail(sprite,time);
     this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
   }
-  dispose(){this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }

@@ -1,10 +1,10 @@
-import { skyApertures, skyForeground, skyWires } from './scene-sky-matte.js?v=20261111-layer44';
+import { skyApertures, skyForeground, skyWires, sillSkyEdge } from './scene-sky-matte.js?v=20261111-edge45';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
 // Lighting follows the complete visible sky. Motion has its own foreground
 // matte; conservative animation bounds must never decide a region's palette.
 export function* prepareSky(scene){
- const x0=528,y0=60,w=1008,h=366,geometry=surface(w,h),g=geometry.getContext('2d');g.translate(-x0,-y0);
+ const x0=528,y0=60,w=1008,h=370,geometry=surface(w,h),g=geometry.getContext('2d');g.translate(-x0,-y0);
  const polygon=(ctx,points)=>{ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
  g.fillStyle='#fff';for(const p of skyApertures)polygon(g,p);
  g.fillStyle='#000';for(const p of skyForeground)polygon(g,p);
@@ -12,7 +12,7 @@ export function* prepareSky(scene){
  const wires=surface(w,h),wire=wires.getContext('2d');wire.translate(-x0,-y0);wire.strokeStyle='#fff';wire.lineCap='round';wire.lineJoin='round';
  for(const {points,width}of skyWires){wire.lineWidth=width;wire.beginPath();points.forEach(([x,y],i)=>i?wire.lineTo(x,y):wire.moveTo(x,y));wire.stroke();}
  const wirePixels=wire.getImageData(0,0,w,h).data,lightMask=new Uint8Array(w*h),mask=surface(w,h),m=mask.getContext('2d'),alpha=m.createImageData(w,h),destinations=[];
- const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<426);
+ const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<430);
  for(let y=0;y<h;y++){
   for(let x=0;x<w;x++){
    const wx=x+x0,wy=y+y0,n=y*w+x,j=n*4,i=(wy*1536+wx)*4;
@@ -22,7 +22,11 @@ export function* prepareSky(scene){
    // Only a traced wire's local rim uses its color to separate it from sky.
    // No global RGB threshold can punch holes in buildings or bright desk trim.
    const wireEdge=wirePixels[j+3]>32&&(original[i+1]<158||original[i]>original[i+1]*.88||original[i+2]<original[i+1]*.94);
-   const visible=area[j]>250&&!lamp&&!fixedLeaf&&!wireEdge;
+   let boardRimSky=false;
+   if(wx>=1388&&wx<=1418&&wy>=249&&wy<=300&&original[i+1]-original[i]>6&&original[i+2]-original[i]>10&&original[i+2]>=original[i+1]){
+    for(let k=1;k<sillSkyEdge.length;k++){const[a,b]=sillSkyEdge[k-1],[c,d]=sillSkyEdge[k];if(wy>=b&&wy<=d){boardRimSky=Math.abs(wx-(a+(c-a)*(wy-b)/(d-b)))<4;break;}}
+   }
+   const visible=(area[j]>250||boardRimSky)&&!lamp&&!fixedLeaf&&!wireEdge;
    lightMask[n]=visible&&!originalLeaf?1:0;
    alpha.data[j+3]=visible?255:0;if(visible)destinations.push(n);
   }
