@@ -121,6 +121,12 @@ export class PixelScene {
       this.lights.push({...sprite,mask,ctx,emitter,plane:surface(emitter.plane?.width||sprite.w,emitter.plane?.height||sprite.h)});
       if(!lamp){const p=this.plate.data;for(let y=sprite.y;y<sprite.y+sprite.h;y++)for(let x=sprite.x;x<sprite.x+sprite.w;x++)if(inside(x,y,emitter.polygon)){const i=(y*W+x)*4;p[i]=12;p[i+1]=25;p[i+2]=33;}}
     }
+    // A small cached mask dims only the pendant's glowing underside. Its dark
+    // shade and the room stay still; the shared clock handles pause/background.
+    this.ceilingLamp=this.cut([[1028,44],[1169,44],[1169,80],[1028,80]],
+      (r,g,b)=>r>155&&g>95&&r>=g*.95&&r>=b,false);
+    const bulb=this.ceilingLamp.canvas.getContext('2d');bulb.globalCompositeOperation='source-atop';
+    bulb.fillStyle='#000';bulb.fillRect(0,0,this.ceilingLamp.w,this.ceilingLamp.h);bulb.globalCompositeOperation='source-over';
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
     yield* this.prepareSky();
     this.screenLayer=surface(1260,570);this.screenCtx=this.screenLayer.getContext('2d');this.screenCtx.scale(3,3);
@@ -271,6 +277,10 @@ export class PixelScene {
     ctx.restore();
   }
   drawLights(time){
+    const phase=time%3.5,blink=.82*smooth((phase-3.24)/.035)*(1-smooth((phase-3.34)/.16));
+    if(blink>0){
+      const lamp=this.ceilingLamp,ctx=this.ctx;ctx.save();ctx.globalAlpha=blink;ctx.drawImage(lamp.canvas,lamp.x,lamp.y);ctx.restore();
+    }
     for(const light of this.lights){
       const {emitter,ctx,w,h}=light;
       if(emitter.kind==='lamp'){
