@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-space19';
+import { scenePixelRatio } from './render-budget.js?v=20261111-air20';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-space19';
-import { screens, paintScreen } from './screen-content.js?v=20261111-space19';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-air20';
+import { screens, paintScreen } from './screen-content.js?v=20261111-air20';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-space19';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space19';
-import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-space19';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-air20';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-air20';
+import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-air20';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -379,8 +379,20 @@ export class AsciiRenderer {
       // Keep the requested size bins, with smaller glyphs at those edges.
       const edgeSize=calmSize+(Math.min(calmSize,1.3)-calmSize)*smooth((contrast-45)/100);
       const size=isCity ? minFontSize : fontStep(edgeSize);
-      // Ten discrete sizes, with one occupied cell at every grid position.
-      const cell = { sx, sy, rgb, size,
+      // Open up the dark room edges, not the colorful sky or bright water.
+      // Featureless shadows may stay entirely empty; wider sampling protects
+      // nearby contours without limiting hole size. The mask is fixed for the
+      // scene, with a separate seed so remaining font sizes stay balanced.
+      const smoothness=1-smooth((contrast-18)/65);
+      const person=inside(sx,sy,personArea);
+      const darkness=1-smooth((light(rgb)-.1)/.24);
+      const sideWeight=1-smooth((sx-510)/220)+smooth((sx-1110)/220);
+      const protectedCell=isCity||cloudIndex>=0||Math.hypot(sx-1100,sy-375)<33;
+      const flatness=darkness>0&&!protectedCell?1-smooth((this.surfaceContrast(sx,sy,9)-10)/24):0;
+      const openness=Math.max(.3+sideWeight*.55,flatness*(.35+sideWeight*.65));
+      const chance=protectedCell?0:openness*darkness*smoothness*(person?.35:1);
+      const blank=hash(col+91,row+47)<chance;
+      const cell = { sx, sy, rgb, size, occupied:!blank,
         x: sx * this.scale + (seed - .5) * .2,
         y: sy * this.scale + (hash(row, col) - .5) * .2,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
@@ -389,14 +401,15 @@ export class AsciiRenderer {
       cell.glyphLayer=cloudIndex>=0?'cloud':isHem||isAmbient?'dynamic':'base';
       cell.water=isWater;
       this.cells.push(cell);
+      if(!cell.occupied)continue;
       if (cloudIndex>=0) {
         this.cloudCells.push({...cell,cloudIndex});
       }
       else if (isHem || isAmbient) this.dynamic.push(cell);
       else { cell.tile=this.palette.get(cell.glyph,cell.rgb); staticCells.push(cell); }
       if (isWater) {
-        // Water keeps a complete, fixed character bed. Moving light is added on
-        // top; no character leaves a hole at the edge of a moving region.
+        // Reflections share the retained water cells and leave the intentional
+        // spaces empty. Their layout never shifts with the ripple animation.
         this.water.push({ ...cell, glyphSource:cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
           sinA:Math.sin(sx*.052+sy*.083), cosA:Math.cos(sx*.052+sy*.083),
           sinB:Math.sin(sx*.023-sy*.037), cosB:Math.cos(sx*.023-sy*.037),
@@ -523,6 +536,15 @@ export class AsciiRenderer {
       for (let c=0;c<3;c++) rgb[c]+=p[i+c]*w;
     }
     return {rgb:rgb.map(v=>v/weight),contrast};
+  }
+  surfaceContrast(sx,sy,radius) {
+    const p=this.platePixels,x=Math.floor(sx),y=Math.floor(sy),center=(y*this.sourceW+x)*4;
+    let contrast=0;
+    for(let dy=-radius;dy<=radius;dy+=radius)for(let dx=-radius;dx<=radius;dx+=radius){
+      const i=(clamp(y+dy,0,this.sourceH-1)*this.sourceW+clamp(x+dx,0,this.sourceW-1))*4;
+      for(let c=0;c<3;c++)contrast=Math.max(contrast,Math.abs(p[i+c]-p[center+c]));
+    }
+    return contrast;
   }
   prepare(ctx) { ctx.font = `500 ${this.fontSize}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; }
   paint(ctx, cell, x, y, size, fill) {

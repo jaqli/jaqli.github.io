@@ -1,8 +1,8 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-space19';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space19';
+import { glyphColor } from './glyph-atlas.js?v=20261111-air20';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-air20';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 
-import { alternatives } from './glyph-rhythm.js?v=20261111-space19';
+import { alternatives } from './glyph-rhythm.js?v=20261111-air20';
 const random=i=>{const n=Math.sin(i*127.1+1729)*43758.5453;return n-Math.floor(n);};
 export const glyphUpdateLimit=12; // small blocks per draw, never queued behind input
 export const glyphPassSeconds=12;
@@ -30,7 +30,7 @@ export class GlyphMotion {
       const cells=[];
       for(let y=row;y<Math.min(row+blockSize,renderer.rows);y++)for(let x=col;x<Math.min(col+blockSize,renderer.columns);x++){
         const cell=renderer.cells[y*renderer.columns+x];
-        if(cell.glyphLayer!=='dynamic')cells.push(cell);
+        if(cell.occupied&&cell.glyphLayer!=='dynamic')cells.push(cell);
       }
       if(!cells.length)continue;
       const x=Math.floor(col*renderer.cellW-this.radiusX),y=Math.floor(row*renderer.cellH-this.radiusY);
@@ -47,7 +47,7 @@ export class GlyphMotion {
   *prepare(){
     // Bake both characters once; the atlas is immutable during animation.
     // This avoids uploading a recolored texture for every scattered update.
-    yield* this.palette.prepare(this.r.cells.filter(c=>c.glyphLayer!=='dynamic'),c=>glyphColor(c.rgb));
+    yield* this.palette.prepare(this.r.cells.filter(c=>c.occupied&&c.glyphLayer!=='dynamic'),c=>glyphColor(c.rgb));
   }
   update(time,extra=[],present){
     const dt=Math.max(0,Math.min(.1,time-this.time));this.time=time;
@@ -105,6 +105,7 @@ export class GlyphMotion {
     const top=Math.max(0,Math.floor((y-this.radiusY)/r.cellH)),bottom=Math.min(r.rows-1,Math.floor((y+h+this.radiusY)/r.cellH));
     for(let row=top;row<=bottom;row++)for(let col=left;col<=right;col++){
       const neighbor=r.cells[row*r.columns+col];
+      if(!neighbor.occupied)continue;
       if(!cloud&&neighbor.glyphLayer==='dynamic')dynamic.push(neighbor);
       if(neighbor.glyphLayer!==layer)continue;
       const nx=r.fontSize*neighbor.size*.45+pad,ny=r.fontSize*neighbor.size*.65+pad;
