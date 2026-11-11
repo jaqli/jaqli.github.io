@@ -1,78 +1,120 @@
-import { drawSceneLayers, drawSceneAmbience } from './scene-snapshot.js?v=20261111-flow28';
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-let navigating = false;
-let overlay;
-window.addEventListener('pageshow', () => {
-  navigating = false;
-  overlay?.remove();
-  document.body.classList.remove('is-leaving');
-});
-document.addEventListener('click', event => {
-  const link = event.target.closest('a');
-  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  const href = link.getAttribute('href');
-  if (!href || link.hasAttribute('download') || link.getAttribute('target')) return;
-  const url = new URL(href, location.href);
-  if (url.origin !== location.origin || url.pathname === location.pathname || reducedMotion.matches) return;
-  event.preventDefault();
-  if (navigating) return;
-  navigating = true;
-  document.body.classList.add('is-leaving');
-  overlay = document.createElement('div');
-  overlay.className = 'page-transition';
-  overlay.setAttribute('aria-hidden', 'true');
-  const canvas = document.createElement('canvas');
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-  overlay.append(canvas);
+import { createParticles } from './page-particles.js?v=20261111-profile30';
+
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const routeKey='jaqli-route',homeKey='jaqli-home-focus';
+const html=document.documentElement;
+let navigating=false,overlay,frame,timer,particles,camera=[],entering=false,revision=0;
+const path=url=>url.pathname+url.search;
+const isHome=url=>/^\/(?:index\.html)?$/.test(url.pathname);
+const clamp=value=>Math.max(.05,Math.min(.95,value));
+function read(key){try{return JSON.parse(sessionStorage.getItem(key));}catch{return null;}}
+function write(key,value){try{sessionStorage.setItem(key,JSON.stringify(value));}catch{}}
+function remove(key){try{sessionStorage.removeItem(key);}catch{}}
+function signal(active){document.dispatchEvent(new CustomEvent('site:transition',{detail:{active}}));}
+function reset(){
+  revision++;
+  cancelAnimationFrame(frame);clearTimeout(timer);particles?.dispose();particles=null;
+  overlay?.remove();overlay=null;
+  for(const item of camera)item.animation.cancel();camera=[];
+  html.classList.remove('route-arriving');
+  document.body.classList.remove('is-leaving','is-entering');
+  entering=false;navigating=false;signal(false);
+}
+function focusFor(link,event){
+  const bounds=link.getBoundingClientRect();
+  return {x:clamp((event.detail?event.clientX:bounds.x+bounds.width/2)/innerWidth),y:clamp((event.detail?event.clientY:bounds.y+bounds.height/2)/innerHeight)};
+}
+function animate(phase,route,done){
+  const incoming=phase==='enter',home=document.body.classList.contains('home');
+  const focus=home?(incoming?(read(homeKey)||{x:.5,y:.5}):route.focus):{x:.5,y:.36};
+  const duration=incoming?540:420;
+  const startScale=incoming?(home?1.2:.92):1;
+  const endScale=incoming?1:(route.direction==='out'?.88:1.24);
+  overlay=document.createElement('div');overlay.className=`page-transition ${incoming?'transition-enter':'transition-leave'}`;
+  overlay.setAttribute('aria-hidden','true');overlay.dataset.phase=phase;
+  const canvas=document.createElement('canvas');overlay.append(canvas);
+  particles=createParticles(canvas,focus);
   document.body.append(overlay);
-  const ctx = canvas.getContext('2d');
-  const snapshot = document.createElement('canvas');
-  snapshot.width = innerWidth;
-  snapshot.height = innerHeight;
-  const snap = snapshot.getContext('2d');
-  if (!ctx || !snap) { location.assign(url.href); return; }
-  const candidate = document.querySelector(document.body.classList.contains('scene-ready') ? '#ascii-canvas' : '#scene-poster');
-  const scene = candidate instanceof HTMLImageElement ? (candidate.complete && candidate.naturalWidth ? candidate : null) : candidate;
-  if (scene) {
-    const rect = scene.getBoundingClientRect();
-    snap.drawImage(scene, rect.x, rect.y, rect.width, rect.height);
-    if (document.body.classList.contains('scene-ready')) {
-      drawSceneLayers(snap);
-    }
-    drawSceneAmbience(snap);
+  document.body.classList.add(incoming?'is-entering':'is-leaving');
+  // Animate the live DOM: sharp text/images, no screenshot library or permanent buffer.
+  const roots=document.querySelectorAll(home?'#scene-viewport,.scene-header,.motion-toggle,.pan-hint,.scene-status':'.document-main,.document-header,.document-footer');
+  for(const element of roots){
+    const bounds=element.getBoundingClientRect();
+    const origin=`${focus.x*innerWidth-bounds.x}px ${focus.y*innerHeight-bounds.y}px`;
+    const animation=element.animate([
+      {transform:`scale(${startScale})`,transformOrigin:origin,opacity:incoming?0:1},
+      {transform:`scale(${endScale})`,transformOrigin:origin,opacity:incoming?1:0},
+    ],{duration,easing:'cubic-bezier(.2,.65,.25,1)',fill:'both'});
+    camera.push({animation});
   }
-  const pixels = snap.getImageData(0, 0, snapshot.width, snapshot.height).data;
-  const fragments = [];
-  const spacing = Math.max(14, Math.sqrt(innerWidth * innerHeight / 2200));
-  for (let y = 0; y < innerHeight; y += spacing) {
-    for (let x = 0; x < innerWidth; x += spacing) {
-      const i = (Math.floor(y) * snapshot.width + Math.floor(x)) * 4;
-      fragments.push({ x, y, phase: Math.random() * 6.28, color: scene ? `rgb(${pixels[i]} ${pixels[i + 1]} ${pixels[i + 2]})` : '#76bdc1' });
-    }
+  html.classList.remove('route-arriving');signal(true);
+  const start=performance.now();
+  const finish=()=>{if(incoming){reset();done?.();}else done();};
+  function tick(now){
+    const p=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-p,3);
+    particles?.draw(p,incoming,startScale+(endScale-startScale)*ease);
+    if(p<1)frame=requestAnimationFrame(tick);else finish();
   }
-  const start = performance.now();
-  const label = link.dataset.transition || 'jaq/li';
-  function animate(now) {
-    const progress = Math.min(1, (now - start) / 520);
-    ctx.fillStyle = '#080d13';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = 1 - progress;
-    ctx.drawImage(snapshot, 0, 0);
-    ctx.font = '12px monospace';
-    for (const fragment of fragments) {
-      ctx.fillStyle = fragment.color;
-      const spread = progress * progress * 210;
-      ctx.fillText('01.:*+'[Math.floor(progress * 20 + fragment.phase) % 6], fragment.x + Math.cos(fragment.phase) * spread, fragment.y - spread * (1 + Math.sin(fragment.phase)));
-    }
-    ctx.globalAlpha = Math.min(1, progress * 3);
-    ctx.fillStyle = '#c9edda';
-    ctx.textAlign = 'center';
-    ctx.fillText(`[ ${label} ]`, canvas.width / 2, canvas.height / 2);
-    ctx.textAlign = 'start';
-    ctx.globalAlpha = 1;
-    if (progress < 1) requestAnimationFrame(animate);
-    else location.assign(url.href);
+  frame=requestAnimationFrame(tick);
+  // Background tabs or a stalled animation must never prevent navigation.
+  timer=setTimeout(finish,duration+100);
+}
+
+let pending=read(routeKey);remove(routeKey);
+if(pending&&(pending.to!==path(location)||Date.now()-pending.at>10000))pending=null;
+const restored=performance.getEntriesByType('navigation')[0]?.type==='back_forward';
+if(!pending&&restored)pending={direction:isHome(location)?'out':'in',focus:{x:.5,y:.5}};
+async function arrive(route){
+  if(reducedMotion.matches){reset();return;}
+  const current=revision;
+  entering=true;
+  // Start with the lightweight poster; never wait for the ASCII worker or videos.
+  if(document.body.classList.contains('home')){
+    const poster=document.querySelector('#scene-poster');
+    await Promise.race([poster?.decode().catch(()=>{}),new Promise(resolve=>setTimeout(resolve,300))]);
+  }else if(!document.body.dataset.contentReady){
+    await new Promise(resolve=>{
+      const ready=()=>{clearTimeout(timeout);document.removeEventListener('site:content-ready',ready);resolve();};
+      const timeout=setTimeout(ready,650);document.addEventListener('site:content-ready',ready,{once:true});
+    });
   }
-  requestAnimationFrame(animate);
+  if(current!==revision||!entering||navigating)return;
+  try{animate('enter',route);}catch{reset();}
+}
+if(pending)arrive(pending);else html.classList.remove('route-arriving');
+
+window.addEventListener('pagehide',reset);
+window.addEventListener('pageshow',event=>{
+  if(event.persisted){reset();arrive({direction:isHome(location)?'out':'in',focus:{x:.5,y:.5}});}
+});
+reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches&&!navigating)reset();});
+
+function internalLink(event){
+  const link=event.target.closest?.('a');
+  if(!link||link.hasAttribute('download')||link.getAttribute('target'))return null;
+  const href=link.getAttribute('href');if(!href)return null;
+  let url;try{url=new URL(href,location.href);}catch{return null;}
+  if(url.origin!==location.origin||!['http:','https:'].includes(url.protocol)||path(url)===path(location))return null;
+  return {link,url};
+}
+// Prefetch only destination HTML, not large media or scene textures.
+const prefetched=new Set();
+function prefetch(event){
+  const target=internalLink(event);if(!target||prefetched.size>=6||prefetched.has(target.url.href)||navigator.connection?.saveData)return;
+  prefetched.add(target.url.href);const hint=document.createElement('link');hint.rel='prefetch';hint.href=target.url.href;document.head.append(hint);
+}
+document.addEventListener('pointerover',prefetch,{passive:true});
+document.addEventListener('focusin',prefetch);
+document.addEventListener('click',event=>{
+  if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  const target=internalLink(event);if(!target||reducedMotion.matches)return;
+  event.preventDefault();if(navigating)return;
+  reset();navigating=true;
+  const focus=focusFor(target.link,event);
+  if(document.body.classList.contains('home'))write(homeKey,focus);
+  const route={to:path(target.url),direction:isHome(target.url)?'out':'in',focus,at:Date.now()};
+  write(routeKey,route);
+  let assigned=false;
+  const go=()=>{if(assigned)return;assigned=true;clearTimeout(timer);location.assign(target.url.href);};
+  try{animate('leave',route,go);}catch{go();}
 });

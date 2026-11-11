@@ -11,8 +11,6 @@
 .profile-portrait::before { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
 .profile-portrait::after { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
 .profile-portrait img { display: block; width: 100%; height: auto; }
-.profile-portrait figcaption { display: flex; justify-content: space-between; gap: 4px; color: #94afb5; font-size: 8px; line-height: 1.5; letter-spacing: .5px; padding-top: 10px; }
-.profile-portrait figcaption span { color: var(--accent); }
 .profile-nav { display: flex; flex-wrap: wrap; gap: 8px 25px; padding: 19px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .profile-nav a { color: #a9bfc5; font-size: 11px; line-height: 1.8; }
 .profile-nav a::before { content: "# "; color: #557a83; }
@@ -23,7 +21,7 @@
 .profile-page .profile-section p { font-family: Arial, "PingFang SC", sans-serif; }
 .profile-page .profile-section h3 { font: 500 17px/1.5 Arial, "PingFang SC", sans-serif; margin: 0 0 7px; color: #deece8; }
 .profile-page .profile-bio { font-size: 15px; line-height: 1.95; max-width: 740px; }
-.profile-timeline, .research-list, .achievement-list, .honor-list { list-style: none; margin: 0; padding: 0; }
+.profile-timeline, .research-list, .honor-list { list-style: none; margin: 0; padding: 0; }
 .profile-timeline li { position: relative; padding: 0 0 28px 24px; border-left: 1px solid #2b424b; }
 .profile-timeline li:last-child { padding-bottom: 0; }
 .profile-timeline li::before { content: "+"; position: absolute; left: -5px; top: 0; color: var(--accent); background: #080d13; font-size: 15px; }
@@ -36,6 +34,23 @@
 .profile-page .research-list p { font-size: 13px; }
 .profile-page p.profile-eyebrow { color: #68868f; font: 10px/1.5 "Courier New", monospace; letter-spacing: 1.5px; margin-bottom: 26px; }
 .profile-page .publication { padding: 0 0 24px; margin-bottom: 24px; border-bottom: 1px dashed #233940; }
+.profile-page .publication.has-media { display: grid; grid-template-columns: 245px minmax(0,1fr); gap: 25px; padding-bottom: 32px; margin-bottom: 32px; }
+.publication-copy { min-width: 0; }
+.publication-name { color: var(--accent); font-weight: bold; }
+.profile-page .publication-authors strong { font-weight: 600; color: #d6e9e7; }
+.profile-page p.publication-description { font-size: 13px; line-height: 1.75; margin-top: 11px; }
+.publication-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 15px; }
+.profile-page .publication-links a { font: 10px/1.5 "Courier New", monospace; padding: 5px 8px; margin: 0; border-color: #2d474e; }
+.publication-media { margin: 0; min-width: 0; align-self: start; }
+.publication-preview, .publication-play { display: block; width: 100%; border: 1px solid #334951; background: #101c23; padding: 0; }
+.publication-media img { display: block; width: 100%; height: auto; }
+.publication-play { position: relative; text-align: left; color: #e4f6ec; }
+.publication-play-label { display: block; padding: 10px 12px; font: 10px/1 "Courier New", monospace; letter-spacing: 1px; background: #10252b; }
+.publication-play:hover .publication-play-label { color: #b5e7d5; background: #193b40; }
+.publication-media video { display: block; width: 100%; max-height: 340px; background: #080d13; }
+.publication-media figcaption { margin-top: 7px; }
+.profile-page .publication-media figcaption a { font: 9px/1.6 "Courier New", monospace; color: #809ba5; }
+.publication-preview:hover, .publication-play:hover { border-color: #78a5a4; }
 .profile-page .publication h3 { margin-bottom: 9px; }
 .profile-page .publication h3 a { font-size: 18px; }
 .profile-page .publication h3 a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
@@ -43,25 +58,18 @@
 .profile-badge { color: #d4c39a; font: 10px/1.8 "Courier New", monospace; }
 .profile-badge::before { content: "[ "; }.profile-badge::after { content: " ]"; }
 .profile-page .publication-authors { font-size: 12px; color: #8da4ad; line-height: 1.8; }
-.profile-disclosure { margin-top: 8px; }
-.profile-disclosure summary { cursor: pointer; color: #a7d6ca; font-size: 12px; line-height: 1.8; padding: 9px 0; }
-.profile-disclosure summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.more-publications { padding: 25px 0 0; }
-.profile-page .more-publications .publication h3 a { font-size: 16px; }
-.achievement-list { display: grid; gap: 26px; }
-.profile-page .achievement-list p.achievement-meta { display: flex; gap: 15px; flex-wrap: wrap; color: #88acb7; font: 11px/1.8 "Courier New", monospace; margin-bottom: 8px; }
 .honor-list { display: grid; gap: 22px; }
 .honor-list li { display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 18px; }
 .honor-list .profile-date { margin-top: 3px; }
 .profile-page .honor-list h3 { font-size: 15px; margin-bottom: 3px; }
 .profile-page .honor-list p { font-size: 12px; }
 .profile-contact > .source-link { margin: 0 10px 16px 0; overflow-wrap: anywhere; }
-.contact-codes { display: flex; flex-wrap: wrap; gap: 24px; padding-top: 15px; }
-.contact-codes figure { margin: 0; width: min(210px,100%); }
-.contact-codes img { display: block; max-width: 100%; height: auto; border: 1px solid #395b61; }
-.contact-codes figcaption { color: #8caab3; padding-top: 10px; font-size: 11px; }
 .profile-source { margin: 28px 0 0; color: #7c9a9f; font-size: 10px; text-align: right; }
 .profile-source a:hover { color: var(--accent); }
+@media(max-width:1000px) {
+  .profile-page .publication.has-media { grid-template-columns: 1fr; gap: 17px; }
+  .publication-media { max-width: 420px; width: 100%; }
+}
 @media(max-width:700px) {
   .profile-main { padding-top: 45px; }
   .profile-hero { grid-template-columns: minmax(0,1fr) 115px; gap: 20px; align-items: start; padding-bottom: 30px; }
@@ -70,8 +78,6 @@
   .profile-hero .doc-kicker { margin-bottom: 18px; font-size: 9px; }
   .profile-affiliation { font-size: 11px; }
   .profile-portrait { padding: 6px; }
-  .profile-portrait figcaption { font-size: 7px; padding-top: 6px; }
-  .profile-portrait figcaption span { display: none; }
   .profile-links { gap: 7px; margin-top: 20px; }
   .profile-links .source-link { font-size: 10px; padding: 8px 10px; }
   .profile-nav { gap: 9px 19px; }

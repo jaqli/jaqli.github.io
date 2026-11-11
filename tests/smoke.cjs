@@ -295,6 +295,7 @@ async function duckBodyPoint(page) {
     await page.waitForURL(`${origin}/tech/`);
     assert.match(await page.locator('h1').textContent(), /Tech/);
     await page.goBack({ waitUntil: 'networkidle' });
+    await page.waitForFunction(() => !document.querySelector('.page-transition'));
     assert.equal(await page.locator('.page-transition').count(), 0);
     console.log('PASS monitor navigates through transition; Back restores scene');
 

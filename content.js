@@ -1,4 +1,4 @@
-import './navigation.js';
+import './navigation.js?v=20261111-profile30';
 
 // Content is a reviewed local snapshot. No browser tokens or third-party scripts.
 const root = document.querySelector('#content');
@@ -73,11 +73,11 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261111-about29', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261111-profile30', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {
-    const { renderProfile } = await import('./profile.js?v=20261111-about29');
+    const { renderProfile } = await import('./profile.js?v=20261111-profile30');
     renderProfile(data.profile);
   }
   else if (section === 'post') renderPost(data);
@@ -86,3 +86,6 @@ try {
   // Source links in the static HTML remain usable if the snapshot cannot load.
   if (section === 'post') root.replaceChildren(el('p', '文章暂时无法载入，请稍后再试。'));
 }
+
+document.body.dataset.contentReady="true";
+document.dispatchEvent(new Event("site:content-ready"));

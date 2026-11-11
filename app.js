@@ -4,7 +4,7 @@ import { FlightLayer } from './flight-layer.js?v=20261111-flow28';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-flow28';
 import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-flow28';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import './navigation.js?v=20261111-flow28';
+import './navigation.js?v=20261111-profile30';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');
@@ -33,7 +33,7 @@ const svgNS = 'http://www.w3.org/2000/svg';
 let width = 0, height = 0, renderer, previousViewportWidth = 0, wasPannable = false;
 let frame = null, elapsed = 0, previousFrame = 0, nextVisualAt = 0;
 let drawTask=null, resizeTask=null, drawTimer=null;
-let paused = motion.matches, ready = false, resizeFrame = null;
+let paused = motion.matches, ready = false, resizeFrame = null, transitioning = false;
 
 
 function svgElement(tag, attributes) {
@@ -60,7 +60,8 @@ for (const hotspot of site.hotspots) {
 }
 
 function layout() {
-  const bounds = viewport.getBoundingClientRect();
+  // Camera transforms during navigation must not change the scene's layout size.
+  const bounds = { width: viewport.clientWidth, height: viewport.clientHeight };
   let oldCenter = width ? (viewport.scrollLeft + previousViewportWidth / 2) / width : .42;
   const scale = Math.max(bounds.width / site.width, bounds.height / site.height);
   width = site.width * scale;
@@ -101,10 +102,10 @@ function draw() {
     status.hidden=false; status.textContent='动效已暂停，刷新页面可重试。';
   }).finally(()=>{
     drawTask=null;
-    if (ready && !paused && !document.hidden && !resizeTask) {
+    if (ready && !paused && !transitioning && !document.hidden && !resizeTask) {
       drawTimer=setTimeout(()=>{
         drawTimer=null;
-        if(paused || document.hidden || resizeTask)return;
+        if(paused || transitioning || document.hidden || resizeTask)return;
         const now=performance.now();elapsed+=previousFrame?(now-previousFrame)/1000:0;previousFrame=now;
         draw();
       },Math.max(0,sceneFrameInterval-(performance.now()-requestedAt)));
@@ -114,7 +115,7 @@ function draw() {
 }
 function tick(now) {
   frame = null;
-  if (!ready || paused || document.hidden) return;
+  if (!ready || paused || transitioning || document.hidden) return;
   const current=Math.max(now,previousFrame);
   const delta = previousFrame ? current - previousFrame : 0;
   previousFrame = current;
@@ -136,16 +137,17 @@ function syncMotion() {
   if (frame !== null) cancelAnimationFrame(frame);
   frame = null;
   previousFrame = 0; nextVisualAt = 0;
-  if (paused || document.hidden) renderer?.cancelFrame?.();
+  if (paused || transitioning || document.hidden) renderer?.cancelFrame?.();
   pause.textContent = paused ? '▷ 播放动效' : 'Ⅱ';
   pause.setAttribute('aria-pressed', String(paused));
   pause.setAttribute('aria-label', paused ? '播放场景动效' : '暂停场景动效');
   pause.title = paused ? (motion.matches ? '系统已启用减少动态效果，点击播放场景动效' : '播放动效') : '暂停动效';
-  if (ready && !paused && !document.hidden) frame = requestAnimationFrame(tick);
+  if (ready && !paused && !transitioning && !document.hidden) frame = requestAnimationFrame(tick);
 }
 pause.addEventListener('click', () => { paused = !paused; syncMotion(); });
 motion.addEventListener('change', event => { paused = event.matches; syncMotion(); });
 document.addEventListener('visibilitychange', syncMotion);
+document.addEventListener('site:transition', event => { transitioning = event.detail.active; syncMotion(); });
 new ResizeObserver(() => {
   if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
   resizeFrame = requestAnimationFrame(() => { layout(); resizeFrame = null; });

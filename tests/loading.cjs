@@ -21,13 +21,17 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     assert.equal(await page.locator('#scene-poster').evaluate(e => getComputedStyle(e).opacity), '1');
     await page.locator('[data-hotspot="cv"] .hotspot-label rect').click();
     await page.waitForSelector('.page-transition');
-    const visibleTransition = await page.locator('.page-transition canvas').evaluate(canvas => {
-      const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-      let lit = 0;
-      for (let i = 0; i < pixels.length; i += 4) if (pixels[i] + pixels[i+1] + pixels[i+2] > 120) lit++;
-      return lit / (pixels.length / 4);
+    // The camera now transforms the live preview under a transparent particle
+    // canvas. Verify both layers rather than expecting a full snapshot in it.
+    const visibleTransition = await page.waitForFunction(() => {
+      const canvas=document.querySelector('.page-transition canvas');if(!canvas)return false;
+      const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      let colored=0;
+      for(let i=0;i<pixels.length;i+=16)if(pixels[i+3]>15&&Math.max(pixels[i],pixels[i+1],pixels[i+2])-Math.min(pixels[i],pixels[i+1],pixels[i+2])>15)colored++;
+      const style=getComputedStyle(document.querySelector('#scene-viewport'));
+      return colored>10&&Number(style.opacity)>0&&Number(style.opacity)<1&&new DOMMatrix(style.transform).a>1;
     });
-    assert(visibleTransition > .05, 'early navigation should dissolve the visible ASCII preview');
+    assert(await visibleTransition.jsonValue(), 'early navigation should scatter colored characters while zooming the visible preview');
     await page.waitForURL(`${origin}/cv/`);
     releaseSource();
     await page.close();

@@ -17,7 +17,7 @@ python3 -m http.server 8081 --bind 0.0.0.0
 - 人物 → `/cv/`；`ABOUT ME` 提示常驻，与 `TECH BLOG` 一致。
 - 水面上的小黄鸭 → `/life/`；没有可见标签、悬停高亮或鼠标手形提示。键盘访问仍保留无障碍焦点。
 - 场景采用等比例 cover 铺满视口。竖屏可左右滑动探索整个房间；点击区域始终使用原图坐标，与画面一起缩放、移动。
-- 内部页面跳转有字符消散动画，子页有浮现动画；系统开启减少动态效果时停用这些动画。右下角可暂停场景，后台标签页停止绘制。
+- 内部页面双向跳转采用字符打散/重组与镜头缩放：进入子页拉近，返回首页缩远；系统开启减少动态效果时停用这些动画。右下角可暂停场景，后台标签页停止绘制。
 
 入口多边形与目标链接位于 `site.config.js`，原图尺寸为 1536 × 1024。首页无上传、拖入图片或密度调整功能。
 
@@ -53,9 +53,13 @@ python3 -m http.server 8081 --bind 0.0.0.0
 
 当前快照收录 11 篇已发布文章（技术 2 篇、生活 9 篇）、111 张本地配图，以及 Scholar 的 18 条论文记录。
 
-About Me 根据 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74) 的公开内容整理，保留来源块 ID：介绍、两段教育经历、三个研究方向、五篇代表论文、三项竞赛和六项荣誉。代表论文优先展示，其余十三篇 Scholar 论文可展开查看，按 Scholar URL 去重。头像使用 Google Scholar 当前头像的 256×241 原始 JPEG，本地保存为 `assets/profile/jiaqi-li.jpg`（14,748 字节）；不裁切、不套颜色滤镜。微信与 QQ 二维码使用 Notion 原图，保存在 `assets/profile/`，默认折叠并延迟加载。工作邮箱经用户确认统一为 `lijiaqi.work@outlook.com`；Notion 原邮件链接的旧地址不沿用。原 PDF 地址 `https://lijia7.github.io/lijiaqi_cv.pdf` 于 2026-11-11 返回 404，因此不展示失效下载入口。
+About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74)、Scholar 与作者确认的最新工作信息。介绍围绕视觉生成、世界模型和 3D 视觉，工作经历为腾讯混元视觉生成团队 Senior Research Scientist，放在论文之前，不推断入职日期。页面只展示 GameCraft、Hy-Nomas、NVDS、CH3Depth、SDDR、DADP 六个项目；保留荣誉，移除教育、竞赛、微信/QQ 及对应图片。完整 Scholar 记录仅保存在快照中，不再在网页展开。
 
-**来源访问：**发布后的新环境已验证可访问博客、Notion 公开站点与 Google Scholar。Notion 数据源使用公开站点，筛选 `Post`、`Published` 且未加锁的记录；忽略隐藏记录及菜单项。Scholar 资料用于公开姓名、机构、研究方向、论文及头像；教育、竞赛、荣誉等采用用户指定的 Notion About，不推断未列出的履历。
+每项论文提供已核对的论文、GitHub、项目页或视频链接，详情见 [素材来源](assets/publications/SOURCES.md)。六张预览图合计约 451 KiB，延迟加载；GameCraft 与 Hy-Nomas 的官方视频只在点击播放时创建播放器和发起请求，不自动下载，切换播放项和后台标签页时暂停。CH3Depth 和 DADP 方法图从公开论文的对应 Figure 渲染，保留原有颜色和文字。未核实到可公开访问的 CH3Depth 代码库以及 DADP 官方代码库/独立项目页，因此只保留对应论文、图示和已公开材料。
+
+头像使用 Google Scholar 的 256×241 原始 JPEG，本地保存为 `assets/profile/jiaqi-li.jpg`（14,748 字节）；不裁切、不套颜色滤镜，照片下方没有姓名或标签。邮箱经作者确认统一为 `lijiaqi.work@outlook.com`。原 PDF 地址 `https://lijia7.github.io/lijiaqi_cv.pdf` 返回 404，不展示失效下载入口。
+
+**来源访问：**发布后的新环境已验证可访问博客、Notion 公开站点与 Google Scholar。Notion 数据源使用公开站点，筛选 `Post`、`Published` 且未加锁的记录；忽略隐藏记录及菜单项。Scholar 资料用于公开姓名、机构、研究方向、论文及头像；荣誉采用用户指定的 Notion About；当前职位采用作者明确提供的信息，不推断未列出的履历。
 
 内容快照格式：
 
@@ -63,9 +67,15 @@ About Me 根据 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 - `blocks[]`：`paragraph`、`heading`、`subheading`、`quote`、`code` 使用 `text`；`list` 使用 `items` 与可选 `ordered`；`link` 使用 `text` 和 `url`；`image` 使用 `url` 和 `alt`。
 - 文章地址为 `/post/?id=<Notion 页面 ID>`，分类列表自动指向该地址，正文按本网站风格排版。文本不会作为 HTML 执行。`runs` 可保存段内链接；图片会保存到 `assets/notion/` 并通过相对路径读取，避免临时链接过期。
 - `profile`：`name`、`affiliation`、`bio`、`interests[]`、`publications[]`、`source`、`syncedAt`。每篇论文含 `title`、`authors`、`venue`、`year`、`url`。仅在完成真实资料核对后填写 `syncedAt`。
-- `profile.avatar`：本地 `url`、原图 `source`、`alt`、尺寸；`profile.about`：Notion `source`、独立 `syncedAt`、`education[]`、`research[]`、`selectedPublications[]`、`competitions[]`、`awards[]`、`contacts`。每项保留 `sourceBlockId`，代表论文用 `scholarURL` 对应完整论文快照。`profile.css` 仅由 About Me 加载，保留全站暗色背景与字符风格的章节编号。
+- `profile.avatar`：本地 `url`、原图 `source`、`alt`、尺寸；`profile.about`：Notion `source`、独立 `syncedAt`、`experience[]`、`research[]`、`selectedPublications[]`、`awards[]`、`contacts`。Notion 来源项保留 `sourceBlockId`，代表论文用 `scholarURL` 对应完整论文快照，并包含 `links[]` 与本地 `media`（尺寸、来源、可选官方视频地址）。`profile.css` 仅由 About Me 加载，保留全站暗色背景与字符风格的章节编号。
 
 这是可审阅的本地内容快照，不是自动同步服务。当前按来源页面 ID 保持映射；`LIFE` 与年度生活文章进入生活页，技术学习及 AI 相关笔记进入技术页。原文链接与原始分类保留在记录中。可使用公开来源或 Notion 官方导出的 Markdown/HTML ZIP 更新快照，不需要网站读者登录 Notion。
+
+## 页面切换
+
+`navigation-boot.js` 在目标页首帧前读取一次短期转场标记，失败会自动恢复可见；`navigation.js` 管理离场 420 ms、入场 540 ms 的双向切换。`page-particles.js` 从当前可见文本或首页颜色采样生成最多 1,400 个 ASCII 粒子，按各自方向散开并在目标页聚合。摄像机用浏览器合成变换缩放真实页面，不截图重建文字。首页恢复时沿上次入口缩远，加载动画不等待完整 Worker 初始化。首屏布局采用未变换的 clientWidth/clientHeight，避免转场缩放改变画面尺寸。
+
+每次动画结束立即销毁粒子与画布，退出/历史返回清理过渡状态，提供计时器兜底；同页锚点、外链、下载、修饰键和系统减少动态效果保留原生行为。同一 pathname 的不同文章 query 也支持转场。只预取目标 HTML，不预取视频或整套场景资源；首页动效在转场期间暂停计算，完成后恢复。
 
 ## 验证
 
@@ -73,6 +83,7 @@ About Me 根据 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 
 ```sh
 node tests/smoke.cjs
+node tests/navigation.cjs
 node tests/loading.cjs
 node tests/responsiveness.cjs
 node tests/layers.cjs
