@@ -1,42 +1,29 @@
-import { distantCity } from './scene-objects.js?v=20261111-sky43';
+import { skyApertures, skyForeground, skyWires } from './scene-sky-matte.js?v=20261111-layer44';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
-const skyColor=(r,g,b)=>g>118&&b>112&&!(g>r*1.16&&g>b*1.25);
 // Lighting follows the complete visible sky. Motion has its own foreground
 // matte; conservative animation bounds must never decide a region's palette.
 export function* prepareSky(scene){
  const x0=528,y0=60,w=1008,h=366,geometry=surface(w,h),g=geometry.getContext('2d');g.translate(-x0,-y0);
  const polygon=(ctx,points)=>{ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
- g.fillStyle='#fff';
- polygon(g,[[529,65],[832,65],[832,423],[620,423],[620,378],[612,378],[611,361],[594,357],[585,336],[578,329],[585,211],[529,198]]);
- g.fillRect(858,65,501,361);g.fillRect(1384,68,152,358);
- g.fillStyle='#000';for(const city of distantCity)polygon(g,city);
- polygon(g,[[1318,111],[1341,113],[1357,124],[1359,141],[1347,159],[1341,166],[1311,172],[1298,158],[1292,143],[1289,129],[1300,121]]);
- polygon(g,[[1430,242],[1473,242],[1471,267],[1438,271],[1427,259]]);
- polygon(g,[[1394,263],[1416,250],[1427,250],[1427,271],[1405,294],[1394,300]]);
- g.fillRect(1427,268,109,32);
+ g.fillStyle='#fff';for(const p of skyApertures)polygon(g,p);
+ g.fillStyle='#000';for(const p of skyForeground)polygon(g,p);
  const area=g.getImageData(0,0,w,h).data;
- const wires=surface(w,h),wire=wires.getContext('2d');wire.translate(-x0,-y0);wire.strokeStyle='#fff';wire.lineWidth=5;wire.lineCap='round';wire.lineJoin='round';
- for(const points of[
-  [[551,60],[556,85],[569,97],[587,101],[604,97],[619,83],[625,60]],
-  [[654,60],[655,103],[661,119],[674,132]],[[729,60],[731,113]],
-  [[798,60],[798,126],[809,144],[815,147],[815,159],[825,176],[839,179]],
-  [[798,60],[798,232],[805,245],[813,255],[830,270],[843,276]],
-  [[805,60],[805,125],[812,135]],[[801,217],[811,218],[829,204],[835,193]],
-  [[1469,60],[1469,166],[1478,198],[1488,209],[1501,207],[1513,199],[1524,181],[1533,157]],
-  [[1276,134],[1275,162],[1286,175],[1337,176],[1364,168]],
- ]){wire.beginPath();points.forEach(([x,y],i)=>i?wire.lineTo(x,y):wire.moveTo(x,y));wire.stroke();}
+ const wires=surface(w,h),wire=wires.getContext('2d');wire.translate(-x0,-y0);wire.strokeStyle='#fff';wire.lineCap='round';wire.lineJoin='round';
+ for(const {points,width}of skyWires){wire.lineWidth=width;wire.beginPath();points.forEach(([x,y],i)=>i?wire.lineTo(x,y):wire.moveTo(x,y));wire.stroke();}
  const wirePixels=wire.getImageData(0,0,w,h).data,lightMask=new Uint8Array(w*h),mask=surface(w,h),m=mask.getContext('2d'),alpha=m.createImageData(w,h),destinations=[];
- const plate=scene.plate.data,original=scene.original.data;
+ const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<426);
  for(let y=0;y<h;y++){
   for(let x=0;x<w;x++){
-   const n=y*w+x,j=n*4,i=((y+y0)*1536+x+x0)*4;
-   // Protect the lamp's actual warm pixels, not a rectangular sky margin.
-   const lamp=x+x0>=1028&&x+x0<=1172&&y+y0<=82&&original[i]>155&&original[i+1]>95&&original[i]>=original[i+1]*.95&&original[i]>=original[i+2];
-   const inWindow=area[j]>128&&!lamp;
-   lightMask[n]=inWindow&&skyColor(original[i],original[i+1],original[i+2])?1:0;
-   const land=y+y0>395&&plate[i+1]<178&&plate[i]<plate[i+1]*.77;
-   const visible=inWindow&&!land&&skyColor(plate[i],plate[i+1],plate[i+2])&&wirePixels[j+3]<128;
+   const wx=x+x0,wy=y+y0,n=y*w+x,j=n*4,i=(wy*1536+wx)*4;
+   const lamp=wx>=1028&&wx<=1172&&wy<=82&&original[i]>155&&original[i+1]>95&&original[i]>=original[i+1]*.95&&original[i]>=original[i+2];
+   let fixedLeaf=false,originalLeaf=false;
+   for(const p of foliage){const px=wx-p.x,py=wy-p.y;if(px>=0&&px<p.w&&py>=0&&py<p.h){const k=py*p.w+px;fixedLeaf=!!p.fixed[k];originalLeaf=!!p.foreground[k];}}
+   // Only a traced wire's local rim uses its color to separate it from sky.
+   // No global RGB threshold can punch holes in buildings or bright desk trim.
+   const wireEdge=wirePixels[j+3]>32&&(original[i+1]<158||original[i]>original[i+1]*.88||original[i+2]<original[i+1]*.94);
+   const visible=area[j]>250&&!lamp&&!fixedLeaf&&!wireEdge;
+   lightMask[n]=visible&&!originalLeaf?1:0;
    alpha.data[j+3]=visible?255:0;if(visible)destinations.push(n);
   }
   if(y%60===0)yield .44+.09*y/h;
@@ -47,8 +34,8 @@ export function* prepareSky(scene){
  // Adjacent patches overlap with a smooth crossfade, retaining pixel texture
  // instead of blurring/inpainting large hidden foreground regions.
  const patches=[
-  {x:640,y:140,w:144,h:250}, {x:870,y:80,w:368,h:248},
-  {x:640,y:140,w:144,h:250,flip:true}, {x:870,y:80,w:368,h:248,flip:true},
+  {x:640,y:140,w:144,h:235}, {x:870,y:80,w:368,h:248},
+  {x:640,y:140,w:144,h:235,flip:true}, {x:870,y:80,w:368,h:248,flip:true},
  ];
  const overlap=48,sourceWidth=patches.reduce((sum,p)=>sum+p.w-overlap,0),sourceCanvas=surface(sourceWidth,h),sourceCtx=sourceCanvas.getContext('2d'),sourceImage=sourceCtx.createImageData(sourceWidth,h);
  const sample=(p,x,y)=>((p.y+Math.floor(y*p.h/h))*1536+p.x+(p.flip?p.w-1-x:x))*4;

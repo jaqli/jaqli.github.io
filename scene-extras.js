@@ -1,6 +1,6 @@
-import { leafShapes } from './scene-foliage.js?v=20261111-sky43';
+import { prepareFoliage } from './scene-foliage.js?v=20261111-layer44';
 import { SceneFan } from './scene-fan.js?v=20261111-sky43';
-import { prepareWarp, drawWarp } from './scene-deform.js?v=20261111-days42';
+import { drawWarp } from './scene-deform.js?v=20261111-layer44';
 import { inside } from './scene-objects.js?v=20261111-sky43';
 
 const TAU=Math.PI*2,W=1536;
@@ -14,11 +14,7 @@ const opening=(time,period,phase)=>1-.96*Math.exp(-((((time+phase)%period-period
 export class SceneExtras {
   *prepare(scene){
     this.tag=scene.cut([[309,80],[315,80],[320,85],[330,87],[332,111],[322,113],[319,110],[304,110],[300,107],[304,101],[305,87]],(r,g,b,x,y)=>y>=80,true,6,undefined,false,true);
-    this.leaves=leafShapes.map(leaf=>{
-      const sprite=scene.cut(leaf.polygon,(r,g,b)=>g>r*(leaf.warm?.78:.91)&&g>b*1.12,true,14,undefined,false,false);
-      const length=Math.max(...leaf.polygon.map(([x,y])=>Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])));
-      return{...leaf,...prepareWarp(sprite,(x,y)=>{const free=clamp(Math.hypot(x-leaf.anchor[0],y-leaf.anchor[1])/length)**1.7;return[free,free*free];},8)};
-    });
+    this.leaves=prepareFoliage(scene);
     yield;
     this.prepareFan(scene);
     yield;

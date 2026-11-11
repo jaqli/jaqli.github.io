@@ -1,4 +1,4 @@
-import { prepareWarp, drawWarp } from './scene-deform.js?v=20261111-days42';
+import { prepareWarp, drawWarp } from './scene-deform.js?v=20261111-layer44';
 const TAU=Math.PI*2;
 const clamp=n=>Math.max(0,Math.min(1,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};

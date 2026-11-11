@@ -1,4 +1,4 @@
-import { refreshWarp } from './scene-deform.js?v=20261111-days42';
+import { refreshWarp } from './scene-deform.js?v=20261111-layer44';
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const yieldTask=()=>globalThis.scheduler?.yield?scheduler.yield():new Promise(resolve=>setTimeout(resolve,0));
 export const sceneTimes=['dawn','noon','dusk','night'];
@@ -18,7 +18,8 @@ export class SceneTime {
   };
   add({canvas:r.base},'room');this.room=this.assets[0];
   add(r.sun,'sun');
-  for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,...e.leaves,a.probe,a.aerial])add(sprite);
+  for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,a.probe,a.aerial])add(sprite);
+  for(const leaf of e.leaves)add(leaf,'foliage');
   add(e.cable);add(a.wire);
   for(const key of ['back','cage'])add({canvas:e.fan[key],x:1205,y:548});
   add({canvas:e.fan.blade},'object',(x,y)=>[1243+(x-44)*31/40-(y-44)*6/40,599+y-44]);
@@ -34,7 +35,7 @@ export class SceneTime {
  color(r,g,b,x,y,kind,out,i,mode){
   const l=r*.2126+g*.7152+b*.0722;
   if(kind==='sun'){out[i]=r;out[i+1]=mode==='dawn'?g*.94:g;out[i+2]=mode==='dawn'?b*.92:b;return;}
-  const sky=kind==='sky'||this.isSky(x,y);
+  const sky=kind==='sky'||kind!=='foliage'&&this.isSky(x,y);
   if(sky){
    const cloud=clamp((r/Math.max(g,1)-.57)/.39);
    if(mode==='night'){

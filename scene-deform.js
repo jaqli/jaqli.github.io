@@ -4,10 +4,15 @@ export function prepareWarp(sprite,field,padding=5){
   const{canvas,w,h}=sprite,ctx=canvas.getContext('2d'),image=ctx.getImageData(0,0,w,h);
   const source=new Float32Array(image.data.length),wx=new Float32Array(w*h),wy=new Float32Array(w*h),active=[];
   for(let i=0;i<w*h;i++){const a=image.data[i*4+3]/255;for(let c=0;c<3;c++)source[i*4+c]=image.data[i*4+c]*a;source[i*4+3]=a;}
+  // Constant-time occupancy queries keep larger motion margins cheap to
+  // prepare. The prefix table is temporary; the animated footprint is exact.
+  const stride=w+1,occupied=new Uint32Array(stride*(h+1));
+  for(let y=0;y<h;y++){let row=0;for(let x=0;x<w;x++){row+=image.data[(y*w+x)*4+3]?1:0;occupied[(y+1)*stride+x+1]=occupied[y*stride+x+1]+row;}}
   for(let y=padding;y<h-padding;y++)for(let x=padding;x<w-padding;x++){
+    const left=x-padding,right=x+padding+1,top=(y-padding)*stride,bottom=(y+padding+1)*stride;
+    if(!(occupied[bottom+right]-occupied[top+right]-occupied[bottom+left]+occupied[top+left]))continue;
     const i=y*w+x,[fx,fy]=field(sprite.x+x,sprite.y+y);wx[i]=fx;wy[i]=fy;
-    let visible=false;for(let dy=-padding;dy<=padding&&!visible;dy++)for(let dx=-padding;dx<=padding;dx++)if(image.data[((y+dy)*w+x+dx)*4+3]){visible=true;break;}
-    if(visible)active.push(i);
+    active.push(i);
   }
   return{...sprite,ctx,source,wx,wy,active:new Int32Array(active),output:ctx.createImageData(w,h)};
 }
