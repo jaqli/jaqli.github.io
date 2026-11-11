@@ -70,7 +70,7 @@ export const cloudWindows = [
   { box: [1392,80,144,132], accepts: () => true },
 ];
 
-export const cloudSpeed = 15;
+export const cloudSpeed = 45;
 
 // Emitters are confined to their original light/face panels; their housings stay still.
 export const emitters = [

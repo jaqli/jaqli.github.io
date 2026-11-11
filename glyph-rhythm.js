@@ -1,6 +1,6 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { glyphColor } from './glyph-atlas.js?v=20261111-detail27';
-import { glyphWeight } from './scene-style.js?v=20261111-detail27';
+import { glyphColor } from './glyph-atlas.js?v=20261111-flow28';
+import { glyphWeight } from './scene-style.js?v=20261111-flow28';
 
 // All visible ASCII characters. Space is represented by the stable scene mask;
 // control characters have no printable shape.

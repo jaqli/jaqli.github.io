@@ -248,7 +248,7 @@ async function duckBodyPoint(page) {
     assert(changes.fixedBirdSizeError<1e-5&&changes.fallbackBirdSizeError===0, 'flight perspective must never enlarge or shrink the fixed-size bird glyphs');
     assert(changes.openEye>changes.closedEye*1.8, 'the robot should visibly close its eyes');
     assert(changes.repeatedBlink<.1, 'the robot should blink again after 3.2 seconds');
-    assert(changes.cloudSpeed>=14 && changes.cloudSpeed<=16, 'clouds should move at the faster requested speed');
+    assert.equal(changes.cloudSpeed,45,'clouds should move at three times the previous 15 source pixels per second');
     assert(changes.paperCount>=9, 'additional papers should join the wind animation');
     for (const key of ['sidebar','status','lamp','redEye','leftFace','rightFace','wallPaper','boardPaper','monitorPaper']) assert(changes[key]>.02, `${key} must visibly animate`);
     for (const key of ['boat','blueCan','redCan','floatingPages','tablet','phone','floatingPage','paperBoat','waterCar','expandedPlot']) assert(changes[key]>.03, `${key} must animate in its actual image region`);

@@ -1,15 +1,16 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-detail27';
+import { scenePixelRatio } from './render-budget.js?v=20261111-flow28';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261111-detail27';
-import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-detail27';
-import { screens, paintScreen } from './screen-content.js?v=20261111-detail27';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-detail27';
+import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261111-flow28';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-flow28';
+import { screens, paintScreen } from './screen-content.js?v=20261111-flow28';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-flow28';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-detail27';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-detail27';
-import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-detail27';
-import { glyphLayout } from './glyph-layout.js?v=20261111-detail27';
-import { glyphWeight, sceneColor, sceneRGB } from './scene-style.js?v=20261111-detail27';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-flow28';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow28';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-flow28';
+import { glyphLayout } from './glyph-layout.js?v=20261111-flow28';
+import { glyphWeight, sceneColor, sceneRGB } from './scene-style.js?v=20261111-flow28';
+import { RippleField } from './water-ripples.js?v=20261111-flow28';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -141,7 +142,6 @@ const screenOccluder = [[722,460],[724,457],[727,457],[725,454],[728,452],[729,4
 // Only the loose bottom edge below the armrest. Back, shoulders and arms stay fixed.
 const hemArea = [[815,617],[848,615],[848,629],[839,637],[818,634]];
 const monitorHousing = [[416,340],[618,358],[620,498],[417,498]];
-const rippleSources = [[1150,570,0],[960,735,2.7],[465,866,4.4],[352,863,1.1]];
 
 function nearPolygon(x, y, polygon) {
   if (inside(x, y, polygon)) return true;
@@ -362,6 +362,7 @@ export class AsciiRenderer {
     this.prepare(baseCtx);
     this.dynamic = [];
     this.water = [];
+    this.ripples=new RippleField();
     this.cloudCells = []; this.cells = [];
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
@@ -437,7 +438,7 @@ export class AsciiRenderer {
         const reflection={ ...cell, glyphSource:cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
           sinA:Math.sin(sx*.052+sy*.083), cosA:Math.cos(sx*.052+sy*.083),
           sinB:Math.sin(sx*.023-sy*.037), cosB:Math.cos(sx*.023-sy*.037),
-          rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) };
+          rings: this.ripples.at(sx,sy) };
         // A shared dark ink atlas dims the original colored strokes at troughs.
         // Reuse the same character clock and leave the color backing untouched;
         // one ink color avoids a second per-color palette for the whole water.
@@ -730,14 +731,13 @@ export class AsciiRenderer {
   }
   drawWater(time,ctx=this.ctx) {
     const sinA=Math.sin(time*1.8),cosA=Math.cos(time*1.8),sinB=Math.sin(time*.9),cosB=Math.cos(time*.9);
-    const rings=rippleSources.map(([, ,phase])=>{const age=(time+phase)%7.5; return {radius:age*20,strength:Math.sin(Math.PI*age/7.5)*1.05};});
-    const band=(distance,width)=>{const t=Math.max(0,1-Math.abs(distance)/width);return t*t*(3-2*t);};
+    this.ripples.update(time);
     for (const cell of this.water) {
       const interference=Math.max(0,.62*(cell.sinA*cosA-cell.cosA*sinA)+.38*(cell.sinB*cosB+cell.cosB*sinB));
       let shine = interference*interference*interference*interference*.55;
       for (const ring of cell.rings) {
-        const wave=rings[ring.index],edge=ring.distance-wave.radius;
-        if(edge<11&&edge>-35)shine+=(band(edge,11)+.4*band(edge+26,9)-.6*band(edge+13,10))*wave.strength;
+        const {values,index,mix,gain}=ring;
+        shine+=(values[index]*(1-mix)+values[index+1]*mix)*gain;
       }
       if (Math.abs(shine) < .035) continue;
       ctx.globalAlpha = Math.min(shine<0?.32:.95, Math.abs(shine));

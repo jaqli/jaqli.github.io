@@ -1,5 +1,5 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { glyphWeight, sceneRGB } from './scene-style.js?v=20261111-detail27';
+import { glyphWeight, sceneRGB } from './scene-style.js?v=20261111-flow28';
 // Tone mapping is shared by the room, clouds and moving objects. Its lookup
 // table avoids repeated exponentiation; the bounded atlas uses numeric keys.
 const channel=v=>Math.min(16,Math.round(v/16));
