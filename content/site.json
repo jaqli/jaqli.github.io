@@ -3652,7 +3652,7 @@
     ],
     "source": "https://scholar.google.com/citations?user=i-2ghuYAAAAJ&hl=zh-CN",
     "syncedAt": "2026-11-10T05:26:47+00:00",
-    "bio": "I am a Senior Research Scientist on the Visual Generation team at Tencent Hunyuan. My research focuses on generative world models, interactive video generation, and 3D visual understanding. I work on models that connect controllable generation with spatial and temporal consistency, including Hunyuan-GameCraft and Hy-Nomas. My earlier research spans depth foundation models, video depth stabilization, and diffusion-based depth prediction, with work published at CVPR, ICCV, NeurIPS, and ACM Multimedia.",
+    "bio": "I am a Senior Research Scientist on the Visual Generation team at Tencent Hunyuan. My research focuses on generative world models, interactive video generation, and 3D visual understanding. I work on models that connect controllable generation with spatial and temporal consistency, including Hunyuan-GameCraft and Hy-Nomas. My earlier research spans depth foundation models, video depth stabilization, and diffusion-based depth prediction, with work published at CVPR, ICCV, NeurIPS, and TPAMI.",
     "avatar": {
       "url": "../assets/profile/jiaqi-li.jpg",
       "alt": "Jiaqi Li",
