@@ -25,7 +25,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     const image=new Image();image.src='data:image/png;base64,'+picture;await image.decode();
     const actual=document.createElement('canvas');actual.width=image.width;actual.height=image.height;actual.getContext('2d').drawImage(image,0,0);
     const sourceScale=1440/1536*2;
-    const regions={sky:[610,190,140,120],city:[1180,356,30,85],water:[1008,475,96,90],hair:[716,468,15,31],body:[785,505,55,75],wall:[350,40,150,100],screen:[441,383,109,77]};
+    const regions={sky:[610,190,140,120],city:[1180,356,30,85],water:[1008,475,96,90],hair:[716,468,15,31],body:[785,505,55,75],wall:[350,40,150,100]};
     const comparison=Object.fromEntries(Object.entries(regions).map(([name,box])=>{
      const pixels=box.map(v=>Math.round(v*sourceScale));
      const a=actual.getContext('2d').getImageData(...pixels).data,b=reference.getContext('2d').getImageData(...pixels).data;
@@ -33,21 +33,31 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
      for(let i=0;i<a.length;i+=4)for(let c=0;c<3;c++){error+=Math.abs(a[i+c]-b[i+c]);channels[c]+=a[i+c]-b[i+c];}
      return[name,{error:error/(a.length/4*3),colorShift:Math.max(...channels.map(v=>Math.abs(v)/(a.length/4)))}];
     }));
+    // CSS applies a projective transform while the Canvas2D fallback uses two
+    // triangles. Compare monitor pixels before projection: this checks actual
+    // texture fidelity without confusing larger text with geometric differences.
+    const screenErrors=[];
+    for(const [i,canvas]of [...document.querySelectorAll('[data-layer^="screen-"]')].entries()){
+     const image=new Image();image.src=canvas.toDataURL();await image.decode();
+     const copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;copy.getContext('2d').drawImage(image,0,0);
+     const a=copy.getContext('2d').getImageData(0,0,copy.width,copy.height).data;
+     const b=renderer.screens[i].ctx.getImageData(0,0,copy.width,copy.height).data;
+     let error=0;for(let p=0;p<a.length;p++)error+=Math.abs(a[p]-b[p]);screenErrors.push(error/a.length);
+    }
     const base=document.querySelector('#ascii-canvas');
-    return {width:base.width,height:base.height,largeDisplayDpr:scenePixelRatio(3840,2160),comparison,
+    return {width:base.width,height:base.height,largeDisplayDpr:scenePixelRatio(3840,2160),comparison,screenErrors,
      screens:[...document.querySelectorAll('[data-layer^="screen-"]')].map(c=>[c.width,c.height])};
    },{picture,time});
    assert.equal(result.width,2880,'do not upscale a low-resolution scene on Retina displays');
    assert.equal(result.height,1920);
    assert.equal(result.largeDisplayDpr,2,'large screens must not silently lose raster resolution');
    assert.deepEqual(result.screens,[[519,360],[324,258],[300,207]],'retain the original 3× screen textures');
+   assert(result.screenErrors.every(error=>error<.1),'monitor textures must preserve sharpness and color before perspective');
    for(const[name,value]of Object.entries(result.comparison)){
-    // Screen perspective is composited by CSS; all other checked regions
-    // retain the original raster directly, including its RGB colors.
-    assert(value.error<(name==='screen'?12:.3),`${name}: glyph sharpness changed (${value.error})`);
-    assert(value.colorShift<(name==='screen'?2:.15),`${name}: color drift (${value.colorShift})`);
+    assert(value.error<.3,`${name}: glyph sharpness changed (${value.error})`);
+    assert(value.colorShift<.15,`${name}: color drift (${value.colorShift})`);
    }
-   console.log('PASS Retina sharpness and RGB fidelity',time,JSON.stringify(result.comparison));
+   console.log('PASS Retina sharpness and RGB fidelity',time,JSON.stringify({comparison:result.comparison,screenErrors:result.screenErrors}));
    await page.close();
   }
  }finally{await browser.close();}

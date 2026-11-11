@@ -1,6 +1,6 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-glyph16';
-import { paintScreen } from './screen-content.js?v=20261111-glyph16';
-import { fontStep } from './ascii-renderer.js?v=20261111-glyph16';
+import { waterSampleInterval } from './render-budget.js?v=20261111-type17';
+import { paintScreen } from './screen-content.js?v=20261111-type17';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-type17';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -75,7 +75,7 @@ export class LayeredScene {
     const r=this.r,cloudFrame=Math.floor(time*30);
     const extra=[],first=this.ambientSizes[0]===-1;
     for(let i=0;i<r.dynamic.length;i++){
-      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
+      const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+fontIncrement*Math.round(Math.sin(time*.75+cell.phase)));
       cell.renderSize=size;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(time*1.3)*.35*Math.max(0,Math.min(1,(cell.sy-617)/17))*r.scale:0);
       if(first)r.stamp(cell,cell.x,cell.renderY,size,this.baseCtx);
       else if(cell.kind==='hem'||size!==this.ambientSizes[i])extra.push(cell);

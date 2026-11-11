@@ -1,4 +1,4 @@
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-glyph16';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-type17';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 
 // Stay in the same tonal family. Preserve each cell's source color and size.
@@ -14,9 +14,13 @@ export class GlyphMotion {
     this.r=renderer;this.enabled=true;this.cursor=0;this.time=0;this.credit=0;
     this.base=renderer.base.getContext('2d');this.cloud=renderer.cloudBase.getContext('2d');
     this.palette=new GlyphAtlas(renderer.fontSize,Math.max(2,renderer.pixelRatio),4096);
+    // Include the largest allowed letters and their neighbors when replacing
+    // ink; a 1.0-sized patch would crop the new 1.5-sized strokes.
+    this.radiusX=renderer.fontSize*renderer.maxGlyphSize*.45+1/renderer.pixelRatio;
+    this.radiusY=renderer.fontSize*renderer.maxGlyphSize*.65+1/renderer.pixelRatio;
     this.scratch=createCanvas();
-    this.scratch.width=Math.ceil((renderer.fontSize*.9+2/renderer.pixelRatio+2)*renderer.pixelRatio);
-    this.scratch.height=Math.ceil((renderer.fontSize*1.3+2/renderer.pixelRatio+2)*renderer.pixelRatio);
+    this.scratch.width=Math.ceil((this.radiusX*2+2)*renderer.pixelRatio);
+    this.scratch.height=Math.ceil((this.radiusY*2+2)*renderer.pixelRatio);
     this.paint=this.scratch.getContext('2d');
     this.order=new Uint32Array(renderer.cells.length);let length=0;
     for(let i=0;i<renderer.cells.length;i++)if(renderer.cells[i].glyphLayer!=='dynamic'&&!renderer.cells[i].water)this.order[length++]=i;
@@ -60,14 +64,20 @@ export class GlyphMotion {
   }
   patch(cell,layer=cell.glyphLayer){
     const r=this.r,cloud=layer==='cloud',neighbors=[],dynamic=[];
-    const rx=r.fontSize*.45+1/r.pixelRatio,ry=r.fontSize*.65+1/r.pixelRatio;
+    // Only the changed letter needs clearing. Reserve the maximum footprint
+    // for breathing letters, whose previous size may differ from this frame.
+    const breathing=cell.glyphLayer==='dynamic',pad=1/r.pixelRatio;
+    const rx=breathing?this.radiusX:r.fontSize*cell.size*.45+pad;
+    const ry=breathing?this.radiusY:r.fontSize*cell.size*.65+pad;
     const x=Math.floor(cell.x-rx),y=Math.floor(cell.y-ry),w=Math.ceil(cell.x+rx)-x,h=Math.ceil(cell.y+ry)-y;
-    const left=Math.max(0,Math.floor((x-rx)/r.cellW)),right=Math.min(r.columns-1,Math.floor((x+w+rx)/r.cellW));
-    const top=Math.max(0,Math.floor((y-ry)/r.cellH)),bottom=Math.min(r.rows-1,Math.floor((y+h+ry)/r.cellH));
+    const left=Math.max(0,Math.floor((x-this.radiusX)/r.cellW)),right=Math.min(r.columns-1,Math.floor((x+w+this.radiusX)/r.cellW));
+    const top=Math.max(0,Math.floor((y-this.radiusY)/r.cellH)),bottom=Math.min(r.rows-1,Math.floor((y+h+this.radiusY)/r.cellH));
     for(let row=top;row<=bottom;row++)for(let col=left;col<=right;col++){
       const neighbor=r.cells[row*r.columns+col];
       if(!cloud&&neighbor.glyphLayer==='dynamic')dynamic.push(neighbor);
       if(neighbor.glyphLayer!==layer)continue;
+      const nx=r.fontSize*neighbor.size*.45+pad,ny=r.fontSize*neighbor.size*.65+pad;
+      if(neighbor.x+nx<x||neighbor.x-nx>x+w||neighbor.y+ny<y||neighbor.y-ny>y+h)continue;
       neighbors.push(neighbor);
     }
     return {cloud,box:[x,y,w,h],neighbors,dynamic};

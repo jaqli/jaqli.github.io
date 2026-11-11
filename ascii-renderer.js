@@ -1,11 +1,11 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-glyph16';
+import { scenePixelRatio } from './render-budget.js?v=20261111-type17';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-glyph16';
-import { screens, paintScreen } from './screen-content.js?v=20261111-glyph16';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-type17';
+import { screens, paintScreen } from './screen-content.js?v=20261111-type17';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-glyph16';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-type17';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -43,8 +43,8 @@ export function inside(x, y, polygon) {
 }
 const clamp = (x, low = 0, high = 1) => Math.max(low, Math.min(high, x));
 const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
-// Nine sizes, weighted toward the readable middle rather than the extremes.
-const sizeStops=[.02,.07,.17,.35,.61,.81,.92,.98,1];
+// Ten sizes, weighted toward the readable middle rather than the extremes.
+const sizeStops=[.02,.07,.17,.35,.61,.81,.92,.97,.99,1];
 const bands = ['.,', ':;', '-=', '+*', 'xo', '%#', 'MW', '@'];
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
@@ -53,9 +53,10 @@ const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const yieldToBrowser = () => globalThis.scheduler?.yield ? scheduler.yield() : new Promise(resolve=>setTimeout(resolve,0));
-export const fontSizes = [.6,.65,.7,.75,.8,.85,.9,.95,1];
+export const fontSizes = [.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5];
 export const minFontSize=fontSizes[0];
-export const fontStep = size => fontSizes[clamp(Math.round((size-minFontSize)/.05),0,fontSizes.length-1)];
+export const fontIncrement=.1;
+export const fontStep = size => fontSizes[clamp(Math.round((size-minFontSize)/fontIncrement),0,fontSizes.length-1)];
 
 function flight(bird, time) {
   const route = bird.route, count = route.length;
@@ -333,10 +334,11 @@ export class AsciiRenderer {
     this.rows = Math.round(height / (width / this.columns * 1.28));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
     // Keep the previous ~5.8px reference font on desktop while packing the
-    // readable 0.6–1.0 glyphs on a single fine lattice.
+    // readable 0.6–1.5 glyphs on a single fine lattice.
     this.fontSize = this.cellH * 1.28;
+    this.maxGlyphSize=fontSizes.at(-1);
     for (const screen of this.screens) {
-      screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?.85:.8);
+      screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?1:.9);
       screen.frame=-1;
     }
     this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
@@ -365,15 +367,15 @@ export class AsciiRenderer {
         const [x,y,w,h]=source.box;
         return smooth(Math.min(sx-x,x+w-sx,sy-y,y+h-sy)/28);
       }));
-      // Most letters share a calm middle weight. Retain all nine size steps,
+      // Most letters share a calm middle weight. Retain all ten size steps,
       // but use the extremes sparingly instead of making every surface noisy.
       const variedSize=fontSizes[sizeStops.findIndex(stop=>seed<stop)];
-      const calmSize=variedSize+(.8-variedSize)*skyWeight;
+      const calmSize=variedSize+(1-variedSize)*skyWeight;
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
-      const edgeSize=calmSize+(Math.min(calmSize,.85)-calmSize)*smooth((contrast-45)/100);
+      const edgeSize=calmSize+(Math.min(calmSize,1.1)-calmSize)*smooth((contrast-45)/100);
       const size=isCity ? minFontSize : fontStep(edgeSize);
-      // Nine discrete sizes, with one occupied cell at every grid position.
+      // Ten discrete sizes, with one occupied cell at every grid position.
       const cell = { sx, sy, rgb, size,
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
@@ -427,7 +429,7 @@ export class AsciiRenderer {
         }
         if (count < 3) continue;
         const rgb = sum.map(v => v / count);
-        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: region.bird ? minFontSize : fontStep(detail*(.8 + .15 * clamp(count / (xStep * yStep)))) });
+        cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size: region.bird ? minFontSize : fontStep(detail*(1 + .2 * clamp(count / (xStep * yStep)))) });
       }
       return cells;
     };
@@ -655,7 +657,7 @@ export class AsciiRenderer {
       if (cell.kind === 'hem') {
         y += Math.sin(time * 1.3) * .35 * clamp((cell.sy - 617) / 17) * this.scale;
       } else {
-        size = fontStep(cell.size+.05*Math.round(Math.sin(time*.75+cell.phase)));
+        size = fontStep(cell.size+fontIncrement*Math.round(Math.sin(time*.75+cell.phase)));
       }
       this.stamp(cell, x, y, size);
     }

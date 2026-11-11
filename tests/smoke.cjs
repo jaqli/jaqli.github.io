@@ -199,10 +199,10 @@ async function duckBodyPoint(page) {
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
     assert(changes.columns >= 420, 'the unified desktop grid should retain fine skyline and hair detail');
-    assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1, 'moving objects must share the requested font range');
+    assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1.5, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');
     assert(changes.distantWingCleared, 'the distant gull must not remain baked into the drifting cloud texture');
-    assert.deepEqual(changes.sizes,[.6,.65,.7,.75,.8,.85,.9,.95,1], 'all nine requested font sizes must be present');
+    assert.deepEqual(changes.sizes,[.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5], 'all ten requested font sizes must be present');
     assert(changes.citySizes.every(sizes=>sizes.length===1&&sizes[0]===.6)&&!changes.cityAnimates, 'distant buildings must always use the minimum size');
     // CSS serializes matrix coefficients to six significant digits.
     assert(changes.fixedBirdSizeError<1e-5&&changes.fallbackBirdSizeError===0, 'flight perspective must never enlarge or shrink the minimum-sized bird glyphs');
