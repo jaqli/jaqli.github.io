@@ -1,6 +1,6 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-rhythm22';
-import { SceneLayers } from './scene-layers.js?v=20261111-rhythm22';
-import { AsciiRenderer } from './ascii-renderer.js?v=20261111-rhythm22';
+import { scenePixelRatio } from './render-budget.js?v=20261111-scatter23';
+import { SceneLayers } from './scene-layers.js?v=20261111-scatter23';
+import { AsciiRenderer } from './ascii-renderer.js?v=20261111-scatter23';
 
 class WorkerRenderer {
   constructor(worker,canvas) {
@@ -37,7 +37,7 @@ class WorkerRenderer {
     this.cancelFrame();
     const dpr=scenePixelRatio(width,height);
     const result=await this.request('resize',{width,height,dpr:devicePixelRatio||1},[],progress);
-    this.flightData=result.flight;
+    this.flightData=result.flight;this.canvas.dataset.raster=result.raster;
     const targets=this.layers.configure(result.layers,width/1536);
     await this.request('layers',{targets},targets.map(target=>target.canvas));
     this.width=width; this.height=height; this.pixelRatio=dpr;
@@ -52,7 +52,7 @@ class WorkerRenderer {
 // Start loading the worker/modules while the compressed scene downloads.
 export function prepareSceneRenderer(canvas){
   if(typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'||typeof createImageBitmap!=='function'||typeof canvas.transferControlToOffscreen!=='function')return null;
-  try{return new WorkerRenderer(new Worker(new URL('./scene-worker.js?v=20261111-rhythm22',import.meta.url),{type:'module'}),canvas);}catch{return null;}
+  try{return new WorkerRenderer(new Worker(new URL('./scene-worker.js?v=20261111-scatter23',import.meta.url),{type:'module'}),canvas);}catch{return null;}
 }
 
 export async function createSceneRenderer(image,canvas,onProgress,prepared=prepareSceneRenderer(canvas)) {
@@ -72,7 +72,7 @@ export async function createSceneRenderer(image,canvas,onProgress,prepared=prepa
       if(renderer?.transferred){const replacement=canvas.cloneNode(false);canvas.replaceWith(replacement);canvas=replacement;}
     }
   }
-  canvas.dataset.renderer='main';
+  canvas.dataset.renderer='main';canvas.dataset.raster='2d';
   const renderer=await AsciiRenderer.create(image,canvas,onProgress);
   renderer.separateFlight=true;
   return renderer;

@@ -9,7 +9,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   const result=await page.evaluate(async()=>{
    const {AsciiRenderer}=await import('./ascii-renderer.js');
    const {GlyphAtlas}=await import('./glyph-atlas.js');
-   const {glyphUpdateLimit,glyphBlockSize}=await import('./glyph-motion.js');
+   const {glyphUpdateLimit}=await import('./glyph-motion.js');
    const renderer=new AsciiRenderer(document.querySelector('#scene-image'),document.createElement('canvas'));
    renderer.resize(1536,1024);renderer.draw(0);
    // Sample several skyline buildings: a single narrow tower has too few
@@ -17,7 +17,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    const regions={wall:[350,40,150,100],sky:[610,190,140,120],body:[785,505,55,75],city:[1170,355,193,96],water:[1008,475,96,90]};
    const sample=()=>Object.fromEntries(Object.entries(regions).map(([name,box])=>[name,renderer.ctx.getImageData(...box).data]));
    const before=sample(),geometry=renderer.cells.map(c=>[c.x,c.y,c.size,c.occupied].join(',')),seen=new Uint8Array(renderer.cells.length);
-   const previous=new Uint8Array(seen.length),lastChange=new Float64Array(seen.length);let maxGap=0;
+   const previous=new Uint8Array(seen.length),lastChange=new Float64Array(seen.length);const firstChange=new Uint16Array(seen.length),variants=new Uint8Array(seen.length).fill(1);let maxGap=0;
    const empty=renderer.cells.filter(c=>!c.occupied);
    let openSquares=0;
    for(let row=0;row<renderer.rows-3;row++)for(let col=0;col<renderer.columns-3;col++){
@@ -26,15 +26,24 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     if(open)openSquares++;
    }
    const contours=renderer.cells.filter(c=>renderer.sampleEdge(c.sx,c.sy,renderer.sourceW/renderer.columns*.34,renderer.sourceH/renderer.rows*.34).contrast>=83);
-   const entries=renderer.glyphMotion.palette.entries;let maxUpdates=0,maxCells=0;
+   const entries=renderer.glyphMotion.palette.entries;let maxCells=0;
    for(let i=1;i<=240;i++){
     const time=i/60;renderer.glyphMotion.update(time);
-    maxUpdates=Math.max(maxUpdates,renderer.glyphMotion.lastBatch.blocks);maxCells=Math.max(maxCells,renderer.glyphMotion.lastBatch.cells);
+    maxCells=Math.max(maxCells,renderer.glyphMotion.lastBatch.cells);
     for(let j=0;j<seen.length;j++)if(renderer.cells[j].glyphVariant!==previous[j]){
-     maxGap=Math.max(maxGap,time-lastChange[j]);lastChange[j]=time;previous[j]=renderer.cells[j].glyphVariant;seen[j]++;
+     maxGap=Math.max(maxGap,time-lastChange[j]);lastChange[j]=time;previous[j]=renderer.cells[j].glyphVariant;seen[j]++;if(!firstChange[j])firstChange[j]=i;variants[j]|=1<<previous[j];
     }
    }
    const retained=renderer.cells.map((c,i)=>({c,i})).filter(({c})=>c.occupied&&c.glyphLayer!=='dynamic');
+   const phases=new Map(),alphabet=new Set();
+   for(const {c,i}of retained){
+    const tile=Math.floor(i/renderer.columns/16)*100+Math.floor(i%renderer.columns/16);
+    if(!phases.has(tile))phases.set(tile,[]);phases.get(tile).push(firstChange[i]);
+    for(let v=0;v<c.glyphPool.length;v++)if(variants[i]&(1<<v))alphabet.add(c.glyphPool[(c.glyphStart+v*c.glyphStride)%c.glyphPool.length]);
+   }
+   const phaseGroups=[...phases.values()].filter(v=>v.length>=16);
+   const scatterShare=phaseGroups.filter(v=>new Set(v).size>=8).length/phaseGroups.length;
+   const minVariants=Math.min(...retained.map(({i})=>variants[i].toString(2).replaceAll('0','').length));
    const missing=retained.filter(({i})=>!seen[i]).length,minChanges=Math.min(...retained.map(({i})=>seen[i]));
    for(const {i}of retained)maxGap=Math.max(maxGap,4-lastChange[i]);
    renderer.glyphMotion.enabled=false;renderer.draw(0);const after=sample();
@@ -58,6 +67,15 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    cloudCells.forEach((c,i)=>palette.drawTile(cloudCtx,cloudTiles[i],c.x,c.y,c.size));
    const expectedCloud=cloudCtx.getImageData(0,0,cloud.width,cloud.height).data,actualCloud=renderer.cloudBase.getContext('2d').getImageData(0,0,cloud.width,cloud.height).data;
    let cloudError=0;for(let i=0;i<actualCloud.length;i++)cloudError+=Math.abs(actualCloud[i]-expectedCloud[i]);
+   // Compare transparent pixels after compositing onto the scene background;
+   // unpremultiplication can amplify a one-bit alpha difference at nearly zero opacity.
+   let cloudCompositeError=0,cloudAlphaError=0;
+   for(let i=0;i<actualCloud.length;i+=4){
+    cloudAlphaError+=Math.abs(actualCloud[i+3]-expectedCloud[i+3]);
+    for(let c=0;c<3;c++){const bg=[8,13,19][c],a=actualCloud[i+3]/255,b=expectedCloud[i+3]/255;
+     cloudCompositeError+=Math.abs(actualCloud[i+c]*a+bg*(1-a)-expectedCloud[i+c]*b-bg*(1-b));}
+   }
+   cloudCompositeError/=actualCloud.length/4*3;cloudAlphaError/=actualCloud.length/4;
    // Exercise actual draw caches too: a fast clock is insufficient if float
    // textures or robot faces still redraw too slowly to show its changes.
    renderer.draw(0);
@@ -70,7 +88,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    movingLast.forEach(t=>movingMaxGap=Math.max(movingMaxGap,3-t));
    const movingMissing=[...movingSeen].filter(count=>count<3).length;
    const sourceCells=new Set(renderer.cells),waterLinked=renderer.water.every(c=>c.occupied&&c.glyphSource.occupied&&sourceCells.has(c.glyphSource));
-   return {changes,maxUpdates,maxCells,missing,minChanges,maxGap,movingMissing,movingMaxGap,waterLinked,limit:glyphUpdateLimit,blockSize:glyphBlockSize,patchError:error/actual.length,cloudPatchError:cloudError/actualCloud.length,
+   return {changes,maxCells,alphabetSize:alphabet.size,scatterShare,minVariants,missing,minChanges,maxGap,movingMissing,movingMaxGap,waterLinked,limit:glyphUpdateLimit,patchError:error/actual.length,cloudPatchError:cloudError/actualCloud.length,cloudCompositeError,cloudAlphaError,
     stableGeometry:renderer.cells.every((c,i)=>[c.x,c.y,c.size,c.occupied].join(',')===geometry[i]),
     emptyShare:empty.length/renderer.cells.length,openSquares,contoursRetained:contours.every(c=>c.occupied),
     skyRetained:renderer.cells.filter(c=>c.glyphLayer==='cloud').every(c=>c.occupied),
@@ -78,7 +96,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     pillarSpaces:[false,true].map(right=>renderer.cells.filter(c=>c.pillar&&(c.sx>1000)===right&&!c.occupied).length),
     emptyStable:empty.every(c=>!c.occupied&&!c.liveGlyph&&!c.glyphVariant)&&[...renderer.dynamic,...renderer.cloudCells].every(c=>c.occupied),
     cityRetained:renderer.cells.filter(c=>c.sx>1183&&c.sx<1197&&c.sy>380&&c.sy<435).every(c=>c.occupied&&c.size===.6),
-    paletteSize:renderer.glyphMotion.palette.entries,immutablePalette:entries===renderer.glyphMotion.palette.entries};
+    paletteSize:renderer.glyphMotion.palette.entries,paletteBytes:renderer.glyphMotion.palette.canvas.width*renderer.glyphMotion.palette.canvas.height*4,immutablePalette:entries===renderer.glyphMotion.palette.entries};
   });
   console.log('Global glyph changes',JSON.stringify(result));
   for(const[name,region]of Object.entries(result.changes)){
@@ -86,7 +104,10 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    assert(region.energy>.97&&region.energy<1.03,`${name} must retain its original tone`);
   }
   assert(result.stableGeometry,'global substitutions must not move or resize the characters');
-  assert(result.maxUpdates<=result.limit&&result.limit<=32&&result.maxCells<=result.limit*result.blockSize**2,'bound per-frame blocks and letters');
+  assert(result.maxCells<=result.limit&&result.limit<=8192,'bound changed characters per frame');
+  assert.equal(result.alphabetSize,94,'use every visible printable ASCII character across the scene');
+  assert(result.minVariants>=4,'each character must use more than a two-symbol pair');
+  assert(result.scatterShare>.98,'letters inside each spatial area must change independently, without synchronized blocks');
   assert(result.minChanges>=4&&result.maxGap<=1,'every retained background character must change at least once per second');
   assert.equal(result.missing,0,'each retained static character, including water, must participate');
   assert(result.emptyShare>.08&&result.emptyShare<.3&&result.openSquares>5,'include substantial space in dark regions and contiguous empty areas');
@@ -97,15 +118,15 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert.equal(result.movingMissing,0,'all moving objects and emitters must change at least three times in three seconds');
   assert(result.movingMaxGap<=1.04,'cached textures must show the changes within one second plus one display frame');
   assert(result.waterLinked,'water reflections must use the same letters as their underlying water cells');
-  assert(result.paletteSize<=4096&&result.immutablePalette,'prepare a fixed palette instead of growing caches during animation');
-  assert(result.patchError<.05&&result.cloudPatchError<.05,'room and transparent sky patches must match a clean reconstruction, without seams or ghosts');
+  assert(result.paletteBytes<=4*1024**2&&result.immutablePalette,'prepare a fixed palette instead of growing caches during animation');
+  assert(result.patchError<.05&&result.cloudCompositeError<.05&&result.cloudAlphaError<.05,'room and transparent sky patches must match a clean reconstruction, without seams or ghosts');
   // Exercise the real worker and composited display, not only the renderer API.
   const worker=page.workers()[0];
   await worker.evaluate(async()=>{
    const{LayeredScene}=await import('/layered-scene.js'+location.search),draw=LayeredScene.prototype.draw;
    LayeredScene.prototype.draw=function(time){
     self.glyphProbe=this.r;const result=draw.call(this,time);
-    const cells=this.r.glyphMotion.blocks.map(b=>b.cells[0]);
+    const cells=this.r.glyphMotion.cells;
     self.rateProbe||={last:cells.map(()=>time),variants:cells.map(c=>c.glyphVariant),counts:cells.map(()=>0),maxGap:0};
     cells.forEach((c,i)=>{if(c.glyphVariant!==rateProbe.variants[i]){rateProbe.maxGap=Math.max(rateProbe.maxGap,time-rateProbe.last[i]);rateProbe.last[i]=time;rateProbe.variants[i]=c.glyphVariant;rateProbe.counts[i]++;}});
     rateProbe.time=time;return result;
@@ -122,7 +143,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert(visible.changed>500&&visible.city.every(size=>size===.6));
   const cadence=await worker.evaluate(()=>({maxGap:Math.max(rateProbe.maxGap,...rateProbe.last.map(t=>rateProbe.time-t)),minChanges:Math.min(...rateProbe.counts)}));
   console.log('Actual worker glyph cadence',JSON.stringify(cadence));
-  assert(cadence.minChanges>=3&&cadence.maxGap<=1.1,'actual worker must keep every block near or above 1 Hz, allowing one late display frame');
+  assert(cadence.minChanges>=3&&cadence.maxGap<=1.1,'actual worker must keep every character near or above 1 Hz, allowing one late display frame');
   await page.waitForTimeout(350);assert(afterBody.equals(await page.screenshot({clip})),'pause must freeze global character changes');
   assert.equal(await floatPixels(),afterFloat,'pause must freeze floating-object letters too');
   console.log('PASS retained background and moving-object glyph coverage, stable negative space, contours, faithful tone and geometry, bounded batches, immutable palette and pause');

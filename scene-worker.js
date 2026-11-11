@@ -1,5 +1,5 @@
-import { AsciiRenderer } from './ascii-renderer.js?v=20261111-rhythm22';
-import { LayeredScene } from './layered-scene.js?v=20261111-rhythm22';
+import { AsciiRenderer } from './ascii-renderer.js?v=20261111-scatter23';
+import { LayeredScene } from './layered-scene.js?v=20261111-scatter23';
 let renderer,display,layers,revision=0;
 let queue=Promise.resolve();
 self.onmessage=({data})=>{
@@ -15,7 +15,7 @@ self.onmessage=({data})=>{
       data.image.close();
       self.postMessage({id,done:true});
     } else if(type==='attach') {
-      display=data.canvas;layers=new LayeredScene(renderer,display);
+      display=data.canvas;layers=new LayeredScene(renderer,display,()=>{queue=queue.then(()=>layers.batch.configure(renderer));return queue;});
       self.postMessage({id,done:true});
     } else if(type==='layers'){
       layers.attach(data.targets);self.postMessage({id,done:true});
@@ -23,7 +23,7 @@ self.onmessage=({data})=>{
       self.devicePixelRatio=data.dpr;
       await renderer.resizeAsync(data.width,data.height,value=>self.postMessage({id,progress:value}));
       const specs=await layers.prepare();
-      self.postMessage({id,done:true,flight:renderer.getFlightData(),layers:specs},specs.flatMap(s=>s.bitmap?[s.bitmap]:[]));
+      self.postMessage({id,done:true,flight:renderer.getFlightData(),layers:specs,raster:layers.batch.gl?'webgl':'2d'},specs.flatMap(s=>s.bitmap?[s.bitmap]:[]));
     } else if (type==='draw') {
       // Yield before presenting so a pause/resize can discard this frame.
       await new Promise(resolve=>setTimeout(resolve,0));

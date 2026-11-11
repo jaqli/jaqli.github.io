@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-rhythm22';
+import { scenePixelRatio } from './render-budget.js?v=20261111-scatter23';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-rhythm22';
-import { screens, paintScreen } from './screen-content.js?v=20261111-rhythm22';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-rhythm22';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-scatter23';
+import { screens, paintScreen } from './screen-content.js?v=20261111-scatter23';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-scatter23';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-rhythm22';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-rhythm22';
-import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-rhythm22';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-scatter23';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-scatter23';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-scatter23';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -48,10 +48,9 @@ const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
 // Give the readable 1.1–1.3 sizes most of the image; reserve small letters
 // for fine detail instead of making them dominate every surface.
 const sizeStops=[.005,.015,.035,.075,.155,.375,.675,.905,.975,1];
-const bands = ['.,', ':;', '-=', '+*', 'xo', '%#', 'MW', '@'];
 const light = c => (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) / 255;
 const color = c => `rgb(${c.map(v => Math.round(255 * (clamp(v / 255) ** .84))).join(' ')})`;
-const glyph = (c, seed) => { const band = bands[Math.min(bands.length - 1, Math.floor(Math.sqrt(light(c)) * bands.length))]; return band[Math.floor(seed * band.length) % band.length]; };
+const glyph = sceneGlyph;
 const sky = (r, g, b) => g - r > 26 && b - r > 33;
 const skyPixel = rgb => (rgb[1] - rgb[0] > 15 && rgb[2] - rgb[0] > 20 && rgb[1] > 110) || Math.min(...rgb) > 150;
 const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
@@ -346,7 +345,7 @@ export class AsciiRenderer {
       screen.fontSize=this.fontSize/this.scale*(screen.kind==='code'?1:.9);
       screen.frame=-1;
     }
-    this.palette = new GlyphAtlas(this.fontSize, Math.max(2,dpr));
+    this.palette = new SpriteAtlas(this.fontSize,Math.max(2,dpr));
     this.cloudCtx = this.cloudLayer.getContext('2d'); this.cloudCtx.setTransform(dpr,0,0,dpr,-this.cloudBox[0]*dpr,-this.cloudBox[1]*dpr);
     this.screenCtx = this.screenLayer.getContext('2d'); this.screenCtx.setTransform(dpr,0,0,dpr,-this.screenBox[0]*dpr,-this.screenBox[1]*dpr);
     this.screenFrame = -1;
@@ -413,7 +412,7 @@ export class AsciiRenderer {
         this.cloudCells.push({...cell,cloudIndex});
       }
       else if (isHem || isAmbient) this.dynamic.push(cell);
-      else { cell.tile=this.palette.get(cell.glyph,cell.rgb); staticCells.push(cell); }
+      else staticCells.push(cell);
       if (isWater) {
         // Reflections share the retained water cells and leave the intentional
         // spaces empty. Their layout never shifts with the ripple animation.
@@ -425,17 +424,15 @@ export class AsciiRenderer {
       }
       if (!(row%4)) yield row / this.rows * .6;
     }
-    // Cache glyphs first, then draw: thousands of repeated fillText calls and
-    // interleaved atlas uploads previously dominated startup CPU time.
+    for(const progress of this.palette.prepare([...staticCells,...this.cloudCells],c=>glyphColor(c.rgb)))yield .6+progress*.02;
     for (let i=0;i<staticCells.length;i++) {
       const cell=staticCells[i];
-      this.palette.drawTile(baseCtx,cell.tile,cell.x,cell.y,cell.size);
-      if (!(i%1024)) yield .6 + .15*i/staticCells.length;
+      this.palette.draw(baseCtx,cell,cell.x,cell.y,cell.size);
+      if (!(i%1024)) yield .62 + .13*i/staticCells.length;
     }
     const cloudBaseCtx=this.cloudBase.getContext('2d'); cloudBaseCtx.setTransform(dpr,0,0,dpr,-this.cloudBox[0]*dpr,-this.cloudBox[1]*dpr);
-    for (const cell of this.cloudCells) cell.tile=this.palette.get(cell.glyph,cell.rgb);
     for (let i=0;i<this.cloudCells.length;i++) {
-      const cell=this.cloudCells[i]; this.palette.drawTile(cloudBaseCtx,cell.tile,cell.x,cell.y,cell.size);
+      const cell=this.cloudCells[i]; this.palette.draw(cloudBaseCtx,cell,cell.x,cell.y,cell.size);
       if (!(i%1024)) yield .75;
     }
     const spriteCells = (region, detail=1) => {
@@ -484,7 +481,8 @@ export class AsciiRenderer {
       return {emitter,cells};
     });
     for (const light of this.lights) {
-      light.cells.forEach(prepareGlyph);
+      // Keep tiny LED faces legible while their letters still change.
+      light.cells.forEach(cell=>{cell.glyphPoolOverride='+*';prepareGlyph(cell);});
       const [bx,by,w,h]=light.emitter.box, pad=this.fontSize;
       light.x=Math.floor(bx*this.scale-pad); light.y=Math.floor(by*this.scale-pad);
       light.canvas=createCanvas();
@@ -625,7 +623,7 @@ export class AsciiRenderer {
           const core=emitter.kind==='lamp'?clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*Math.PI*1.25)**2):0;
           cell.rgb=tint.map((c,i)=>[10,21,28][i]+c*brightness*(1-core)+255*core);
           cell.glyphVariant=glyphVariant(cell,time);
-          cell.tile=this.palette.get(cell.glyphVariant?alternatives[cell.glyph]:cell.glyph,cell.rgb);
+          cell.tile=this.palette.get(glyphAt(cell),cell.rgb);
         }
         for (const cell of cells) {
           if (cell.basis) {

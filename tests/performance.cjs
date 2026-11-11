@@ -38,7 +38,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    const main=await page.evaluate(layered=>{
     const frames=sceneFrames.slice(1),intervals=frames.slice(1).map((t,i)=>t-frames[i]).sort((a,b)=>a-b);
     const selector=layered?'#motion-layers [data-static], #flight-layer canvas':'#ascii-canvas, #flight-layer canvas';
-    return{waterFps:waterSamples.length>2?+((waterSamples.length-1)*1000/(waterSamples.at(-1)-waterSamples[0])).toFixed(1):null,fps:+((frames.length-1)*1000/(frames.at(-1)-frames[0])).toFixed(1),intervalP95Ms:+intervals[Math.floor(intervals.length*.95)].toFixed(1),
+    return{raster:document.querySelector('#ascii-canvas').dataset.raster||'2d',waterFps:waterSamples.length>2?+((waterSamples.length-1)*1000/(waterSamples.at(-1)-waterSamples[0])).toFixed(1):null,fps:+((frames.length-1)*1000/(frames.at(-1)-frames[0])).toFixed(1),intervalP95Ms:+intervals[Math.floor(intervals.length*.95)].toFixed(1),
      mainBytes:[...document.querySelectorAll(selector)].reduce((n,c)=>n+c.width*c.height*4,0)};
    },layered);
    const workerResult=await worker.evaluate(()=>{
@@ -50,9 +50,9 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     };
     walk(rendererProbe);if(self.layerProbe){walk(layerProbe.display);walk(layerProbe.waterStage);for(const target of layerProbe.targets.values())walk(target);}
     const methods=Object.fromEntries(Object.entries(sceneProfile).filter(([,v])=>v.length).map(([name,times])=>[name,+(times.reduce((a,b)=>a+b,0)/times.length).toFixed(2)]));
-    return{bytes,methods};
+    return{bytes,methods,gpuBytes:self.layerProbe?.batch?.bufferBytes||0};
    });
-   results.push({name:config.name,workerFps:main.fps,waterFps:main.waterFps??main.fps,intervalP95Ms:main.intervalP95Ms,canvasBuffersMiB:+((main.mainBytes+workerResult.bytes)/1024**2).toFixed(1),meanDrawMs:workerResult.methods});
+   results.push({name:config.name,raster:main.raster,extraGpuBuffersMiB:+(workerResult.gpuBytes/1024**2).toFixed(1),workerFps:main.fps,waterFps:main.waterFps??main.fps,intervalP95Ms:main.intervalP95Ms,canvasBuffersMiB:+((main.mainBytes+workerResult.bytes)/1024**2).toFixed(1),meanDrawMs:workerResult.methods});
    await page.close();
   }
   console.log(JSON.stringify(results,null,2));if(process.env.PERF_OUTPUT)fs.writeFileSync(process.env.PERF_OUTPUT,JSON.stringify(results,null,2));

@@ -1,7 +1,8 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-rhythm22';
-import { paintScreen } from './screen-content.js?v=20261111-rhythm22';
-import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-rhythm22';
-import { glyphVariant } from './glyph-rhythm.js?v=20261111-rhythm22';
+import { GlyphBatch } from './glyph-batch.js?v=20261111-scatter23';
+import { waterSampleInterval } from './render-budget.js?v=20261111-scatter23';
+import { paintScreen } from './screen-content.js?v=20261111-scatter23';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-scatter23';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-scatter23';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -9,12 +10,15 @@ function screenMatrix(quad,w,h,scale){
   return `matrix3d(${(x1-x0+g*x1)/w},${(y1-y0+g*y1)/w},0,${g/(w*scale)},${(x3-x0+k*x3)/h},${(y3-y0+k*y3)/h},0,${k/(h*scale)},0,0,1,0,${x0*scale},${y0*scale},0,1)`;
 }
 export class LayeredScene {
-  constructor(renderer,display){this.r=renderer;this.display=display;this.baseCtx=display.getContext('2d',{alpha:false});}
+  constructor(renderer,display,onRestore){this.r=renderer;this.display=display;this.onRestore=onRestore;}
   async prepare(){
     const r=this.r,dpr=r.pixelRatio,s=r.scale,specs=[];
     const add=(id,box,extra={})=>{const [x,y,w,h]=box;const spec={id,x,y,w,h,width:Math.ceil(w*dpr),height:Math.ceil(h*dpr),...extra};specs.push(spec);return spec;};
     this.display.width=Math.round(r.width*dpr);this.display.height=Math.round(r.height*dpr);
-    this.baseCtx.setTransform(dpr,0,0,dpr,0,0);this.baseCtx.drawImage(r.base,0,0,r.width,r.height);
+    this.batch ||= new GlyphBatch(this.display,r);this.batch.onRestore=this.onRestore;
+    if(!this.batch.gl)this.baseCtx=this.display.getContext('2d',{alpha:false});
+    if(this.batch.gl){this.batch.configure(r);r.glyphMotion.enableGPU();r.base.width=r.base.height=1;}
+    else{this.baseCtx.setTransform(dpr,0,0,dpr,0,0);this.baseCtx.drawImage(r.base,0,0,r.width,r.height);}
     add('clouds',r.cloudBox);
     const top=Math.floor(Math.min(...r.water.map(cell=>cell.y))-r.fontSize);
     for(let i=0;i<3;i++)add('water-'+i,[0,top,r.width,r.height-top],{water:true});
@@ -65,11 +69,16 @@ export class LayeredScene {
     // Cache the same Number precision as the size calculation; float32
     // rounding made unchanged fractional bins compare unequal every frame.
     this.ambientSizes=new Float64Array(r.dynamic.length).fill(-1);
+    const head=this.targets.get('head').spec;
+    this.headPatch=r.glyphMotion.patchBox(head.x,head.y,head.w,head.h,'base');
     this.drawHead();
   }
   drawHead(){
-    const r=this.r,{ctx,spec}=this.targets.get('head'),{x,y,w,h}=spec;
-    ctx.clearRect(x,y,w,h);ctx.drawImage(r.base,x*r.pixelRatio,y*r.pixelRatio,spec.width,spec.height,x,y,w,h);
+    const r=this.r,{ctx}=this.targets.get('head');
+    // Rasterize this small crop directly: reading the updated display canvas
+    // forces pending room draws to flush for every scattered hair change.
+    r.glyphMotion.paintPatch(ctx,this.headPatch);
+    for(const cell of this.headPatch.dynamic)r.stamp(cell,cell.x,cell.renderY??cell.y,cell.renderSize??cell.size,ctx);
     ctx.globalCompositeOperation='destination-in';ctx.drawImage(r.headMask,...r.headMaskBox.map(v=>v*r.scale));ctx.globalCompositeOperation='source-over';
   }
   resetWater(){this.waterIndices=[-1,-1,-1];}
@@ -80,25 +89,26 @@ export class LayeredScene {
       const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+fontIncrement*Math.round(Math.sin(time*.75+cell.phase)));
       const variant=glyphVariant(cell,time),lettersChanged=variant!==cell.glyphVariant;cell.glyphVariant=variant;
       cell.renderSize=size;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(time*1.3)*.35*Math.max(0,Math.min(1,(cell.sy-617)/17))*r.scale:0);
-      if(first)r.stamp(cell,cell.x,cell.renderY,size,this.baseCtx);
-      else if(lettersChanged||cell.kind==='hem'||size!==this.ambientSizes[i])extra.push(cell);
+      if(first&&!this.batch.gl)r.stamp(cell,cell.x,cell.renderY,size,this.baseCtx);
+      else if(!this.batch.gl&&(lettersChanged||cell.kind==='hem'||size!==this.ambientSizes[i]))extra.push(cell);
       this.ambientSizes[i]=size;
     }
     const head=this.targets.get('head');
+    let headChanged=false;
     r.glyphMotion.update(time,extra,patch=>{
       const {box:[x,y,w,h],dynamic}=patch;
-      r.glyphMotion.paintPatch(this.baseCtx,patch);
-      if(dynamic.length){
+      if(!this.batch.gl)r.glyphMotion.paintPatch(this.baseCtx,patch);
+      if(dynamic.length&&!this.batch.gl){
         this.baseCtx.save();this.baseCtx.beginPath();this.baseCtx.rect(x,y,w,h);this.baseCtx.clip();
         for(const cell of dynamic)r.stamp(cell,cell.x,cell.renderY,cell.renderSize,this.baseCtx);
         this.baseCtx.restore();
       }
       if(x<head.spec.x+head.spec.w&&x+w>head.spec.x&&y<head.spec.y+head.spec.h&&y+h>head.spec.y){
-        head.ctx.globalCompositeOperation='source-atop';
-        head.ctx.drawImage(this.display,x*r.pixelRatio,y*r.pixelRatio,w*r.pixelRatio,h*r.pixelRatio,x,y,w,h);
-        head.ctx.globalCompositeOperation='source-over';
+        headChanged=true;
       }
     });
+    if(this.batch.gl)this.batch.draw(time);
+    if(this.batch.gl?this.batch.updatedBase:headChanged)this.drawHead();
     // Slow cloud tint changes need fewer texture updates than water/wing motion.
     if(cloudFrame!==this.cloudFrame){r.drawClouds(time,false);this.cloudFrame=cloudFrame;}
     const waterFrames=[],waterIndex=Math.floor(time/waterSampleInterval);

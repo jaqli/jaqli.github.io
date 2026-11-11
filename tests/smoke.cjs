@@ -49,6 +49,11 @@ async function duckBodyPoint(page) {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript(()=>{
+      const Native=Worker;window.pendingSceneFrames=0;
+      window.Worker=class extends Native{constructor(...args){super(...args);this.addEventListener('message',({data})=>{if('painted' in data)pendingSceneFrames--;});}
+        postMessage(data,...args){if(data.type==='draw')pendingSceneFrames++;return super.postMessage(data,...args);}};
+    });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
@@ -246,6 +251,9 @@ async function duckBodyPoint(page) {
     console.log('PASS full-viewport artwork, no uploader or control panel');
 
     const snapshot = async () => {
+      // Let a frame that began before pause finish; the blocked-frame test in
+      // responsiveness.cjs separately verifies cancellation before presentation.
+      if(await page.locator('#pause').getAttribute('aria-pressed')==='true')await page.waitForFunction(()=>pendingSceneFrames===0);
       // Transferred canvases commit at a compositor boundary. Let the last
       // already-painted frame settle before comparing a paused surface.
       if(await page.locator('#pause').getAttribute('aria-pressed')==='true')await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
