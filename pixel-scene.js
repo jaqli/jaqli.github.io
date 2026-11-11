@@ -1,15 +1,15 @@
 import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-sky43';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
-import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-edge45';
+import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-edge48';
 import { screens, paintScreen } from './screen-content.js?v=20261111-detail39';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
 import { SceneExtras } from './scene-extras.js?v=20261111-layer44';
-import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge45';
-import { SceneTime } from './scene-time.js?v=20261111-layer44';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-detail47';
+import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
+import { SceneTime } from './scene-time.js?v=20261111-edge48';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-edge48';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 
 const W=1536,H=1024;
@@ -34,7 +34,8 @@ export class PixelScene {
   }
   constructor(image,canvas,screenCanvas=null){
     this.image=image;this.canvas=canvas;canvas.width=W;canvas.height=H;
-    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';
+    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';canvas.dataset.pixelUnit='4';
+    this.pixelGrid=surface(W/4,H/4);this.gridCtx=this.pixelGrid.getContext('2d',{alpha:false});this.gridCtx.imageSmoothingEnabled=false;
     this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;
     this.base=surface(W,H);const ctx=this.base.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,W,H);
     this.original=ctx.getImageData(0,0,W,H);this.plate=new ImageData(this.original.data.slice(),W,H);
@@ -46,7 +47,7 @@ export class PixelScene {
       this.displayCtx=screenCanvas.getContext('2d');
     }
   }
-  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false,backgroundKey=null){
+  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false,backgroundKey=null,repairBackdrop=null){
     const [x,y,w,h]=bounds(polygon,pad),canvas=surface(w,h),ctx=canvas.getContext('2d'),bitmap=ctx.createImageData(w,h);
     const source=this.original.data,plate=this.plate.data;
     let coverage,repairCoverage;
@@ -106,7 +107,8 @@ export class PixelScene {
         const index=(py+margin)*pw+px+margin;if(!mask[index])continue;
         const sample=waterRepair&&field[index]>=0?field[index]:reflectedSample(index,field,donors,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
         const alpha=(repairCoverage?repairCoverage[py*w+px]:bitmap.data[(py*w+px)*4+3])/255;
-        for(let c=0;c<3;c++)plate[i+c]=source[i+c]*(1-alpha)+source[j+c]*alpha;
+        const replacement=repairBackdrop?.(x+px,y+py,source,!!bitmap.data[(py*w+px)*4+3]);
+        for(let c=0;c<3;c++)plate[i+c]=source[i+c]*(1-alpha)+(replacement?replacement[c]:source[j+c])*alpha;
       }
     }
     ctx.putImageData(bitmap,0,0);return {canvas,x,y,w,h};
@@ -145,7 +147,15 @@ export class PixelScene {
       const accept=(r,g,b)=>shape.id==='paper-cream'?!(g-r>15&&b-r>20):shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
       const soft=shape.kind==='float'||shape.kind==='paper'||shape.kind==='hinge';
       const backgroundKey=shape.id==='duck'?(r,g,b,x,y)=>y<834?g>45&&g-r>15&&b-r>25:g>125&&g-r>24&&b-r>32:null;
-      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft,backgroundKey),shape});
+      // The paper behind the duck is a fixed occluder, not blue water. Keep its
+      // visible edge and continue its short corner when the head moves down.
+      const backdrop=shape.id==='duck'?(x,y,source,object)=>{
+        if(y>=789&&y<=802&&x>=329&&x<=357){const i=(y*W+(object?360:x))*4;return source.subarray(i,i+3);}
+        if(y<782||y>809||x>332-(y-784)*1.05)return null;
+        const i=(y*W+(object?Math.min(x,302):x))*4;
+        return source.subarray(i,i+3);
+      }:null;
+      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft,backgroundKey,backdrop),shape});
       yield .12+.28*this.details.length/(detailShapes.length+additionalShapes.length);
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
@@ -192,7 +202,7 @@ export class PixelScene {
   *prepareSky(){yield* prepareSky(this);}
   async setTimeOfDay(mode){await this.timeOfDay.apply(mode);}
   async resizeAsync(width,height,onProgress=()=>{}){this.width=width;this.height=height;onProgress(1);}
-  drawClouds(time){for(const cloud of this.clouds)drawSkyLayer(this.ctx,cloud,time);}
+  drawClouds(time){for(const cloud of this.clouds)drawSkyLayer(this.ctx,cloud,time);if(this.haze)this.ctx.drawImage(this.haze.canvas,this.haze.x,this.haze.y);}
   drawWater(time){
     const ctx=this.waterCtx;ctx.clearRect(0,0,W/2,H/2);ctx.globalCompositeOperation='source-over';
     for(const [index,source] of rippleSources.entries()){
@@ -278,6 +288,10 @@ export class PixelScene {
     const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.timeOfDay.drawSky(ctx,time);this.drawWater(time);this.drawScreens(time);
     for(const sprite of this.details)this.drawDetail(sprite,time);
     this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
+    // Composite all moving layers first, then sample one shared 4×4 grid.
+    // Native extraction/motion keeps its precision; no per-object grid seams.
+    this.gridCtx.drawImage(this.canvas,0,0,W/4,H/4);
+    ctx.drawImage(this.pixelGrid,0,0,W,H);
   }
-  dispose(){this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){if(this.haze)this.haze.canvas.width=this.haze.canvas.height=1;this.haze=null;this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }

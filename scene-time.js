@@ -17,7 +17,7 @@ export class SceneTime {
    this.assets.push({canvas,ctx,x,y,w:canvas.width,h:canvas.height,original:pixels,kind,position,warp:sprite.source instanceof Float32Array?sprite:null});
   };
   add({canvas:r.base},'room');this.room=this.assets[0];
-  add(r.sun,'sun');
+  add(r.sun,'sun');if(r.haze)add(r.haze,'sky');
   for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,a.probe,a.aerial])add(sprite);
   for(const leaf of e.leaves)add(leaf,'foliage');
   add(e.cable);add(a.wire);
@@ -121,7 +121,7 @@ export class SceneTime {
   // Individual city windows, lit inside existing building silhouettes.
   for(const [x,y,w,h]of[[1177,386,12,35],[1215,397,7,27],[1255,410,9,28],[1298,411,6,29],[1346,421,10,23],[1401,388,6,32]]){
    for(let row=0;row<h;row+=8)for(let col=0;col<w;col+=6){
-    if((x+y+row+col)%5===0)continue;
+    if((x+y+row+col)%5===0||this.isSky(x+col,y+row)||this.isSky(x+col+1,y+row+2))continue;
     ctx.fillStyle=(row+col)%3?'#d8ad68':'#72b2cc';ctx.globalAlpha=.63+.12*Math.sin(time*.16+x+row);ctx.fillRect(x+col,y+row,2,3);
    }
   }

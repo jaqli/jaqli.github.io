@@ -42,6 +42,7 @@ async function preparePixelScene(){
  const target=path.join(root,'assets/scene.webp');
  await sharp(pixels,{raw:info}).webp({lossless:true,effort:6}).toFile(target);
  await sharp(target).resize(192,128).webp({quality:72}).toFile(path.join(root,'assets/scene-seed.webp'));
+ await sharp(target).resize(width/4,height/4,{kernel:'nearest'}).webp({lossless:true,effort:6}).toFile(path.join(root,'assets/scene-poster.webp'));
  const colors=new Set();let squared=0;const mean=[0,0,0];
  for(let i=0;i<pixels.length;i+=3){colors.add(pixels[i]*65536+pixels[i+1]*256+pixels[i+2]);for(let c=0;c<3;c++){const d=pixels[i+c]-data[i+c];squared+=d*d;mean[c]+=d;}}
  console.log(JSON.stringify({width,height,processedPixels:width*height,colors:colors.size,rmse:Math.sqrt(squared/pixels.length),meanShift:mean.map(n=>n/(width*height)),bytes:fs.statSync(target).size}));

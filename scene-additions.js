@@ -64,7 +64,7 @@ export class SceneAdditions{
    for(let j=0;j<4;j++)ctx.fillRect(Math.round(1480+Math.sin(p*7+j)*2+p*6),Math.round(354-p*27+j*2),1,2);
   }
   const beacon=Math.exp(-(((time%5.2-4.4)/.15)**2));
-  if(beacon>.01){ctx.fillStyle=`rgba(255,104,75,${beacon*.9})`;ctx.fillRect(1188,345,3,2);}
+  if(beacon>.01){ctx.fillStyle=`rgba(255,104,75,${beacon*.9})`;ctx.fillRect(1190,345,3,2);}
   ctx.restore();
  }
  dispose(){for(const s of[this.probe,this.aerial,this.wire,...this.indicators])s.canvas.width=s.canvas.height=1;this.wire=null;this.indicators=[];}

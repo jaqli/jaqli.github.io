@@ -1,8 +1,8 @@
-import { site } from './site.config.js?v=20261111-detail47';
-import { detailShapes, detailPoint } from './scene-details.js?v=20261111-edge45';
-import { PixelScene } from './pixel-scene.js?v=20261111-detail47';
+import { site } from './site.config.js?v=20261111-edge48';
+import { detailShapes, detailPoint } from './scene-details.js?v=20261111-edge48';
+import { PixelScene } from './pixel-scene.js?v=20261111-edge48';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import { sceneIntro } from './scene-intro.js?v=20261111-detail47';
+import { sceneIntro } from './scene-intro.js?v=20261111-edge48';
 import './navigation.js?v=20261111-detail39';
 
 const viewport = document.querySelector('#scene-viewport');

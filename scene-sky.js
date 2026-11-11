@@ -1,5 +1,7 @@
-import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-detail47';
-import { skyApertures, skyForeground, skyWires, sillSkyEdge } from './scene-sky-matte.js?v=20261111-detail47';
+import { inside } from './scene-objects.js?v=20261111-sky43';
+import { refineSkyEdges } from './scene-edge-matte.js?v=20261111-edge48';
+import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-edge48';
+import { skyApertures, skyForeground, skyWires, sillSkyEdge, rearCity } from './scene-sky-matte.js?v=20261111-edge48';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
 // Lighting follows the complete visible sky. Motion has its own foreground
@@ -29,13 +31,16 @@ export function* prepareSky(scene){
     for(let k=1;k<sillSkyEdge.length;k++){const[a,b]=sillSkyEdge[k-1],[c,d]=sillSkyEdge[k];if(wy>=b&&wy<=d){boardRimSky=Math.abs(wx-(a+(c-a)*(wy-b)/(d-b)))<4;break;}}
    }
    let amount=(area[j]>250||boardRimSky)&&!lamp&&!fixedLeaf&&!wireEdge?255:0;
-   if(wx>=shelf.x&&wx<shelf.x+shelf.w&&wy>=shelf.y&&wy<shelf.y+shelf.h){const a=shelf.coverage[(wy-shelf.y)*shelf.w+wx-shelf.x];if(a>=0)amount=a;}
+   // The thin red aerial has no blue face: these local cyan edge pixels are
+   // its old sky, not part of the filament or the dark cap below it.
+   if(wx>=620&&wx<=630&&wy>=354&&wy<370&&original[i+1]>original[i]+3&&original[i+2]>original[i]+8)amount=255;
+   if(wx>=shelf.x&&wx<shelf.x+shelf.w&&wy>=shelf.y&&wy<shelf.y+shelf.h){const a=shelf.coverage[(wy-shelf.y)*shelf.w+wx-shelf.x];if(a>=0)amount=inside(wx,wy,rearCity)?0:a;}
    // Calm distant water replaces the removed shore fragments. A two-pixel
    // transition joins the cloud layer to the water without a hard cutoff.
    const horizon=amount>0&&wy>=426&&((wx>=734&&wx<832)||(wx>=858&&wx<1115));
    if(horizon){const sx=wx<965?974+(wx%17):wx,sy=456+(wy-426),k=(sy*1536+sx)*4;for(let ch=0;ch<3;ch++)plate[i+ch]=original[k+ch];if(wy>=428)amount=Math.round(amount*(1-smooth((wy-427)/3)));}
    lightMask[n]=amount===255&&!originalLeaf&&!horizon?1:0;
-   alpha.data[j+3]=amount;if(amount===255)destinations.push(n);
+   alpha.data[j+3]=amount;
   }
   if(y%60===0)yield .44+.09*y/h;
  }
@@ -45,8 +50,25 @@ export function* prepareSky(scene){
   const sx=x<965?974+(x%17):x,sy=456+(y-430)%17,i=(y*1536+x)*4,k=(sy*1536+sx)*4;
   for(let ch=0;ch<3;ch++)plate[i+ch]=original[k+ch];
  }
+ refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask);
+ for(let n=0;n<w*h;n++){if(alpha.data[n*4+3]===255)destinations.push(n);if(alpha.data[n*4+3]>0&&alpha.data[n*4+3]<255)lightMask[n]=0;}
  scene.base.getContext('2d').putImageData(scene.plate,0,0);
  m.putImageData(alpha,0,0);yield .54;
+ // A narrow atmospheric band unifies both sides of the distant horizon. It
+ // covers background only; buildings, mullions and the observer remain crisp.
+ const haze=surface(w,60),hc=haze.getContext('2d'),hp=hc.createImageData(w,60),horizon=[0,0,0];let samples=0;
+ for(let sy=457;sy<462;sy++)for(let sx=977;sx<1114;sx++){const i=(sy*1536+sx)*4;for(let c=0;c<3;c++)horizon[c]+=original[i+c];samples++;}
+ for(let c=0;c<3;c++)horizon[c]=Math.round(horizon[c]/samples);
+ for(let y=0;y<60;y++)for(let x=0;x<w;x++){
+  const wx=x+x0,wy=y+400,skyIndex=(wy-y0)*w+x;
+  const seaWindow=(wx>=858&&wx<=1361)||(wx>=734&&wx<832&&wy<443);
+  const above=wy<430&&(alpha.data[skyIndex*4+3]===255||(wy>=424&&seaWindow&&!skyForeground.some(p=>inside(wx,wy,p))));
+  const below=wy>=430&&seaWindow&&!skyForeground.some(p=>inside(wx,wy,p));
+  if(!above&&!below)continue;
+  const fade=wy<430?smooth(Math.max(0,(wy-400)/30)):1-smooth(Math.min(1,(wy-430)/28));
+  const i=(y*w+x)*4;for(let c=0;c<3;c++)hp.data[i+c]=horizon[c];hp.data[i+3]=Math.round(fade*255);
+ }
+ hc.putImageData(hp,0,0);scene.haze={canvas:haze,x:x0,y:400};
  // Build the loop from unobstructed source-art patches. No columns from
  // behind a window frame, plant, desk or city can travel into the visible sky.
  // Join overlapping patches along their closest-color path. A wide crossfade
