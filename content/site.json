@@ -3684,84 +3684,6 @@
       ],
       "selectedPublications": [
         {
-          "id": "gamecraft",
-          "shortTitle": "GameCraft",
-          "title": "Hunyuan-GameCraft: High-dynamic Interactive Game Video Generation with Hybrid History Condition",
-          "authors": "J Li, J Tang, Z Xu, L Wu, Y Zhou, S Shao, T Yu, Z Cao, Q Lu",
-          "year": "2025",
-          "venue": "arXiv",
-          "url": "https://arxiv.org/abs/2506.17201",
-          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:_kc_bZDykSQC",
-          "description": "Interactive game video generation with camera control and hybrid history conditioning.",
-          "links": [
-            {
-              "label": "GitHub",
-              "url": "https://github.com/Tencent-Hunyuan/Hunyuan-GameCraft-1.0"
-            },
-            {
-              "label": "Project page",
-              "url": "https://hunyuan-gamecraft.github.io/"
-            },
-            {
-              "label": "Models",
-              "url": "https://huggingface.co/tencent/Hunyuan-GameCraft-1.0"
-            }
-          ],
-          "media": {
-            "url": "../assets/publications/gamecraft.webp",
-            "width": 1100,
-            "height": 399,
-            "alt": "Hunyuan-GameCraft generated worlds and camera-control examples",
-            "source": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
-            "caption": "Full video ↗",
-            "video": "../assets/publications/gamecraft-loop.mp4",
-            "videoOriginal": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
-            "videoWidth": 480,
-            "videoHeight": 278,
-            "previewStart": 8,
-            "previewDuration": 12
-          },
-          "verifiedAt": "2026-11-11",
-          "role": "First Author"
-        },
-        {
-          "id": "gamecraft2",
-          "shortTitle": "GameCraft 2",
-          "title": "Hunyuan-GameCraft-2: Instruction-following Interactive Game World Model",
-          "authors": "J Tang, J Liu, J Li, L Wu, H Yang, P Zhao, S Gong, X Yuan, S Shao, L Zhang, Q Lu",
-          "year": "2025",
-          "venue": "arXiv",
-          "url": "https://arxiv.org/abs/2511.23429",
-          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qxL8FJ1GzNcC",
-          "description": "Instruction-following game world generation with natural-language, keyboard, and mouse control over camera motion, character behavior, and environment dynamics.",
-          "links": [
-            {
-              "label": "Project page",
-              "url": "https://hunyuan-gamecraft-2.github.io/"
-            },
-            {
-              "label": "Live demo",
-              "url": "https://hunyuan.tencent.com/game/game-craft"
-            }
-          ],
-          "media": {
-            "url": "../assets/publications/gamecraft2.webp",
-            "width": 800,
-            "height": 436,
-            "alt": "Hunyuan-GameCraft-2 instruction-driven interaction teaser",
-            "source": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
-            "caption": "Demo video ↗",
-            "video": "../assets/publications/gamecraft2-loop.mp4",
-            "videoOriginal": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
-            "videoWidth": 480,
-            "videoHeight": 276,
-            "previewStart": 0,
-            "previewDuration": 5.291667
-          },
-          "verifiedAt": "2026-11-11",
-          "role": "Co-first Author"
-        },
-        {
           "id": "nomas",
           "shortTitle": "Hy-Nomas",
           "title": "Hy-Nomas: Towards Free-form Interactive World Generation",
@@ -3802,42 +3724,82 @@
           "verifiedAt": "2026-11-11"
         },
         {
-          "id": "nvds",
-          "shortTitle": "NVDS",
-          "title": "Neural Video Depth Stabilizer",
-          "authors": "Y Wang, M Shi, J Li, Z Huang, Z Cao, J Zhang, K Xian, G Lin",
-          "year": "2023",
-          "venue": "ICCV 2023",
-          "url": "https://openaccess.thecvf.com/content/ICCV2023/html/Wang_Neural_Video_Depth_Stabilizer_ICCV_2023_paper.html",
-          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qjMakFHDy7sC",
-          "description": "A neural stabilizer for temporally consistent video depth, with the VDW benchmark.",
+          "id": "gamecraft2",
+          "shortTitle": "GameCraft 2",
+          "title": "Hunyuan-GameCraft-2: Instruction-following Interactive Game World Model",
+          "authors": "J Tang, J Liu, J Li, L Wu, H Yang, P Zhao, S Gong, X Yuan, S Shao, L Zhang, Q Lu",
+          "year": "2025",
+          "venue": "arXiv",
+          "url": "https://arxiv.org/abs/2511.23429",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qxL8FJ1GzNcC",
+          "description": "Instruction-following game world generation with natural-language, keyboard, and mouse control over camera motion, character behavior, and environment dynamics.",
           "links": [
             {
-              "label": "GitHub",
-              "url": "https://github.com/RaymondWang987/NVDS"
-            },
-            {
               "label": "Project page",
-              "url": "https://raymondwang987.github.io/NVDS/"
+              "url": "https://hunyuan-gamecraft-2.github.io/"
             },
             {
-              "label": "Video",
-              "url": "https://www.bilibili.com/video/BV1KW4y1d7F8/"
-            },
-            {
-              "label": "NVDS+ / TPAMI",
-              "url": "https://ieeexplore.ieee.org/document/10707178"
+              "label": "Live demo",
+              "url": "https://hunyuan.tencent.com/game/game-craft"
             }
           ],
           "media": {
-            "url": "../assets/publications/nvds.webp",
-            "width": 1100,
-            "height": 344,
-            "alt": "NVDS efficiency and video-depth dataset comparisons",
-            "source": "https://raymondwang987.github.io/NVDS/img/fig1_0717_2.png",
-            "caption": "Project overview ↗"
+            "url": "../assets/publications/gamecraft2.webp",
+            "width": 800,
+            "height": 436,
+            "alt": "Hunyuan-GameCraft-2 instruction-driven interaction teaser",
+            "source": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
+            "caption": "Demo video ↗",
+            "video": "../assets/publications/gamecraft2-loop.mp4",
+            "videoOriginal": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
+            "videoWidth": 480,
+            "videoHeight": 276,
+            "previewStart": 0,
+            "previewDuration": 5.291667
           },
-          "verifiedAt": "2026-11-11"
+          "verifiedAt": "2026-11-11",
+          "role": "Co-first Author"
+        },
+        {
+          "id": "gamecraft",
+          "shortTitle": "GameCraft",
+          "title": "Hunyuan-GameCraft: High-dynamic Interactive Game Video Generation with Hybrid History Condition",
+          "authors": "J Li, J Tang, Z Xu, L Wu, Y Zhou, S Shao, T Yu, Z Cao, Q Lu",
+          "year": "2025",
+          "venue": "arXiv",
+          "url": "https://arxiv.org/abs/2506.17201",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:_kc_bZDykSQC",
+          "description": "Interactive game video generation with camera control and hybrid history conditioning.",
+          "links": [
+            {
+              "label": "GitHub",
+              "url": "https://github.com/Tencent-Hunyuan/Hunyuan-GameCraft-1.0"
+            },
+            {
+              "label": "Project page",
+              "url": "https://hunyuan-gamecraft.github.io/"
+            },
+            {
+              "label": "Models",
+              "url": "https://huggingface.co/tencent/Hunyuan-GameCraft-1.0"
+            }
+          ],
+          "media": {
+            "url": "../assets/publications/gamecraft.webp",
+            "width": 1100,
+            "height": 399,
+            "alt": "Hunyuan-GameCraft generated worlds and camera-control examples",
+            "source": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
+            "caption": "Full video ↗",
+            "video": "../assets/publications/gamecraft-loop.mp4",
+            "videoOriginal": "https://hunyuan-gamecraft.github.io/assets/videos/teaser.mov",
+            "videoWidth": 480,
+            "videoHeight": 278,
+            "previewStart": 8,
+            "previewDuration": 12
+          },
+          "verifiedAt": "2026-11-11",
+          "role": "First Author"
         },
         {
           "id": "ch3depth",
@@ -3919,6 +3881,44 @@
           },
           "verifiedAt": "2026-11-11",
           "role": "First Author"
+        },
+        {
+          "id": "nvds",
+          "shortTitle": "NVDS",
+          "title": "Neural Video Depth Stabilizer",
+          "authors": "Y Wang, M Shi, J Li, Z Huang, Z Cao, J Zhang, K Xian, G Lin",
+          "year": "2023",
+          "venue": "ICCV 2023",
+          "url": "https://openaccess.thecvf.com/content/ICCV2023/html/Wang_Neural_Video_Depth_Stabilizer_ICCV_2023_paper.html",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qjMakFHDy7sC",
+          "description": "A neural stabilizer for temporally consistent video depth, with the VDW benchmark.",
+          "links": [
+            {
+              "label": "GitHub",
+              "url": "https://github.com/RaymondWang987/NVDS"
+            },
+            {
+              "label": "Project page",
+              "url": "https://raymondwang987.github.io/NVDS/"
+            },
+            {
+              "label": "Video",
+              "url": "https://www.bilibili.com/video/BV1KW4y1d7F8/"
+            },
+            {
+              "label": "NVDS+ / TPAMI",
+              "url": "https://ieeexplore.ieee.org/document/10707178"
+            }
+          ],
+          "media": {
+            "url": "../assets/publications/nvds.webp",
+            "width": 1100,
+            "height": 344,
+            "alt": "NVDS efficiency and video-depth dataset comparisons",
+            "source": "https://raymondwang987.github.io/NVDS/img/fig1_0717_2.png",
+            "caption": "Project overview ↗"
+          },
+          "verifiedAt": "2026-11-11"
         }
       ],
       "awards": [
