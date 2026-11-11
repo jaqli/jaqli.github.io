@@ -3652,6 +3652,191 @@
     ],
     "source": "https://scholar.google.com/citations?user=i-2ghuYAAAAJ&hl=zh-CN",
     "syncedAt": "2026-11-10T05:26:47+00:00",
-    "bio": ""
+    "bio": "I am Jiaqi Li, a master’s student in Artificial Intelligence at Huazhong University of Science and Technology (HUST), advised by Prof. Zhiguo Cao. I began my master’s studies in September 2023, after receiving my B.S. in Automation from HUST in 2023. My research focuses on 3D vision, autonomous driving and diffusion-based depth estimation.",
+    "avatar": {
+      "url": "../assets/profile/jiaqi-li.jpg",
+      "alt": "Jiaqi Li",
+      "width": 256,
+      "height": 241,
+      "source": "https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=i-2ghuYAAAAJ&citpid=11"
+    },
+    "about": {
+      "source": "https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74",
+      "syncedAt": "2026-11-11",
+      "tagline": "3D Vision / Depth Estimation / Diffusion Models",
+      "bioSourceBlockId": "8ee03abe-719a-45a7-b350-d8d4a2dbdba8",
+      "contacts": {
+        "email": "lijiaqi.work@outlook.com",
+        "github": "https://github.com/lijia7",
+        "codes": [
+          {
+            "label": "WeChat",
+            "url": "../assets/profile/wechat.png",
+            "sourceBlockId": "3a357e7a-d8e5-454f-bf94-8a2f49f74fb4"
+          },
+          {
+            "label": "QQ",
+            "url": "../assets/profile/qq.png",
+            "sourceBlockId": "5f381f73-5922-4462-a7af-fd255e6aa115"
+          }
+        ]
+      },
+      "education": [
+        {
+          "period": "2023 — Present",
+          "title": "Master’s studies in Artificial Intelligence",
+          "institution": "Huazhong University of Science and Technology",
+          "department": "School of Artificial Intelligence & Automation · Wuhan, China",
+          "advisor": "Prof. Zhiguo Cao",
+          "sourceBlockId": "b122ac58-b5af-4312-934c-5716b7cf7621"
+        },
+        {
+          "period": "2019 — 2023",
+          "title": "B.S. in Automation",
+          "institution": "Huazhong University of Science and Technology",
+          "department": "School of Artificial Intelligence & Automation · Wuhan, China",
+          "sourceBlockId": "fee66c28-9a2f-401a-89c5-4d59045831b7"
+        }
+      ],
+      "research": [
+        {
+          "title": "3D Vision",
+          "description": "Depth estimation / 3D scene understanding",
+          "sourceBlockId": "db02e764-d0a7-45fa-a530-4a81369f7303"
+        },
+        {
+          "title": "Autonomous Driving",
+          "description": "Multi-view depth estimation and reconstruction",
+          "sourceBlockId": "b76a9ca5-e893-491d-82a5-70f260cb4394"
+        },
+        {
+          "title": "Diffusion Models",
+          "description": "Downstream applications / Flow matching",
+          "sourceBlockId": "1447a8e2-6f2b-4449-af4a-eea244a567cd"
+        }
+      ],
+      "selectedPublications": [
+        {
+          "title": "Self-Distilled Depth Refinement with Noisy Poisson Fusion",
+          "authors": "J Li, Y Wang, J Zheng, Z Huang, K Xian, Z Cao, J Zhang",
+          "year": "2024",
+          "venue": "NeurIPS 2024",
+          "role": "First Author",
+          "url": "https://arxiv.org/pdf/2409.17880v1",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:roLk4NBRz8UC",
+          "sourceBlockId": "11fa59b4-bb47-80db-8a79-d189ffef5c1a"
+        },
+        {
+          "title": "NVDS+: Towards Efficient and Versatile Neural Stabilizer for Video Depth Estimation",
+          "authors": "Y Wang, M Shi, J Li, C Hong, Z Huang, J Peng, Z Cao, J Zhang, K Xian, ...",
+          "year": "2024",
+          "venue": "TPAMI",
+          "role": "",
+          "url": "https://ieeexplore.ieee.org/document/10707178",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:UebtZRa9Y70C",
+          "sourceBlockId": "11fa59b4-bb47-80ac-9053-e2f914c7d610"
+        },
+        {
+          "title": "Towards Robust Monocular Depth Estimation in Non-Lambertian Surfaces",
+          "authors": "J Zhang, J Li, Y Huang, Y Wang, J Zheng, L Shen, Z Cao",
+          "year": "2024",
+          "venue": "ECCVW 2024",
+          "role": "Corresponding Author",
+          "url": "https://arxiv.org/abs/2408.06083",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:_FxGoFyzp5QC",
+          "sourceBlockId": "11fa59b4-bb47-806b-bc19-ddc2aca93ab4"
+        },
+        {
+          "title": "Diffusion-Augmented Depth Prediction with Sparse Annotations",
+          "authors": "J Li, Y Wang, Z Huang, J Zheng, K Xian, Z Cao, J Zhang",
+          "year": "2023",
+          "venue": "ACM MM 2023",
+          "role": "First Author",
+          "url": "https://dl.acm.org/doi/abs/10.1145/3581783.3611807",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:UeHWp8X0CEIC",
+          "sourceBlockId": "21c6c53a-a9e6-4f86-9e21-45b52d633ab3"
+        },
+        {
+          "title": "Neural Video Depth Stabilizer",
+          "authors": "Y Wang, M Shi, J Li, Z Huang, Z Cao, J Zhang, K Xian, G Lin",
+          "year": "2023",
+          "venue": "ICCV 2023",
+          "role": "",
+          "url": "https://openaccess.thecvf.com/content/ICCV2023/html/Wang_Neural_Video_Depth_Stabilizer_ICCV_2023_paper.html",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qjMakFHDy7sC",
+          "sourceBlockId": "800933f3-17c8-479e-a6a2-772d20fedb51"
+        }
+      ],
+      "competitions": [
+        {
+          "year": "2024",
+          "title": "TRICKY Challenge on Monocular Depth from Images of Specular and Transparent Surfaces",
+          "venue": "ECCVW",
+          "result": "Winner",
+          "role": "Team Leader",
+          "sourceBlockId": "111e50bd-19b9-41e9-b385-9443fe50dc15"
+        },
+        {
+          "year": "2024",
+          "title": "NTIRE Challenge on HR Depth from Images of Specular and Transparent Surfaces",
+          "venue": "CVPRW",
+          "result": "Winner",
+          "role": "Team Leader",
+          "sourceBlockId": "11fa59b4-bb47-8042-9186-c99f6dc7e371"
+        },
+        {
+          "year": "2022",
+          "title": "Mobile AI & AIM Challenge",
+          "venue": "ECCVW",
+          "result": "Fifth Place",
+          "role": "Team Leader",
+          "sourceBlockId": "1ffad4b6-177f-41e8-ab21-8afc16fb235b"
+        }
+      ],
+      "awards": [
+        {
+          "year": "2023",
+          "title": "First-Class Scholarship for Postgraduates",
+          "organization": "HUST",
+          "note": "研究生一等学业奖学金",
+          "sourceBlockId": "0fe0d69f-6ec8-40cc-93f3-1feca1d0bfde"
+        },
+        {
+          "year": "2023",
+          "title": "Honours Degree",
+          "organization": "HUST",
+          "note": "荣誉学士学位 · Top 3%",
+          "sourceBlockId": "f8b7a9b1-6330-4bf7-ac0e-90e7aa8e9165"
+        },
+        {
+          "year": "2023",
+          "title": "Outstanding Graduate",
+          "organization": "HUST",
+          "note": "优秀毕业生 · Top 10%",
+          "sourceBlockId": "11fa59b4-bb47-80f2-9f6e-c4946f2d67b6"
+        },
+        {
+          "year": "2021",
+          "title": "National Scholarship",
+          "organization": "Ministry of Education of PRC",
+          "note": "国家奖学金 · Highest Honor · Top 0.2%",
+          "sourceBlockId": "407ba0b2-5b04-490a-ac93-cdf61d56d2b2"
+        },
+        {
+          "year": "2021",
+          "title": "Outstanding Undergraduate Student",
+          "organization": "HUST",
+          "note": "本科特优生 · Top 1%",
+          "sourceBlockId": "1632c3cc-9504-48a9-bc16-8522bafee550"
+        },
+        {
+          "year": "2021",
+          "title": "Merit Undergraduate",
+          "organization": "HUST",
+          "note": "三好学生 · Top 7%",
+          "sourceBlockId": "cc75953c-cd72-4819-89f9-b6df5cc9348f"
+        }
+      ]
+    }
   }
 }

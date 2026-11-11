@@ -71,33 +71,15 @@ function renderPost(data) {
   root.replaceChildren(...(post.blocks || []).map(renderBlock));
   if (post.source) root.append(externalLink('在 Notion 阅读原文 ↗', post.source));
 }
-function renderProfile(data) {
-  const profile = data.profile;
-  if (!profile.syncedAt) return;
-  document.querySelector('#profile-name').textContent = profile.name;
-  document.querySelector('#profile-lead').textContent = profile.affiliation || 'Curriculum Vitae';
-  root.replaceChildren();
-  const addSection = (title, node) => { const s = el('section', null, 'profile-section'); s.append(el('h2', title), node); root.append(s); };
-  if (profile.bio) addSection('ABOUT', el('p', profile.bio));
-  if (profile.interests?.length) addSection('RESEARCH', el('p', profile.interests.join(' / ')));
-  if (profile.publications?.length) {
-    const publications = el('div');
-    for (const paper of profile.publications) {
-      const p = el('div', null, 'publication');
-      const title = el('a', paper.title);
-      if (safeURL(paper.url)) { title.href = safeURL(paper.url); title.target = '_blank'; title.rel = 'noopener noreferrer'; }
-      const year = paper.venue?.includes(String(paper.year)) ? '' : paper.year;
-      p.append(title, el('p', [paper.authors, paper.venue, year].filter(Boolean).join(' · '))); publications.append(p);
-    }
-    addSection('PUBLICATIONS', publications);
-  }
-  root.append(externalLink('Google Scholar ↗', profile.source));
-}
+
 try {
-  const response = await fetch(new URL('./content/site.json', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261111-about29', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
-  if (section === 'cv') renderProfile(data);
+  if (section === 'cv') {
+    const { renderProfile } = await import('./profile.js?v=20261111-about29');
+    renderProfile(data.profile);
+  }
   else if (section === 'post') renderPost(data);
   else renderPosts(data);
 } catch {

@@ -49,11 +49,13 @@ python3 -m http.server 8081 --bind 0.0.0.0
 
 ## 内容映射
 
-`content/site.json` 是网站使用的本地内容快照，由 `content.js` 排版为技术文章、生活随记、文章详情和 CV。网页无需 Notion 令牌，也不会在访客浏览器中请求 Notion 或 Scholar API。原文链接保留在各页面。
+`content/site.json` 是网站使用的本地内容快照，由 `content.js` 排版为技术文章、生活随记和文章详情，About Me 由按需加载的 `profile.js` 排版，地址保持 `/cv/`。网页无需 Notion 令牌，也不会在访客浏览器中请求 Notion 或 Scholar API。原文链接保留在各页面。
 
 当前快照收录 11 篇已发布文章（技术 2 篇、生活 9 篇）、111 张本地配图，以及 Scholar 的 18 条论文记录。
 
-**来源访问：**发布后的新环境已验证可访问博客、Notion 公开站点与 Google Scholar。Notion 数据源使用公开站点，筛选 `Post`、`Published` 且未加锁的记录；忽略隐藏记录及菜单项。Scholar 资料仅使用公开姓名、机构、研究方向和论文，不推断未列出的履历。
+About Me 根据 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74) 的公开内容整理，保留来源块 ID：介绍、两段教育经历、三个研究方向、五篇代表论文、三项竞赛和六项荣誉。代表论文优先展示，其余十三篇 Scholar 论文可展开查看，按 Scholar URL 去重。头像使用 Google Scholar 当前头像的 256×241 原始 JPEG，本地保存为 `assets/profile/jiaqi-li.jpg`（14,748 字节）；不裁切、不套颜色滤镜。微信与 QQ 二维码使用 Notion 原图，保存在 `assets/profile/`，默认折叠并延迟加载。工作邮箱经用户确认统一为 `lijiaqi.work@outlook.com`；Notion 原邮件链接的旧地址不沿用。原 PDF 地址 `https://lijia7.github.io/lijiaqi_cv.pdf` 于 2026-11-11 返回 404，因此不展示失效下载入口。
+
+**来源访问：**发布后的新环境已验证可访问博客、Notion 公开站点与 Google Scholar。Notion 数据源使用公开站点，筛选 `Post`、`Published` 且未加锁的记录；忽略隐藏记录及菜单项。Scholar 资料用于公开姓名、机构、研究方向、论文及头像；教育、竞赛、荣誉等采用用户指定的 Notion About，不推断未列出的履历。
 
 内容快照格式：
 
@@ -61,6 +63,7 @@ python3 -m http.server 8081 --bind 0.0.0.0
 - `blocks[]`：`paragraph`、`heading`、`subheading`、`quote`、`code` 使用 `text`；`list` 使用 `items` 与可选 `ordered`；`link` 使用 `text` 和 `url`；`image` 使用 `url` 和 `alt`。
 - 文章地址为 `/post/?id=<Notion 页面 ID>`，分类列表自动指向该地址，正文按本网站风格排版。文本不会作为 HTML 执行。`runs` 可保存段内链接；图片会保存到 `assets/notion/` 并通过相对路径读取，避免临时链接过期。
 - `profile`：`name`、`affiliation`、`bio`、`interests[]`、`publications[]`、`source`、`syncedAt`。每篇论文含 `title`、`authors`、`venue`、`year`、`url`。仅在完成真实资料核对后填写 `syncedAt`。
+- `profile.avatar`：本地 `url`、原图 `source`、`alt`、尺寸；`profile.about`：Notion `source`、独立 `syncedAt`、`education[]`、`research[]`、`selectedPublications[]`、`competitions[]`、`awards[]`、`contacts`。每项保留 `sourceBlockId`，代表论文用 `scholarURL` 对应完整论文快照。`profile.css` 仅由 About Me 加载，保留全站暗色背景与字符风格的章节编号。
 
 这是可审阅的本地内容快照，不是自动同步服务。当前按来源页面 ID 保持映射；`LIFE` 与年度生活文章进入生活页，技术学习及 AI 相关笔记进入技术页。原文链接与原始分类保留在记录中。可使用公开来源或 Notion 官方导出的 Markdown/HTML ZIP 更新快照，不需要网站读者登录 Notion。
 

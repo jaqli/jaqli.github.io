@@ -412,7 +412,7 @@ async function duckBodyPoint(page) {
       ] },
       profile: { syncedAt: '2026-01-01', name: '测试研究者', affiliation: '测试机构', interests: ['测试方向'], publications: [{ title: 'TEST ONLY: Paper', authors: 'Test Author', venue: 'Test Venue', year: '2026', url: 'https://example.com/paper' }], source: 'https://example.com/profile' },
     };
-    await page.route('**/content/site.json', r => r.fulfill({ json: fixture }));
+    await page.route('**/content/site.json*', r => r.fulfill({ json: fixture }));
     await page.goto(`${origin}/tech/`, { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.article-card').count(), 1);
     await page.locator('.article-card').click();
