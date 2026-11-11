@@ -3725,6 +3725,43 @@
           "role": "First Author"
         },
         {
+          "id": "gamecraft2",
+          "shortTitle": "GameCraft 2",
+          "title": "Hunyuan-GameCraft-2: Instruction-following Interactive Game World Model",
+          "authors": "J Tang, J Liu, J Li, L Wu, H Yang, P Zhao, S Gong, X Yuan, S Shao, L Zhang, Q Lu",
+          "year": "2025",
+          "venue": "arXiv",
+          "url": "https://arxiv.org/abs/2511.23429",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:qxL8FJ1GzNcC",
+          "description": "Instruction-following game world generation with natural-language, keyboard, and mouse control over camera motion, character behavior, and environment dynamics.",
+          "links": [
+            {
+              "label": "Project page",
+              "url": "https://hunyuan-gamecraft-2.github.io/"
+            },
+            {
+              "label": "Live demo",
+              "url": "https://hunyuan.tencent.com/game/game-craft"
+            }
+          ],
+          "media": {
+            "url": "../assets/publications/gamecraft2.webp",
+            "width": 800,
+            "height": 436,
+            "alt": "Hunyuan-GameCraft-2 instruction-driven interaction teaser",
+            "source": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
+            "caption": "Demo video ↗",
+            "video": "../assets/publications/gamecraft2-loop.mp4",
+            "videoOriginal": "https://hunyuan-gamecraft-2.github.io/asserts/videos/longvideo/95e5cbe99e6b49f44de257d30c411510.mov",
+            "videoWidth": 480,
+            "videoHeight": 276,
+            "previewStart": 0,
+            "previewDuration": 5.291667
+          },
+          "verifiedAt": "2026-11-11",
+          "role": "Co-first Author"
+        },
+        {
           "id": "nomas",
           "shortTitle": "Hy-Nomas",
           "title": "Hy-Nomas: Towards Free-form Interactive World Generation",

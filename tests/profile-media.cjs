@@ -24,6 +24,6 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);await page.close();
   console.log(`PASS ${width}px autoplay, loop, deferred fetch, offscreen/manual pause, reduced-motion override and compact profile`);
  }
- const bytes=['gamecraft-loop.mp4','nomas-loop.mp4'].reduce((sum,name)=>sum+fs.statSync(path.join(__dirname,'../assets/publications',name)).size,0);
- assert(bytes<410000);console.log(`PASS combined video previews: ${bytes} bytes`);
+ const bytes=['gamecraft-loop.mp4','gamecraft2-loop.mp4','nomas-loop.mp4'].reduce((sum,name)=>sum+fs.statSync(path.join(__dirname,'../assets/publications',name)).size,0);
+ assert(bytes<470000);console.log(`PASS combined video previews: ${bytes} bytes`);
 }finally{await browser.close();}})().catch(error=>{console.error(error);process.exitCode=1;});
