@@ -1,7 +1,7 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-mixed24';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-mixed24';
+import { glyphColor } from './glyph-atlas.js?v=20261111-layout25';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-layout25';
 
-import { glyphAt } from './glyph-rhythm.js?v=20261111-mixed24';
+import { glyphAt } from './glyph-rhythm.js?v=20261111-layout25';
 export const glyphUpdateLimit=8192; // changed characters per draw; old states are skipped
 
 // Every retained letter has its own 1.2–1.5 Hz clock and symbol sequence.
@@ -26,6 +26,18 @@ export class GlyphMotion {
       const dy=cell.kind==='hem'?.35*this.r.scale:0;
       const x=Math.floor((cell.x-l)*dpr)/dpr,y=Math.floor((cell.y-t-dy)*dpr)/dpr;
       cell.inkBox=[x,y,Math.ceil((cell.x+rr)*dpr)/dpr-x,Math.ceil((cell.y+b+dy)*dpr)/dpr-y];
+    }
+    // Index actual positions, not source-grid indices: a free-positioned glyph
+    // can cross its former slot. Keep this small index for head-mask queries.
+    const r=this.r;
+    this.bucketColumns=Math.ceil(r.width/r.cellW);this.bucketRows=Math.ceil(r.height/r.cellH);
+    this.heads=new Int32Array(this.bucketColumns*this.bucketRows).fill(-1);
+    this.next=new Int32Array(r.cells.length).fill(-1);
+    for(let i=0;i<r.cells.length;i++){
+      const cell=r.cells[i];cell.glyphOrder=i;if(!cell.occupied)continue;
+      const col=Math.max(0,Math.min(this.bucketColumns-1,Math.floor(cell.x/r.cellW)));
+      const row=Math.max(0,Math.min(this.bucketRows-1,Math.floor(cell.y/r.cellH))),bucket=row*this.bucketColumns+col;
+      this.next[i]=this.heads[bucket];this.heads[bucket]=i;
     }
     for(const cell of this.r.cells)if(cell.occupied){
       cell.glyphPatch=this.patch(cell,cell.glyphLayer==='cloud'?'cloud':'base');cell.nextGlyphChange=0;
@@ -87,16 +99,18 @@ export class GlyphMotion {
   patch(cell,layer=cell.glyphLayer){return this.patchBox(...cell.inkBox,layer);}
   patchBox(x,y,w,h,layer){
     const r=this.r,cloud=layer==='cloud',neighbors=[],dynamic=[];
-    const left=Math.max(0,Math.floor((x-this.radiusX)/r.cellW)),right=Math.min(r.columns-1,Math.floor((x+w+this.radiusX)/r.cellW));
-    const top=Math.max(0,Math.floor((y-this.radiusY)/r.cellH)),bottom=Math.min(r.rows-1,Math.floor((y+h+this.radiusY)/r.cellH));
+    const left=Math.max(0,Math.floor((x-this.radiusX)/r.cellW)),right=Math.min(this.bucketColumns-1,Math.floor((x+w+this.radiusX)/r.cellW));
+    const top=Math.max(0,Math.floor((y-this.radiusY)/r.cellH)),bottom=Math.min(this.bucketRows-1,Math.floor((y+h+this.radiusY)/r.cellH));
     for(let row=top;row<=bottom;row++)for(let col=left;col<=right;col++){
-      const neighbor=r.cells[row*r.columns+col];
-      if(!neighbor.occupied)continue;
-      const [xx,yy,ww,hh]=neighbor.inkBox;
-      if(xx+ww<=x||xx>=x+w||yy+hh<=y||yy>=y+h)continue;
-      if(!cloud&&neighbor.glyphLayer==='dynamic')dynamic.push(neighbor);
-      else if(neighbor.glyphLayer===layer)neighbors.push(neighbor);
+      for(let i=this.heads[row*this.bucketColumns+col];i!==-1;i=this.next[i]){
+        const neighbor=r.cells[i];
+        const [xx,yy,ww,hh]=neighbor.inkBox;
+        if(xx+ww<=x||xx>=x+w||yy+hh<=y||yy>=y+h)continue;
+        if(!cloud&&neighbor.glyphLayer==='dynamic')dynamic.push(neighbor);
+        else if(neighbor.glyphLayer===layer)neighbors.push(neighbor);
+      }
     }
+    neighbors.sort((a,b)=>a.glyphOrder-b.glyphOrder);dynamic.sort((a,b)=>a.glyphOrder-b.glyphOrder);
     return {cloud,box:[x,y,w,h],neighbors,dynamic};
   }
 }

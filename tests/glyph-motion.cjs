@@ -19,6 +19,17 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    const before=sample(),geometry=renderer.cells.map(c=>[c.x,c.y,c.size,c.occupied].join(',')),seen=new Uint8Array(renderer.cells.length);
    const previous=new Uint8Array(seen.length),lastChange=new Float64Array(seen.length);const firstChange=new Uint16Array(seen.length),variants=new Uint8Array(seen.length).fill(1);let maxGap=0;
    const empty=renderer.cells.filter(c=>!c.occupied);
+   const skyCells=renderer.cells.filter(c=>c.glyphLayer==='cloud');
+   // A spectrum peak at the old cell pitch exposes rows/columns even when
+   // every glyph has a different size. Free positions should break both axes.
+   const alignment=(axis,pitch)=>{
+    let x=0,y=0;for(const cell of skyCells){const phase=cell[axis]/pitch*Math.PI*2;x+=Math.cos(phase);y+=Math.sin(phase);}
+    return Math.hypot(x,y)/skyCells.length;
+   };
+   const skyAlignment=[alignment('x',renderer.cellW),alignment('y',renderer.cellH)];
+   const slots=new Map();
+   for(const cell of skyCells){const slot=Math.floor(cell.y/renderer.cellH)*renderer.columns+Math.floor(cell.x/renderer.cellW);slots.set(slot,(slots.get(slot)||0)+1);}
+   const sharedSlots=[...slots.values()].filter(count=>count>1).length/slots.size;
    let openSquares=0;
    for(let row=0;row<renderer.rows-3;row++)for(let col=0;col<renderer.columns-3;col++){
     let open=true;
@@ -88,7 +99,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    movingLast.forEach(t=>movingMaxGap=Math.max(movingMaxGap,3-t));
    const movingMissing=[...movingSeen].filter(count=>count<3).length;
    const sourceCells=new Set(renderer.cells),waterLinked=renderer.water.every(c=>c.occupied&&c.glyphSource.occupied&&sourceCells.has(c.glyphSource));
-   return {changes,maxCells,alphabetSize:alphabet.size,scatterShare,minVariants,missing,minChanges,maxGap,movingMissing,movingMaxGap,waterLinked,limit:glyphUpdateLimit,patchError:error/actual.length,cloudPatchError:cloudError/actualCloud.length,cloudCompositeError,cloudAlphaError,
+   return {changes,maxCells,alphabetSize:alphabet.size,scatterShare,minVariants,missing,minChanges,maxGap,movingMissing,movingMaxGap,waterLinked,skyAlignment,sharedSlots,limit:glyphUpdateLimit,patchError:error/actual.length,cloudPatchError:cloudError/actualCloud.length,cloudCompositeError,cloudAlphaError,
     stableGeometry:renderer.cells.every((c,i)=>[c.x,c.y,c.size,c.occupied].join(',')===geometry[i]),
     emptyShare:empty.length/renderer.cells.length,openSquares,contoursRetained:contours.every(c=>c.occupied),
     skyRetained:renderer.cells.filter(c=>c.glyphLayer==='cloud').every(c=>c.occupied),
@@ -104,6 +115,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    assert(region.energy>.97&&region.energy<1.03,`${name} must retain its original tone`);
   }
   assert(result.stableGeometry,'global substitutions must not move or resize the characters');
+  assert(result.skyAlignment.every(peak=>peak<.4)&&result.sharedSlots>.1,'positions must break fixed rows and columns, rather than keeping one letter in every original slot');
   assert(result.maxCells<=result.limit&&result.limit<=8192,'bound changed characters per frame');
   assert.equal(result.alphabetSize,94,'use every visible printable ASCII character across the scene');
   assert(result.minVariants>=4,'each character must use more than a two-symbol pair');

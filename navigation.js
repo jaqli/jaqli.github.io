@@ -1,4 +1,4 @@
-import { drawSceneLayers } from './scene-snapshot.js?v=20261111-mixed24';
+import { drawSceneLayers } from './scene-snapshot.js?v=20261111-layout25';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let navigating = false;
 let overlay;

@@ -1,10 +1,10 @@
-import { scenePixelRatio, sceneFrameInterval } from './render-budget.js?v=20261111-mixed24';
+import { scenePixelRatio, sceneFrameInterval } from './render-budget.js?v=20261111-layout25';
 import { site } from './site.config.js?v=20261110-flight11';
-import { FlightLayer } from './flight-layer.js?v=20261111-mixed24';
+import { FlightLayer } from './flight-layer.js?v=20261111-layout25';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261110-depth6';
-import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-mixed24';
+import { createSceneRenderer, prepareSceneRenderer } from './scene-renderer.js?v=20261111-layout25';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import './navigation.js?v=20261111-mixed24';
+import './navigation.js?v=20261111-layout25';
 
 const viewport = document.querySelector('#scene-viewport');
 const world = document.querySelector('#scene-world');

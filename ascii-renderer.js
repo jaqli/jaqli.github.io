@@ -1,13 +1,14 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-mixed24';
+import { scenePixelRatio } from './render-budget.js?v=20261111-layout25';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-mixed24';
-import { screens, paintScreen } from './screen-content.js?v=20261111-mixed24';
-import { faceLight, lampColor } from './scene-lights.js?v=20261111-mixed24';
+import { GlyphAtlas, glyphColor } from './glyph-atlas.js?v=20261111-layout25';
+import { screens, paintScreen } from './screen-content.js?v=20261111-layout25';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-layout25';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-mixed24';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-mixed24';
-import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-mixed24';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-layout25';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-layout25';
+import { sceneGlyph, glyphAt, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-layout25';
+import { glyphLayout } from './glyph-layout.js?v=20261111-layout25';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -325,7 +326,7 @@ export class AsciiRenderer {
     for (const canvas of [this.canvas, this.base]) { canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); }
     // Transparent caches cover only their content, not the whole room.
     // Integer CSS bounds avoid a second resampling of fractional-sized DOM
-    // canvases. Glyph coordinates remain on the original global lattice.
+    // canvases. Glyph coordinates share one source-image coordinate system.
     const box=([x,y,w,h])=>{const left=Math.floor(x*this.scale),top=Math.floor(y*this.scale);
       return[left,top,Math.ceil((x+w)*this.scale)-left,Math.ceil((y+h)*this.scale)-top];};
     this.cloudBox=box([522,68,1024,355]);
@@ -334,9 +335,8 @@ export class AsciiRenderer {
       canvas.width=Math.ceil(box[2]*dpr); canvas.height=Math.ceil(box[3]*dpr);
     }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // One sampling lattice across the entire room: local half-pitch overlays
-    // created visible islands of different texture around the head and skyline.
-    // Wider centers and extra line spacing let the existing font sizes breathe.
+    // Use one bounded sampling budget for the room. The display positions are
+    // relaxed independently below, so letters do not occupy uniform slots.
     this.columns = Math.min(300, Math.max(180, Math.round(width / 5.6)));
     this.rows = Math.round(height / (width / this.columns * 1.42));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
@@ -362,9 +362,14 @@ export class AsciiRenderer {
     this.cloudCells = []; this.cells = [];
     const staticCells = [];
     const sxStep = this.sourceW / this.columns, syStep = this.sourceH / this.rows;
+    const layout=glyphLayout({columns:this.columns,rows:this.rows,width:this.sourceW,height:this.sourceH,
+      fontSize:this.fontSize/this.scale,sizeAt:mixedSize,fixedAt:(x,y)=>distantCity.some(poly=>inside(x,y,poly))});
+    let placement=layout.next();
+    while(!placement.done){yield placement.value*.08;placement=layout.next();}
+    const points=placement.value;
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.columns; col++) {
-      const sx = (col + .5) * sxStep, sy = (row + .5) * syStep;
+      const point=points[row*this.columns+col],sx=point.x,sy=point.y;
       const {rgb,contrast} = this.sampleEdge(sx,sy,sxStep*.34,syStep*.34), seed = hash(col, row);
       const isCity=distantCity.some(polygon=>inside(sx,sy,polygon));
       const isWater = !isCity && waterAreas.some(poly => inside(sx, sy, poly)) &&
@@ -377,7 +382,7 @@ export class AsciiRenderer {
       }));
       // The sky shares the same local size variety as the room; do not pull
       // whole regions toward one size. Keep silhouette protection at edges.
-      const variedSize=mixedSize(col,row);
+      const variedSize=point.size;
       // Large glyphs crossing high-contrast silhouettes made bright outlines.
       // Keep the requested size bins, with smaller glyphs at those edges.
       const edgeSize=variedSize+(Math.min(variedSize,1.3)-variedSize)*smooth((contrast-45)/100);
@@ -402,8 +407,8 @@ export class AsciiRenderer {
       const chance=protectedCell?0:Math.max(openness*darkness*smoothness*(person?.35:1),pillarSpace);
       const blank=hash(col+91,row+47)<chance;
       const cell = { sx, sy, rgb, size, occupied:!blank, pillar:pillarWeight>0,
-        x: sx * this.scale + (seed - .5) * .2,
-        y: sy * this.scale + (hash(row, col) - .5) * .2,
+        x: sx * this.scale,
+        y: sy * this.scale,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
         kind: isHem ? 'hem' : 'ambient', glyphVariant:0 };
       const isAmbient = !isCity && !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
@@ -425,7 +430,7 @@ export class AsciiRenderer {
           rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) });
       }
       }
-      if (!(row%4)) yield row / this.rows * .6;
+      if (!(row%4)) yield .08+row / this.rows * .52;
     }
     for(const progress of this.palette.prepare([...staticCells,...this.cloudCells],c=>glyphColor(c.rgb)))yield .6+progress*.02;
     for (let i=0;i<staticCells.length;i++) {
@@ -441,10 +446,18 @@ export class AsciiRenderer {
     const spriteCells = (region, detail=1) => {
       const xStep=sxStep*detail, yStep=syStep*detail;
       const cells = [];
-      for (let sy = region.y0; sy < region.y1; sy += yStep) for (let sx = region.x0; sx < region.x1; sx += xStep) {
+      function* finePoints(){
+        for(let y=region.y0;y<region.y1;y+=yStep)for(let x=region.x0;x<region.x1;x+=xStep)yield{x:x+xStep/2,y:y+yStep/2};
+      }
+      // Reuse the room's irregular positions for papers and floating objects,
+      // avoiding rectangular islands of a different texture. Tiny bird/LED
+      // features keep their original fine sampling for a readable silhouette.
+      for(const point of region.bird||detail<1?finePoints():points){
+        const sx=point.x-xStep/2,sy=point.y-yStep/2;
+        if(sx+xStep<region.x0||sx>region.x1||sy+yStep<region.y0||sy>region.y1)continue;
         const sum = [0, 0, 0]; let count = 0, px = 0, py = 0;
-        for (let y = Math.floor(sy); y < Math.min(region.y1 + 1, sy + yStep); y++) {
-          for (let x = Math.floor(sx); x < Math.min(region.x1 + 1, sx + xStep); x++) {
+        for (let y = Math.max(region.y0,Math.floor(sy)); y < Math.min(region.y1 + 1, sy + yStep); y++) {
+          for (let x = Math.max(region.x0,Math.floor(sx)); x < Math.min(region.x1 + 1, sx + xStep); x++) {
             if (!region.mask[(y - region.y0) * region.stride + x - region.x0]) continue;
             const i = (y * this.sourceW + x) * 4;
             for (let c = 0; c < 3; c++) sum[c] += this.original[i + c];
@@ -456,7 +469,7 @@ export class AsciiRenderer {
         const coverage=clamp(count/(xStep*yStep));
         // Papers and floats use the room's mixed sizes. Keep tiny LED features
         // legible and trim large letters at partially covered object edges.
-        const size=region.bird?minFontSize:detail<1?fontStep(detail*(1+.2*coverage)):fontStep(Math.min(mixedSize(sx,sy),1+.5*coverage));
+        const size=region.bird?minFontSize:detail<1?fontStep(detail*(1+.2*coverage)):fontStep(Math.min(point.size,1+.5*coverage));
         cells.push({ sx: px / count, sy: py / count, glyph: glyph(rgb, hash(sx, sy)), color: color(rgb), size });
       }
       return cells;
