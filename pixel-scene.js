@@ -1,4 +1,5 @@
-import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-hybrid36';
+import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea, distantCity } from './scene-objects.js?v=20261111-surface37';
+import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
 import { detailShapes, detailPoint, eyeOpening, cloudSpeed, emitters } from './scene-details.js?v=20261111-flow28';
 import { screens, paintScreen } from './screen-content.js?v=20261111-hybrid36';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
@@ -41,8 +42,17 @@ export class PixelScene {
       if(!(pad?near(sx,sy,polygon):inside(sx,sy,polygon))||!accept(source[i],source[i+1],source[i+2],sx,sy))continue;
       for(let c=0;c<3;c++)bitmap.data[j+c]=source[i+c];bitmap.data[j+3]=255;
       if(erase){
-        const left=(sy*W+Math.max(0,x-5))*4,right=(sy*W+Math.min(W-1,x+w+5))*4,mix=px/w;
-        for(let c=0;c<3;c++)plate[i+c]=background?source[(background[1]*W+background[0])*4+c]:source[left+c]*(1-mix)+source[right+c]*mix;
+        if(background)for(let c=0;c<3;c++)plate[i+c]=source[(background[1]*W+background[0])*4+c];
+      }
+    }
+    if(erase&&!background){
+      const margin=12,pw=w+margin*2,ph=h+margin*2,mask=new Uint8Array(pw*ph);
+      for(let py=0;py<h;py++)for(let px=0;px<w;px++)mask[(py+margin)*pw+px+margin]=bitmap.data[(py*w+px)*4+3]?1:0;
+      const field=exteriorField(mask,pw,ph);
+      for(let py=0;py<h;py++)for(let px=0;px<w;px++){
+        const index=(py+margin)*pw+px+margin;if(!mask[index])continue;
+        const sample=reflectedSample(index,field,mask,pw,ph),sx=clamp(x+sample%pw-margin,0,W-1),sy=clamp(y+Math.floor(sample/pw)-margin,0,H-1),i=((y+py)*W+x+px)*4,j=(sy*W+sx)*4;
+        for(let c=0;c<3;c++)plate[i+c]=source[j+c];
       }
     }
     ctx.putImageData(bitmap,0,0);return {canvas,x,y,w,h};
@@ -82,10 +92,7 @@ export class PixelScene {
       if(!lamp){const p=this.plate.data;for(let y=sprite.y;y<sprite.y+sprite.h;y++)for(let x=sprite.x;x<sprite.x+sprite.w;x++)if(inside(x,y,emitter.polygon)){const i=(y*W+x)*4;p[i]=12;p[i+1]=25;p[i+2]=33;}}
     }
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
-    // Sample only unobstructed sky. A full window crop contains wires, plant
-    // pots and furniture; stretching those gaps creates moving horizontal bars.
-    const cloudWindows=[{box:[604,145,180,230]},{box:[870,140,360,200]}];
-    for(const window of cloudWindows){this.clouds.push(this.cloud(window));yield .44+.35*this.clouds.length/cloudWindows.length;}
+    yield* this.prepareSky();
     this.screenLayer=surface(420,190);this.screenCtx=this.screenLayer.getContext('2d');
     const quads=[screens[0].quad,[[335,407],[438,413],[440,481],[336,480]],[[640,435],[730,441],[734,501],[644,495]]];
     this.screens=screens.map((screen,i)=>{const canvas=surface(screen.width*3,screen.height*3),ctx=canvas.getContext('2d');ctx.scale(3,3);return {...screen,quad:quads[i],fontSize:4,fontWeight:700,canvas,ctx};});
@@ -98,7 +105,7 @@ export class PixelScene {
       const i=(sy*W+sx)*4,r=source[i],g=source[i+1],b=source[i+2];
       if(!((g>r*.87&&b>r*.8&&g>65)||Math.min(r,g,b)>150))continue;
       bitmap.data[(y*W/2+x)*4+3]=255;
-      if(r+g+b>590&&((x*7+y*11)%53===0))this.glints.push({x,y,w:2+(x%6),phase:x*.17+y*.13});
+      if(r+g+b>590&&((x*7+y*11)%53===0)){const noise=Math.sin(x*127.1+y*311.7)*43758.5453;this.glints.push({x,y,w:2+(x%6),phase:(noise-Math.floor(noise))*Math.PI*2});}
      }
      if((y-218)%24===0)yield .79+.2*(y-218)/(H/2-218);
     }
@@ -106,25 +113,67 @@ export class PixelScene {
     // Pixel buffers are needed only for extraction, never read back each frame.
     this.original=null;this.plate=null;yield 1;
   }
-  cloud(window){
-    const [x0,y0,w,h]=window.box,texture=surface(w,h),fade=surface(w,h),layer=surface(w,h);
-    const tc=texture.getContext('2d'),fc=fade.getContext('2d'),colors=tc.createImageData(w,h),alpha=fc.createImageData(w,h),source=this.plate.data;
+  *prepareSky(){
+    const x0=532,y0=68,w=W-x0,h=360,maskCanvas=surface(w,h),maskCtx=maskCanvas.getContext('2d');
+    maskCtx.translate(-x0,-y0);
+    const polygon=points=>{maskCtx.beginPath();points.forEach(([x,y],i)=>i?maskCtx.lineTo(x,y):maskCtx.moveTo(x,y));maskCtx.closePath();maskCtx.fill();};
+    maskCtx.fillStyle='#fff';
+    polygon([[532,70],[792,70],[792,393],[620,393],[619,378],[596,378],[593,349],[578,349],[574,210],[532,196]]);
+    maskCtx.fillRect(862,76,502,348);maskCtx.fillRect(1387,73,149,194);
+    maskCtx.fillStyle='#000';
+    maskCtx.strokeStyle='#000';maskCtx.lineWidth=6;maskCtx.lineJoin='round';
+    for(const city of distantCity){polygon(city);maskCtx.stroke();}
+    polygon(detailShapes.find(shape=>shape.id==='leaves').polygon);
+    polygon([[1272,111],[1381,111],[1381,191],[1268,191]]);
+    polygon([[1390,245],[1407,237],[1426,232],[1434,211],[1474,212],[1494,234],[1536,245],[1536,270],[1390,270]]);
+    maskCtx.fillRect(1030,68,142,16);
+    maskCtx.beginPath();maskCtx.arc(1100,375,30,0,Math.PI*2);maskCtx.fill();
+    maskCtx.strokeStyle='#000';maskCtx.lineWidth=9;maskCtx.lineCap='round';maskCtx.lineJoin='round';
+    for(const wire of [
+      [[551,68],[556,85],[569,97],[587,101],[604,97],[619,83],[625,68]],
+      [[654,68],[655,103],[661,119],[674,132]],[[729,68],[731,113]],
+      [[1469,68],[1469,166],[1478,198],[1488,209],[1501,207],[1513,199],[1524,181],[1533,157]]
+    ]){maskCtx.beginPath();wire.forEach(([x,y],i)=>i?maskCtx.lineTo(x,y):maskCtx.moveTo(x,y));maskCtx.stroke();}
+    const rgba=maskCtx.getImageData(0,0,w,h),holes=new Uint8Array(w*h),source=this.plate.data;
     for(let y=0;y<h;y++){
       for(let x=0;x<w;x++){
         const i=((y+y0)*W+x+x0)*4,j=(y*w+x)*4;
-        for(let c=0;c<3;c++)colors.data[j+c]=source[i+c];colors.data[j+3]=255;
-        const edge=smooth(Math.min(x/24,(w-1-x)/24,y/24,(h-1-y)/24));
-        alpha.data[j+3]=Math.round(190*edge);
+        const visible=rgba.data[j]>128&&source[i+1]>105&&source[i+2]>105;
+        holes[y*w+x]=visible?0:1;rgba.data[j]=rgba.data[j+1]=rgba.data[j+2]=255;rgba.data[j+3]=visible?255:0;
       }
-      for(let edge=0;edge<24;edge++)for(let c=0;c<3;c++){const a=(y*w+edge)*4+c,b=(y*w+w-1-edge)*4+c,mean=(colors.data[a]+colors.data[b])/2,amount=(1-edge/24)**2;colors.data[a]=colors.data[a]*(1-amount)+mean*amount;colors.data[b]=colors.data[b]*(1-amount)+mean*amount;}
+      if(y%60===0)yield .44+.06*y/h;
     }
-    tc.putImageData(colors,0,0);fc.putImageData(alpha,0,0);return {x:x0,y:y0,w,h,texture,fade,layer,ctx:layer.getContext('2d')};
+    maskCtx.setTransform(1,0,0,1,0,0);maskCtx.putImageData(rgba,0,0);
+    // Sample one opaque sky surface. Its motion smoothly stops at occluders,
+    // so no foreground or invented texture can enter the moving sky.
+    const visible=new Uint8Array(w*h);for(let i=0;i<visible.length;i++)visible[i]=1-holes[i];
+    const nearest=exteriorField(visible,w,h);yield .55;
+    const sourcePixels=new Uint32Array(w*h),destinations=[],weights=[];
+    const original32=new Uint32Array(source.buffer,source.byteOffset,source.byteLength/4);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const index=y*w+x;sourcePixels[index]=original32[(y+y0)*W+x+x0];
+        if(holes[index])continue;
+        const edge=nearest[index],distance=edge<0?0:Math.abs(x-edge%w)+Math.abs(y-Math.floor(edge/w));
+        destinations.push(index);weights.push(smooth((distance-3)/64));
+      }
+      if(y%40===0)yield .55+.22*y/h;
+    }
+    const layer=surface(w,h),ctx=layer.getContext('2d'),output=ctx.createImageData(w,h);
+    this.clouds=[{x:x0,y:y0,w,h,layer,ctx,output,pixels:new Uint32Array(output.data.buffer),sourcePixels,destinations:new Int32Array(destinations),weights:new Float32Array(weights)}];yield .79;
   }
   async resizeAsync(width,height,onProgress=()=>{}){this.width=width;this.height=height;onProgress(1);}
   drawClouds(time){
     const frame=Math.floor(time*30);
     for(const c of this.clouds){
-      if(frame!==this.lastCloud){const shift=Math.floor(time*cloudSpeed)%c.w;c.ctx.globalCompositeOperation='copy';c.ctx.drawImage(c.texture,shift,0);c.ctx.globalCompositeOperation='source-over';c.ctx.drawImage(c.texture,shift-c.w,0);c.ctx.globalCompositeOperation='destination-in';c.ctx.drawImage(c.fade,0,0);}
+      if(frame!==this.lastCloud){
+        const clock=time*cloudSpeed/45,dx=42*Math.sin(clock*.19)+6*Math.sin(clock*.37),dy=2*Math.sin(clock*.13);
+        for(let n=0;n<c.destinations.length;n++){
+          const index=c.destinations[n],weight=c.weights[n];
+          c.pixels[index]=c.sourcePixels[index-Math.round(dx*weight)-Math.round(dy*weight)*c.w];
+        }
+        c.ctx.putImageData(c.output,0,0);
+      }
       this.ctx.drawImage(c.layer,c.x,c.y);
     }
     this.lastCloud=frame;
@@ -159,7 +208,9 @@ export class PixelScene {
   drawDetail(sprite,time){
     const {canvas,x,y,w,h,shape}=sprite,ctx=this.ctx;
     if(shape.kind==='paper'||shape.kind==='leaves'){
-      for(let row=0;row<h;row+=3){const p=detailPoint(shape,x,y+row,time);ctx.drawImage(canvas,0,row,w,Math.min(3,h-row),p[0],p[1],w,Math.min(3,h-row));}
+      const [ax,ay]=shape.anchor,endY=shape.kind==='paper'?ay+shape.length:ay-63;
+      const end=detailPoint(shape,ax,endY,time),dy=endY-ay;
+      ctx.save();ctx.translate(ax,ay);ctx.transform(1,0,(end[0]-ax)/dy,(end[1]-ay)/dy,0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
       return;
     }
     const [ax,ay]=shape.anchor,p=detailPoint(shape,ax,ay,time),px=detailPoint(shape,ax+1,ay,time),py=detailPoint(shape,ax,ay+1,time);

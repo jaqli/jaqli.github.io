@@ -1,4 +1,4 @@
-import { birds, inside, birdPose, birdPoint, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-hybrid36';
+import { birds, inside, birdPose, birdPoint, waterAreas, screenOccluder, hemArea, distantCity } from './scene-objects.js?v=20261111-surface37';
 export { birds, inside, birdPose, birdPoint };
 import { scenePixelRatio } from './render-budget.js?v=20261111-flow28';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
@@ -40,19 +40,6 @@ export const fontStep = size => fontSizes[clamp(Math.round((size-minFontSize)/fo
 // Trace the distant buildings in source coordinates. Their small letters get
 // extra samples between the room's original points. Window frames and nearer
 // monitors, shelving and plants remain outside these silhouettes.
-const distantCity = [
-  [[1114,447],[1134,437],[1143,437],[1143,416],[1152,415],[1152,404],[1162,404],[1163,420],[1171,419],
-   [1171,376],[1178,373],[1179,357],[1186,356],[1187,345],[1191,345],[1191,359],[1197,359],[1198,376],
-   [1205,379],[1205,402],[1211,402],[1211,384],[1222,384],[1222,412],[1229,406],[1238,407],[1239,417],
-   [1251,418],[1251,398],[1266,397],[1266,415],[1279,413],[1279,423],[1293,425],[1293,402],[1306,399],
-   [1306,423],[1317,421],[1317,435],[1324,434],[1325,411],[1335,412],[1335,423],[1341,423],[1341,412],
-   [1352,411],[1352,397],[1362,397],[1362,451],[1335,452],[1318,448],[1280,453],[1256,449],[1224,450],
-   [1195,450],[1160,447],[1133,453]],
-  [[1384,399],[1393,391],[1394,379],[1403,377],[1403,347],[1411,337],[1411,431],[1384,431]],
-  [[1427,360],[1439,360],[1439,332],[1448,332],[1448,314],[1464,314],[1464,325],[1477,325],
-   [1477,307],[1496,307],[1496,300],[1527,300],[1527,332],[1512,338],[1512,351],[1494,354],
-   [1471,355],[1460,351],[1450,358],[1444,361],[1427,367]],
-];
 const personArea = [[650,516],[711,486],[722,447],[773,445],[799,472],[859,473],[890,524],[876,613],[848,643],[812,642],[802,599],[771,564],[689,560]];
 // Trace the actual curls separately from the broad body/motion exclusion area.
 // The screen stays whole behind this foreground silhouette, including the

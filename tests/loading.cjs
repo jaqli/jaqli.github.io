@@ -5,7 +5,7 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
   try {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const page = await browser.newPage({ viewport: { width: 1440, height: 700 } });
     let releaseSource;
     const sourceGate = new Promise(resolve => { releaseSource = resolve; });
     await page.route('**/assets/scene.webp*', async route => {
@@ -20,6 +20,9 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     assert(await page.locator('#scene-progress').isVisible());
     assert.equal(await page.locator('#scene-poster').getAttribute('src'), null,'do not download or stretch the old blurry poster');
     assert.equal(await page.locator('#scene-intro').evaluate(e => getComputedStyle(e).opacity), '1');
+    const previewBounds=await page.locator('#scene-intro').boundingBox();
+    assert.equal(previewBounds.y,0,'loading preview also preserves the entire top edge');
+    assert(previewBounds.height>700,'wide preview crops only the bottom');
     await page.locator('[data-hotspot="cv"] .hotspot-label rect').click();
     await page.waitForSelector('.page-transition');
     // The camera now transforms the live preview under a transparent particle
