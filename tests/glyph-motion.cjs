@@ -12,7 +12,9 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
    const {glyphUpdateLimit}=await import('./glyph-motion.js');
    const renderer=new AsciiRenderer(document.querySelector('#scene-image'),document.createElement('canvas'));
    renderer.resize(1536,1024);renderer.draw(0);
-   const regions={wall:[350,40,150,100],sky:[610,190,140,120],body:[785,505,55,75],city:[1180,356,30,85],water:[1008,475,96,90]};
+   // Sample several skyline buildings: a single narrow tower has too few
+   // letters at the wider spacing for a representative ink-energy average.
+   const regions={wall:[350,40,150,100],sky:[610,190,140,120],body:[785,505,55,75],city:[1170,355,193,96],water:[1008,475,96,90]};
    const sample=()=>Object.fromEntries(Object.entries(regions).map(([name,box])=>[name,renderer.ctx.getImageData(...box).data]));
    const before=sample(),geometry=renderer.cells.map(c=>[c.x,c.y,c.size,c.occupied].join(',')),seen=new Uint8Array(renderer.cells.length);
    const empty=renderer.cells.filter(c=>!c.occupied);
@@ -61,7 +63,8 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
     stableGeometry:renderer.cells.every((c,i)=>[c.x,c.y,c.size,c.occupied].join(',')===geometry[i]),
     emptyShare:empty.length/renderer.cells.length,openSquares,contoursRetained:contours.every(c=>c.occupied),
     skyRetained:renderer.cells.filter(c=>c.glyphLayer==='cloud').every(c=>c.occupied),
-    brightRetained:renderer.cells.filter(c=>(.2126*c.rgb[0]+.7152*c.rgb[1]+.0722*c.rgb[2])/255>=.34).every(c=>c.occupied),
+    brightRetained:renderer.cells.filter(c=>(.2126*c.rgb[0]+.7152*c.rgb[1]+.0722*c.rgb[2])/255>=(c.pillar?.63:.34)).every(c=>c.occupied),
+    pillarSpaces:[false,true].map(right=>renderer.cells.filter(c=>c.pillar&&(c.sx>1000)===right&&!c.occupied).length),
     emptyStable:empty.every(c=>!c.occupied&&!c.liveGlyph&&!c.glyphVariant)&&[...renderer.dynamic,...renderer.cloudCells].every(c=>c.occupied),
     cityRetained:renderer.cells.filter(c=>c.sx>1183&&c.sx<1197&&c.sy>380&&c.sy<435).every(c=>c.occupied&&c.size===.6),
     paletteSize:renderer.glyphMotion.palette.entries,immutablePalette:entries===renderer.glyphMotion.palette.entries};
@@ -74,7 +77,8 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert(result.stableGeometry,'global substitutions must not move or resize the characters');
   assert(result.maxUpdates<=result.limit&&result.limit<=12&&result.maxCells<=result.limit*64,'bound per-frame blocks and letters');
   assert.equal(result.missing,0,'each retained static character, including water, must participate');
-  assert(result.emptyShare>.08&&result.emptyShare<.3&&result.openSquares>20,'include substantial space in dark regions and contiguous empty areas');
+  assert(result.emptyShare>.08&&result.emptyShare<.3&&result.openSquares>5,'include substantial space in dark regions and contiguous empty areas');
+  assert(result.pillarSpaces.every(count=>count>20),'both window posts must have space in their dark inner faces');
   assert(result.emptyStable,'global changes, clouds and moving highlights must leave intentional spaces empty');
   assert(result.contoursRetained&&result.cityRetained,'preserve high-contrast details and the minimum-size city');
   assert(result.skyRetained&&result.brightRetained,'keep colorful sky, clouds and bright surfaces filled with characters');

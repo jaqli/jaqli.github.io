@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-air20';
+import { scenePixelRatio } from './render-budget.js?v=20261111-space21';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-air20';
-import { screens, paintScreen } from './screen-content.js?v=20261111-air20';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-space21';
+import { screens, paintScreen } from './screen-content.js?v=20261111-space21';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-air20';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-air20';
-import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-air20';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-space21';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space21';
+import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-space21';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -333,8 +333,9 @@ export class AsciiRenderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // One sampling lattice across the entire room: local half-pitch overlays
     // created visible islands of different texture around the head and skyline.
-    this.columns = Math.min(360, Math.max(200, Math.round(width / 4.6)));
-    this.rows = Math.round(height / (width / this.columns * 1.28));
+    // Wider centers and extra line spacing let the existing font sizes breathe.
+    this.columns = Math.min(300, Math.max(180, Math.round(width / 5.6)));
+    this.rows = Math.round(height / (width / this.columns * 1.42));
     this.cellW = width / this.columns; this.cellH = height / this.rows;
     // Size and spacing are independent: opening the grid must not enlarge
     // every letter by the same factor and immediately fill the gaps again.
@@ -390,9 +391,15 @@ export class AsciiRenderer {
       const protectedCell=isCity||cloudIndex>=0||Math.hypot(sx-1100,sy-375)<33;
       const flatness=darkness>0&&!protectedCell?1-smooth((this.surfaceContrast(sx,sy,9)-10)/24):0;
       const openness=Math.max(.3+sideWeight*.55,flatness*(.35+sideWeight*.65));
-      const chance=protectedCell?0:openness*darkness*smoothness*(person?.35:1);
+      // The two narrow window posts are darker than the sky but not as dark as
+      // room shadows. Open their inner faces too, keeping lit rims and cables.
+      const pillarWeight=Math.max(
+        smooth(Math.min(sx-833,850-sx,sy-72,483-sy)/2),
+        smooth(Math.min(sx-1368,1380-sx,sy-145,515-sy)/2));
+      const pillarSpace=pillarWeight*(1-smooth((light(rgb)-.43)/.2))*(1-smooth((contrast-16)/45))*.96;
+      const chance=protectedCell?0:Math.max(openness*darkness*smoothness*(person?.35:1),pillarSpace);
       const blank=hash(col+91,row+47)<chance;
-      const cell = { sx, sy, rgb, size, occupied:!blank,
+      const cell = { sx, sy, rgb, size, occupied:!blank, pillar:pillarWeight>0,
         x: sx * this.scale + (seed - .5) * .2,
         y: sy * this.scale + (hash(row, col) - .5) * .2,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),

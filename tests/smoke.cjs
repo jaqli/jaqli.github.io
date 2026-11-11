@@ -211,8 +211,8 @@ async function duckBodyPoint(page) {
     assert(changes.leftTop>.02, 'the newly exposed top rows of the left display should animate');
     for (const key of ['bird', 'water', 'code', 'terminal', 'plot']) assert(changes[key] > changes.wall * 3 + .02, `${key} should animate independently`);
     assert(changes.coverage > .65, 'water must not develop wide black gaps');
-    assert(changes.columns>=300&&changes.columns<=360&&changes.totalCells<75000,'open up the desktop lattice without losing the city silhouette');
-    assert(changes.cellW>=4.4&&changes.cellH>=5.6&&changes.letterGap>.35,'typical letters need real horizontal and vertical breathing room');
+    assert(changes.columns>=260&&changes.columns<=300&&changes.totalCells<40000,'open up the desktop lattice without losing the city silhouette');
+    assert(changes.cellW>=5.5&&changes.cellH>=7.8&&changes.letterGap>1.4,'typical letters need real horizontal and vertical breathing room');
     assert(changes.mediumLargeShare>.75&&changes.largeShare>.2,'medium and large glyphs must visibly dominate the scene');
     assert(changes.spriteSizeRange[0]>=.6 && changes.spriteSizeRange[1]<=1.5, 'moving objects must share the requested font range');
     assert(changes.flightX > 240 && changes.flightY > 120, 'the gull should traverse the sky');

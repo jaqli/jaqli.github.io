@@ -1,7 +1,7 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-air20';
-import { paintScreen } from './screen-content.js?v=20261111-air20';
-import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-air20';
-import { glyphVariant } from './glyph-rhythm.js?v=20261111-air20';
+import { waterSampleInterval } from './render-budget.js?v=20261111-space21';
+import { paintScreen } from './screen-content.js?v=20261111-space21';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-space21';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-space21';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
