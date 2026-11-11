@@ -207,14 +207,19 @@ export class PixelScene {
   }
   drawDetail(sprite,time){
     const {canvas,x,y,w,h,shape}=sprite,ctx=this.ctx;
+    // Tiny rotations with nearest-neighbor sampling make whole columns jump
+    // between source rows, producing a line that sweeps across a floating prop.
+    // Interpolate only these moving cutouts at subpixel positions. The room
+    // keeps its original raster, colors and nearest-neighbor display scaling.
+    ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
     if(shape.kind==='paper'||shape.kind==='leaves'){
       const [ax,ay]=shape.anchor,endY=shape.kind==='paper'?ay+shape.length:ay-63;
       const end=detailPoint(shape,ax,endY,time),dy=endY-ay;
-      ctx.save();ctx.translate(ax,ay);ctx.transform(1,0,(end[0]-ax)/dy,(end[1]-ay)/dy,0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
+      ctx.translate(ax,ay);ctx.transform(1,0,(end[0]-ax)/dy,(end[1]-ay)/dy,0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
       return;
     }
     const [ax,ay]=shape.anchor,p=detailPoint(shape,ax,ay,time),px=detailPoint(shape,ax+1,ay,time),py=detailPoint(shape,ax,ay+1,time);
-    ctx.save();ctx.translate(...p);ctx.transform(px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1],0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
+    ctx.translate(...p);ctx.transform(px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1],0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
   }
   drawBird(sprite,time){
     const {bird,canvas,x,y,w,h}=sprite,pose=birdPose(bird,time),ctx=this.ctx,[cx,cy]=bird.center;

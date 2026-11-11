@@ -66,7 +66,7 @@ export const sceneIntro={
 if(canvas&&ctx){
   const scale=Math.max(viewport.clientWidth/1536,viewport.clientHeight/1024);
   world.style.width=`${1536*scale}px`;world.style.height=`${1024*scale}px`;
-  world.style.top='0px';
+  world.style.top=`${Math.min(0,(viewport.clientHeight-1024*scale)/3)}px`;
   viewport.scrollLeft=Math.max(0,1536*scale*.42-viewport.clientWidth/2);
   rebuild(1536*scale,1024*scale);
   seed.decode().then(()=>{

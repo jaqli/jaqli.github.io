@@ -17,7 +17,7 @@ const snapshot=page=>page.locator('#ascii-canvas').evaluate(c=>c.toDataURL());
  assert(!resources.some(url=>/glyph-|ascii-renderer|scene-worker|scene-ambience|scene-preview/.test(url)),'full-room character machinery must not load');
  const still=await snapshot(page);await page.waitForTimeout(180);assert.equal(await snapshot(page),still,'reduced motion starts with a still picture');
  const regions=await page.evaluate(async()=>{
-  const {PixelScene}=await import('./pixel-scene.js?v=20261111-surface37');
+  const {PixelScene}=await import('./pixel-scene.js?v=20261111-motion38');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas);
   const reference=document.createElement('canvas');reference.width=1536;reference.height=1024;reference.getContext('2d').drawImage(document.querySelector('#scene-image'),0,0);
   const source=reference.getContext('2d').getImageData(0,0,1536,1024).data;
@@ -38,10 +38,28 @@ const snapshot=page=>page.locator('#ascii-canvas').evaluate(c=>c.toDataURL());
    r.ctx.fillStyle='#00ff00';r.ctx.fillRect(0,0,1536,1024);r.drawClouds(time);const b=r.ctx.getImageData(0,0,1536,1024).data;
    result.skyBleed=Math.max(result.skyBleed,diff(a,b,boxes.cloud));
   }
+  // A slow rigid bob must not switch a whole source row at once. At 60 Hz,
+  // nearest-neighbor rotation produced 200+ channel jumps in these real props.
+  result.propSteps={};
+  for(const id of ['tablet','foreground-page','water-controller','duck']){
+   const sprite=r.details.find(s=>s.shape.id===id),x=sprite.x-12,y=sprite.y-12,w=sprite.w+24,h=sprite.h+24;
+   let maxStep=0;
+   for(const start of [.5,1.5,3.5,5.5]){
+    let previous;
+    for(let frame=0;frame<15;frame++){
+     r.ctx.drawImage(r.base,0,0);r.drawDetail(sprite,start+frame/60);
+     const data=r.ctx.getImageData(x,y,w,h).data;
+     if(previous)for(let i=0;i<data.length;i+=4)for(let c=0;c<3;c++)maxStep=Math.max(maxStep,Math.abs(data[i+c]-previous[i+c]));
+     previous=data;
+    }
+   }
+   result.propSteps[id]=maxStep;
+  }
   r.dispose();reference.width=reference.height=1;return result;
  });
  for(const name of ['wall','person','city','frame']){assert.equal(regions[name].motion,0,`${name} remains still`);assert.equal(regions[name].source,0,`${name} preserves original pixels and color`);}
  assert.equal(regions.skyBleed,0,'moving sky must completely replace the original clouds');
+ for(const [id,step] of Object.entries(regions.propSteps))assert(step<=32,`${id} must move continuously without a column snapping to another pixel row (jump ${step})`);
  for(const name of ['code','wave','plot','water','duck','paper','eyes','lamp','redEye','leftFace','rightFace','cloud','bird'])assert(regions[name].motion>.05,`${name} should move or change`);
  console.log('PASS unchanged original colors in wall/person/city; local screen, sky, water, object and light animation',JSON.stringify(regions));
  await page.locator('#pause').click();await page.waitForTimeout(300);
@@ -59,14 +77,14 @@ const snapshot=page=>page.locator('#ascii-canvas').evaluate(c=>c.toDataURL());
  console.log('PASS visible monitor and hidden duck entrances');
  await page.setViewportSize({width:1440,height:700});await page.goto(origin);await page.waitForSelector('.scene-ready');
  const crop=await page.locator('#scene-world').boundingBox();
- assert.equal(crop.y,0,'wide scenes keep the entire top edge');assert(crop.y+crop.height>700,'only the bottom overflows');
+ assert(Math.abs(crop.y*3+crop.height-700)<.1,'wide scenes split the top/bottom crop 1:2');assert(crop.y<0&&crop.y+crop.height>700,'excess height is cropped at both ends');
  await page.setViewportSize({width:390,height:844});await page.goto(origin);await page.waitForSelector('.scene-ready');
  assert(await page.locator('#pan-hint').isVisible());
  assert.deepEqual(await page.locator('#ascii-canvas').evaluate(c=>[c.width,c.height]),[1536,1024]);
  await page.locator('#scene-viewport').evaluate(e=>e.scrollLeft=450);
  assert(await page.locator('#scene-viewport').evaluate(e=>e.scrollLeft>400));
  await page.setViewportSize({width:844,height:390});await page.waitForTimeout(120);
- assert.equal((await page.locator('#scene-world').boundingBox()).y,0,'rotation keeps the scene top-aligned');
+ const rotated=await page.locator('#scene-world').boundingBox();assert(Math.abs(rotated.y*3+rotated.height-390)<.1,'rotation retains the 1:2 crop split');
  assert.deepEqual(await page.locator('#ascii-canvas').evaluate(c=>[c.width,c.height]),[1536,1024]);
  const alignment=await page.evaluate(()=>{const a=document.querySelector('#ascii-canvas').getBoundingClientRect(),b=document.querySelector('#hotspots').getBoundingClientRect();return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)+Math.abs(a.width-b.width)+Math.abs(a.height-b.height);});assert(alignment<1);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);

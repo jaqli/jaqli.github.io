@@ -1,8 +1,8 @@
 import { site } from './site.config.js?v=20261110-flight11';
 import { detailShapes, detailPoint } from './scene-details.js?v=20261111-flow28';
-import { PixelScene } from './pixel-scene.js?v=20261111-surface37';
+import { PixelScene } from './pixel-scene.js?v=20261111-motion38';
 import { loadSceneImage } from './scene-loader.js?v=20261110-depth6';
-import { sceneIntro } from './scene-intro.js?v=20261111-surface37';
+import { sceneIntro } from './scene-intro.js?v=20261111-motion38';
 import './navigation.js?v=20261111-hybrid36';
 
 const viewport = document.querySelector('#scene-viewport');
@@ -67,7 +67,7 @@ function layout() {
   height = site.height * scale;
   world.style.width = `${width}px`;
   world.style.height = `${height}px`;
-  world.style.top = '0px';
+  world.style.top = `${Math.min(0, (bounds.height - height) / 3)}px`;
   sceneIntro.resize(width,height);
   const pannable = width > bounds.width + 5;
   if (pannable && !wasPannable) oldCenter = .42;

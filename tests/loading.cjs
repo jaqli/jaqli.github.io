@@ -21,8 +21,8 @@ const origin = process.env.TEST_ORIGIN || 'http://127.0.0.1:8081';
     assert.equal(await page.locator('#scene-poster').getAttribute('src'), null,'do not download or stretch the old blurry poster');
     assert.equal(await page.locator('#scene-intro').evaluate(e => getComputedStyle(e).opacity), '1');
     const previewBounds=await page.locator('#scene-intro').boundingBox();
-    assert.equal(previewBounds.y,0,'loading preview also preserves the entire top edge');
-    assert(previewBounds.height>700,'wide preview crops only the bottom');
+    assert(Math.abs(previewBounds.y*3+previewBounds.height-700)<.1,'loading preview splits top/bottom crop 1:2');
+    assert(previewBounds.height>700,'wide preview crops the excess height');
     await page.locator('[data-hotspot="cv"] .hotspot-label rect').click();
     await page.waitForSelector('.page-transition');
     // The camera now transforms the live preview under a transparent particle

@@ -30,7 +30,7 @@ const settled=page=>page.waitForFunction(()=>!document.querySelector('.page-tran
   await page.waitForURL(`${origin}/`);await page.waitForSelector('.scene-ready');await settled(page);
   const bounds=await page.locator('#scene-world').boundingBox();
   assert.equal(Math.round(bounds.width),1280,'camera scale must not affect scene layout');
-  assert.equal(Math.round(bounds.y),0,'returning camera restores top alignment without cropping the upper scene');
+  assert(Math.abs(bounds.y*3+bounds.height-800)<.1,'returning camera restores the 1:2 crop split');
   await page.goBack();await page.waitForSelector('#experience');await settled(page);
   await page.goForward();await page.waitForSelector('.scene-ready');await settled(page);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),1280);
