@@ -1,9 +1,12 @@
 // Resolve only a one-pixel boundary between traced foreground and open sky.
 // The source RGB may contain the old sky; keep the interior color and let the
 // current sky supply the coverage instead of carrying blue/pink fringe pixels.
-export function refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask){
+export function refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,precise){
  const src=scene.original.data,plate=scene.plate.data,mask=alpha.data,original=mask.slice();
  for(let y=3;y<h-3;y++)for(let x=3;x<w-3;x++){
+  // The shelf's individually resolved silhouettes already reject their old
+  // sky. Do not reinterpret dark terra-cotta pixels as partial sky coverage.
+  if(precise&&x+x0>=precise.x&&x+x0<precise.x+precise.w&&y+y0>=precise.y&&y+y0<precise.y+precise.h)continue;
   const n=y*w+x;if(original[n*4+3]!==0)continue;
   const i=((y+y0)*1536+x+x0)*4;let best=null;
   for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){

@@ -1,7 +1,8 @@
 import { inside } from './scene-objects.js?v=20261111-sky43';
-import { refineSkyEdges } from './scene-edge-matte.js?v=20261111-edge48';
+import { refineSkyEdges } from './scene-edge-matte.js?v=20261112-edge50';
 import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-edge48';
-import { skyApertures, skyForeground, skyWires, sillSkyEdge, rearCity } from './scene-sky-matte.js?v=20261111-edge48';
+import { prepareSillMatte } from './scene-sill-matte.js?v=20261112-edge50';
+import { skyApertures, skyForeground, skyWires, rearCity } from './scene-sky-matte.js?v=20261112-edge50';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
 // Lighting follows the complete visible sky. Motion has its own foreground
@@ -15,7 +16,7 @@ export function* prepareSky(scene){
  const wires=surface(w,h),wire=wires.getContext('2d');wire.translate(-x0,-y0);wire.strokeStyle='#fff';wire.lineCap='round';wire.lineJoin='round';
  for(const {points,width}of skyWires){wire.lineWidth=width;wire.beginPath();points.forEach(([x,y],i)=>i?wire.lineTo(x,y):wire.moveTo(x,y));wire.stroke();}
  const wirePixels=wire.getImageData(0,0,w,h).data,lightMask=new Uint8Array(w*h),mask=surface(w,h),m=mask.getContext('2d'),alpha=m.createImageData(w,h),destinations=[];
- const shelf=prepareShelfMatte(scene);
+ const shelf=prepareShelfMatte(scene),sill=prepareSillMatte(scene);
  const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<430);
  for(let y=0;y<h;y++){
   for(let x=0;x<w;x++){
@@ -26,11 +27,8 @@ export function* prepareSky(scene){
    // Only a traced wire's local rim uses its color to separate it from sky.
    // No global RGB threshold can punch holes in buildings or bright desk trim.
    const wireEdge=wirePixels[j+3]>32&&(original[i+1]<158||original[i]>original[i+1]*.88||original[i+2]<original[i+1]*.94);
-   let boardRimSky=false;
-   if(wx>=1388&&wx<=1418&&wy>=249&&wy<=300&&original[i+1]-original[i]>6&&original[i+2]-original[i]>10&&original[i+2]>=original[i+1]){
-    for(let k=1;k<sillSkyEdge.length;k++){const[a,b]=sillSkyEdge[k-1],[c,d]=sillSkyEdge[k];if(wy>=b&&wy<=d){boardRimSky=Math.abs(wx-(a+(c-a)*(wy-b)/(d-b)))<4;break;}}
-   }
-   let amount=(area[j]>250||boardRimSky)&&!lamp&&!fixedLeaf&&!wireEdge?255:0;
+   let amount=area[j]>250&&!lamp&&!fixedLeaf&&!wireEdge?255:0;
+   if(wx>=sill.x&&wx<sill.x+sill.w&&wy>=sill.y&&wy<sill.y+sill.h)amount=fixedLeaf?0:sill.coverage[(wy-sill.y)*sill.w+wx-sill.x];
    // The thin red aerial has no blue face: these local cyan edge pixels are
    // its old sky, not part of the filament or the dark cap below it.
    if(wx>=620&&wx<=630&&wy>=354&&wy<370&&original[i+1]>original[i]+3&&original[i+2]>original[i]+8)amount=255;
@@ -50,7 +48,7 @@ export function* prepareSky(scene){
   const sx=x<965?974+(x%17):x,sy=456+(y-430)%17,i=(y*1536+x)*4,k=(sy*1536+sx)*4;
   for(let ch=0;ch<3;ch++)plate[i+ch]=original[k+ch];
  }
- refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask);
+ refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,sill);
  for(let n=0;n<w*h;n++){if(alpha.data[n*4+3]===255)destinations.push(n);if(alpha.data[n*4+3]>0&&alpha.data[n*4+3]<255)lightMask[n]=0;}
  scene.base.getContext('2d').putImageData(scene.plate,0,0);
  m.putImageData(alpha,0,0);yield .54;

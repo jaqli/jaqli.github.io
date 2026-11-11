@@ -6,11 +6,12 @@ import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
-import { SceneExtras } from './scene-extras.js?v=20261111-layer44';
+import { SceneExtras } from './scene-extras.js?v=20261112-edge50';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
 import { SceneTime } from './scene-time.js?v=20261111-edge48';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-edge48';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-edge50';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
+import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
 
 const W=1536,H=1024;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -135,7 +136,8 @@ export class PixelScene {
       };
       const corners=[skyColor(x,y),skyColor(x+w,y),skyColor(x,y+h),skyColor(x+w,y+h)];
       const backdrop=(col,row,c)=>{const u=clamp((col-x)/w),v=clamp((row-y)/h);return (corners[0][c]*(1-u)+corners[1][c]*u)*(1-v)+(corners[2][c]*(1-u)+corners[3][c]*u)*v;};
-      this.birds.push({...this.cut(bird.points,(r,g,b,sx,sy)=>[r,g,b].some((v,c)=>Math.abs(v-backdrop(sx,sy,c))>18),false,3),bird});
+      const sprite={...this.cut(bird.points,(r,g,b,sx,sy)=>[r,g,b].some((v,c)=>Math.abs(v-backdrop(sx,sy,c))>18),false,3),bird};
+      cleanBirdMatte(sprite);this.birds.push(sprite);
       for(let row=y;row<y+h;row++)for(let col=x;col<x+w;col++){
         const i=(row*W+col)*4,u=(col-x)/w,v=(row-y)/h,edge=smooth(Math.min(col-x,x+w-1-col,row-y,y+h-1-row)/5);
         for(let c=0;c<3;c++){const clean=(corners[0][c]*(1-u)+corners[1][c]*u)*(1-v)+(corners[2][c]*(1-u)+corners[3][c]*u)*v;this.plate.data[i+c]=source[i+c]*(1-edge)+clean*edge;}

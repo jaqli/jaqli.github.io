@@ -1,4 +1,4 @@
-import { prepareFoliage } from './scene-foliage.js?v=20261111-layer44';
+import { prepareFoliage } from './scene-foliage.js?v=20261112-edge50';
 import { SceneFan } from './scene-fan.js?v=20261111-sky43';
 import { drawWarp } from './scene-deform.js?v=20261111-layer44';
 import { inside } from './scene-objects.js?v=20261111-sky43';

@@ -40,24 +40,28 @@ export function prepareFoliage(scene){
   {x:1235,y:60,w:172,h:104,ids:[3,4,5,6,7,8,9]},
   {x:1351,y:422,w:96,h:155,ids:[10,11,12,13,14,15,16,17,18],warm:true},
  ]){
-  const{x,y,w,h,ids}=region,owner=new Int16Array(w*h).fill(-1),nearby=new Int16Array(w*h).fill(-1),strong=new Uint8Array(w*h),foreground=new Uint8Array(w*h);
+  const{x,y,w,h,ids}=region,owner=new Int16Array(w*h).fill(-1),nearby=new Int16Array(w*h).fill(-1),outerRim=new Uint8Array(w*h),strong=new Uint8Array(w*h),foreground=new Uint8Array(w*h);
   const candidates=ids.map(id=>{const leaf=leafShapes[id],xs=leaf.polygon.map(p=>p[0]),ys=leaf.polygon.map(p=>p[1]);return{id,leaf,left:Math.min(...xs)-4,right:Math.max(...xs)+4,top:Math.min(...ys)-4,bottom:Math.max(...ys)+4};});
   for(let py=0;py<h;py++)for(let px=0;px<w;px++){
    const n=py*w+px,i=((y+py)*1536+x+px)*4,r=source[i],g=source[i+1],b=source[i+2];
-   strong[n]=g>r*(region.warm?.72:.98)&&g>b*1.08&&(region.warm||g-r>5)?1:0;
+   // Yellow leaves are substantially less blue than the cream window trim.
+   // The old warm-color rule also picked up nearby frame highlights.
+   strong[n]=g>r*(region.warm?.8:.98)&&g>b*(region.warm?1.4:1.08)&&(region.warm||g-r>5)?1:0;
    let best=Infinity;
-   for(const {id,leaf,left,right,top,bottom} of candidates){if(x+px<left||x+px>right||y+py<top||y+py>bottom)continue;const d=distance(x+px,y+py,leaf.polygon);if(d>3.5)continue;const score=d*100+Math.hypot(x+px-leaf.anchor[0],y+py-leaf.anchor[1])*.01;if(score<best){best=score;nearby[n]=id;}}
+   for(const {id,leaf,left,right,top,bottom} of candidates){if(x+px<left||x+px>right||y+py<top||y+py>bottom)continue;const d=distance(x+px,y+py,leaf.polygon);if(d>3.5)continue;const score=d*100+Math.hypot(x+px-leaf.anchor[0],y+py-leaf.anchor[1])*.01;if(score<best){best=score;nearby[n]=id;outerRim[n]=d>0?1:0;}}
+   if(region.warm&&outerRim[n]&&g>160&&b>g*.45)strong[n]=0;
    if(strong[n]&&nearby[n]>=0)owner[n]=nearby[n];
   }
   // Include the dark anti-aliased rim adjacent to green, but no cyan sky fringe.
   for(let py=1;py<h-1;py++)for(let px=1;px<w-1;px++){
    const n=py*w+px,i=((y+py)*1536+x+px)*4,r=source[i],g=source[i+1],b=source[i+2];
    const adjacent=strong[n-1]||strong[n+1]||strong[n-w]||strong[n+w]||strong[n-w-1]||strong[n+w+1]||strong[n-w+1]||strong[n+w-1];
-   foreground[n]=strong[n]||(adjacent&&g<160&&g>r*.8&&g>b*.82)?1:0;
+   const cyanRim=g>100&&b>=g&&b-r>15;
+   foreground[n]=strong[n]||(adjacent&&g<160&&g>r*.8&&g>b*.82&&!cyanRim)?1:0;
    if(nearby[n]>=0&&foreground[n])owner[n]=nearby[n];
   }
   // Fill one-pixel interior holes without expanding a leaf into its backdrop.
-  const before=owner.slice();for(let py=1;py<h-1;py++)for(let px=1;px<w-1;px++){const n=py*w+px;if(before[n]<0&&nearby[n]>=0&&[n-1,n+1,n-w,n+w].every(k=>before[k]>=0)){owner[n]=nearby[n];foreground[n]=1;}}
+  const before=owner.slice();for(let py=1;py<h-1;py++)for(let px=1;px<w-1;px++){const n=py*w+px,i=((y+py)*1536+x+px)*4,r=source[i],g=source[i+1],b=source[i+2],sky=g>100&&b>=g&&b-r>15,trim=region.warm&&outerRim[n]&&g>160&&b>g*.45;if(before[n]<0&&nearby[n]>=0&&!sky&&!trim&&[n-1,n+1,n-w,n+w].every(k=>before[k]>=0)){owner[n]=nearby[n];foreground[n]=1;}}
   const removed=new Uint8Array(w*h),fixed=new Uint8Array(w*h);for(let n=0;n<owner.length;n++){removed[n]=owner[n]>=0?1:0;const wx=x+n%w,wy=y+Math.floor(n/w),stem=region.ids[0]===3?((wx>=1287&&wx<=1352&&wy>=94&&wy<=129)||(wx>=1273&&wx<=1284&&wy>=140&&wy<=163)):region.ids[0]===0&&wx>=1437&&wx<=1498&&wy>=230;fixed[n]=foreground[n]&&!removed[n]&&stem?1:0;}
   const donors=foreground.slice();for(let n=0;n<donors.length;n++)if(removed[n])donors[n]=1;
   const nearest=exteriorField(donors,w,h);
