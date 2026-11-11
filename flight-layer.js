@@ -1,4 +1,6 @@
-import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-type17';
+import { birdPose, minFontSize } from './ascii-renderer.js?v=20261111-flow18';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow18';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-flow18';
 const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
 
 // Tiny transparent bird canvases move at display cadence. Their transforms do
@@ -7,21 +9,9 @@ export class FlightLayer {
   constructor(root) { this.root=root; this.sprites=[]; }
   configure({sprites,fontSize,cellW,cellH,scale,pixelRatio:dpr}) {
     this.scale=scale; this.cellW=cellW; this.cellH=cellH; this.dpr=dpr;
-    this.tile=Math.ceil(fontSize*1.6*dpr); this.side=this.tile/dpr;
-    const colors=new Map();
-    for (const sprite of sprites) for (const cell of sprite.cells) {
-      const key=`${cell.glyph}:${cell.color}`;
-      if (!colors.has(key)) colors.set(key,colors.size);
-      const index=colors.get(key); cell.tx=index%32*this.tile; cell.ty=Math.floor(index/32)*this.tile;
-    }
-    this.atlas=document.createElement('canvas');
-    this.atlas.width=32*this.tile; this.atlas.height=Math.ceil(colors.size/32)*this.tile;
-    const atlas=this.atlas.getContext('2d');
-    atlas.font=`500 ${fontSize*dpr}px monospace`; atlas.textAlign='center'; atlas.textBaseline='middle';
-    for (const [key,index] of colors) {
-      atlas.fillStyle=key.slice(2);
-      atlas.fillText(key[0],index%32*this.tile+this.tile/2,Math.floor(index/32)*this.tile+this.tile/2);
-    }
+    this.spriteAtlas=new SpriteAtlas(fontSize,dpr);
+    for(const _ of this.spriteAtlas.prepare(sprites.flatMap(s=>s.cells))){}
+    this.atlas=this.spriteAtlas.canvas;
     this.sprites=sprites.map(({bird,cells})=>{
       const [cx,cy]=bird.center, pad=fontSize*2;
       const xs=cells.map(c=>(c.sx-cx)*scale), ys=cells.map(c=>(c.sy-cy)*scale);
@@ -42,7 +32,9 @@ export class FlightLayer {
   draw(time) {
     for (const sprite of this.sprites) {
       const pose=birdPose(sprite.bird,time),{canvas,ctx,cells,x,y,width,height}=sprite;
-      if (!Number.isFinite(sprite.flap) || Math.abs(pose.flap-sprite.flap)>.001 || Math.abs(pose.scale-sprite.scale)>.002) {
+      let lettersChanged=false;
+      for(const cell of cells){const variant=glyphVariant(cell,time);if(variant!==cell.glyphVariant)lettersChanged=true;cell.glyphVariant=variant;}
+      if (lettersChanged || !Number.isFinite(sprite.flap) || Math.abs(pose.flap-sprite.flap)>.001 || Math.abs(pose.scale-sprite.scale)>.002) {
         sprite.flap=pose.flap; sprite.scale=pose.scale;
         ctx.clearRect(0,0,width,height); ctx.fillStyle='#080d13';
         for (const cell of cells) {
@@ -54,8 +46,7 @@ export class FlightLayer {
             this.cellW*.86*cell.drawSize,this.cellH*.8*cell.drawSize);
         }
         for (const cell of cells) {
-          const side=this.side*cell.drawSize;
-          ctx.drawImage(this.atlas,cell.tx,cell.ty,this.tile,this.tile,cell.x-side/2,cell.dy-side/2,side,side);
+          this.spriteAtlas.draw(ctx,cell,cell.x,cell.dy,cell.drawSize);
         }
       }
       // Match the scale of the cached glyphs exactly, including frames where

@@ -1,6 +1,7 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-type17';
-import { paintScreen } from './screen-content.js?v=20261111-type17';
-import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-type17';
+import { waterSampleInterval } from './render-budget.js?v=20261111-flow18';
+import { paintScreen } from './screen-content.js?v=20261111-flow18';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-flow18';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-flow18';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -26,7 +27,7 @@ export class LayeredScene {
     const x=Math.floor(hx*s),y=Math.floor(hy*s),w=Math.ceil((hx+hw)*s)-x,h=Math.ceil((hy+hh)*s)-y;
     add('head',[x,y,w,h]);
     for(const sprite of r.details){
-      if(sprite.texture){const {canvas,x,y,width,height}=sprite.texture;add(sprite.shape.id,[x,y,width,height],{bitmap:await createImageBitmap(canvas),shape:sprite.shape});}
+      if(sprite.texture){const {canvas,x,y,width,height}=sprite.texture;add(sprite.shape.id,[x,y,width,height],{shape:sprite.shape});}
       else{
         const xs=sprite.cells.map(c=>c.sx*s),ys=sprite.cells.map(c=>c.sy*s),pad=r.fontSize*2;
         const x=Math.floor(Math.min(...xs)-pad),y=Math.floor(Math.min(...ys)-pad);
@@ -53,6 +54,7 @@ export class LayeredScene {
       const {canvas,ctx}=this.targets.get('screen-'+i),screen=r.screens[i];screen.canvas=canvas;screen.ctx=ctx;ctx.setTransform(3,0,0,3,0,0);screen.frame=-1;
     }
     for(const light of r.lights){const target=this.targets.get(light.emitter.id);light.canvas=target.canvas;light.ctx=target.ctx;light.frame=null;}
+    for(const sprite of r.details)if(sprite.texture){sprite.texture.canvas=this.targets.get(sprite.shape.id).canvas;sprite.glyphFrame=undefined;}
     const water=this.specs.find(spec=>spec.water);
     this.waterBox=[water.x,water.y,water.w,water.h];
     this.waterStage ||= new OffscreenCanvas(1,1);
@@ -76,14 +78,15 @@ export class LayeredScene {
     const extra=[],first=this.ambientSizes[0]===-1;
     for(let i=0;i<r.dynamic.length;i++){
       const cell=r.dynamic[i],size=cell.kind==='hem'?cell.size:fontStep(cell.size+fontIncrement*Math.round(Math.sin(time*.75+cell.phase)));
+      const variant=glyphVariant(cell,time),lettersChanged=variant!==cell.glyphVariant;cell.glyphVariant=variant;
       cell.renderSize=size;cell.renderY=cell.y+(cell.kind==='hem'?Math.sin(time*1.3)*.35*Math.max(0,Math.min(1,(cell.sy-617)/17))*r.scale:0);
       if(first)r.stamp(cell,cell.x,cell.renderY,size,this.baseCtx);
-      else if(cell.kind==='hem'||size!==this.ambientSizes[i])extra.push(cell);
+      else if(lettersChanged||cell.kind==='hem'||size!==this.ambientSizes[i])extra.push(cell);
       this.ambientSizes[i]=size;
     }
     const head=this.targets.get('head');
-    r.glyphMotion.update(time,extra,(patch,{box:[x,y,w,h],dynamic})=>{
-      const source=[0,0,w*r.pixelRatio,h*r.pixelRatio,x,y,w,h];
+    r.glyphMotion.update(time,extra,(patch,{box:[x,y,w,h],dynamic},pixels)=>{
+      const source=[...pixels,x,y,w,h];
       // Transfer just the updated pixels, not the entire mutable room texture.
       this.baseCtx.drawImage(patch,...source);
       if(dynamic.length){
@@ -105,7 +108,7 @@ export class LayeredScene {
     }
     for(const screen of r.screens)paintScreen(screen,time);
     for(const sprite of r.details){
-      if(sprite.texture)continue;
+      if(sprite.texture){r.refreshFloat(sprite,time);continue;}
       const {ctx,spec}=this.targets.get(sprite.shape.id);ctx.clearRect(spec.x,spec.y,spec.w,spec.h);
       r.drawDetails(time,[sprite],ctx);
     }

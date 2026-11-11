@@ -1,11 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-type17';
+import { scenePixelRatio } from './render-budget.js?v=20261111-flow18';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-type17';
-import { screens, paintScreen } from './screen-content.js?v=20261111-type17';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-flow18';
+import { screens, paintScreen } from './screen-content.js?v=20261111-flow18';
 import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-type17';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-flow18';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-flow18';
+import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-flow18';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -380,7 +382,7 @@ export class AsciiRenderer {
         x: sx * this.scale + (seed - .5) * .4,
         y: sy * this.scale + (hash(row, col) - .5) * .35,
         seed, phase: seed * Math.PI * 2, glyph: glyph(rgb, seed), color: color(rgb),
-        kind: isHem ? 'hem' : 'ambient' };
+        kind: isHem ? 'hem' : 'ambient', glyphVariant:0 };
       const isAmbient = !isCity && !isWater && contrast<65 && skyWeight<.1 && seed < .018 && !inside(sx, sy, personArea) && !inside(sx,sy,screenOccluder) && !inside(sx,sy,monitorHousing);
       cell.glyphLayer=cloudIndex>=0?'cloud':isHem||isAmbient?'dynamic':'base';
       cell.water=isWater;
@@ -393,7 +395,7 @@ export class AsciiRenderer {
       if (isWater) {
         // Water keeps a complete, fixed character bed. Moving light is added on
         // top; no character leaves a hole at the edge of a moving region.
-        this.water.push({ ...cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
+        this.water.push({ ...cell, glyphSource:cell, color: color(rgb.map((v, c) => Math.min(255, v * 1.15 + [52,59,62][c]))),
           sinA:Math.sin(sx*.052+sy*.083), cosA:Math.cos(sx*.052+sy*.083),
           sinB:Math.sin(sx*.023-sy*.037), cosB:Math.cos(sx*.023-sy*.037),
           rings: rippleSources.map(([x,y],index)=>({distance:Math.hypot((sx-x)/1.7,(sy-y)*2.2),index})).filter(r=>r.distance<=150) });
@@ -460,6 +462,7 @@ export class AsciiRenderer {
       return {emitter,cells};
     });
     for (const light of this.lights) {
+      light.cells.forEach(prepareGlyph);
       const [bx,by,w,h]=light.emitter.box, pad=this.fontSize;
       light.x=Math.floor(bx*this.scale-pad); light.y=Math.floor(by*this.scale-pad);
       light.canvas=createCanvas();
@@ -472,27 +475,10 @@ export class AsciiRenderer {
     // Rasterize colored characters once. Repeated fillText + transform + color
     // sampling for thousands of cells made the previous animation CPU-bound.
     const movingCells = [...this.dynamic, ...this.water, ...this.sprites.flatMap(sprite => sprite.cells), ...this.details.flatMap(sprite=>sprite.cells)];
-    this.atlas = createCanvas();
-    this.tilePixels = Math.ceil(this.fontSize * 1.6 * dpr);
-    this.tileSize = this.tilePixels / dpr;
-    const atlasColumns = 64;
-    const unique=new Map();
-    for (const cell of movingCells) {
-      const key=cell.glyph+cell.color;
-      if (!unique.has(key)) unique.set(key,{cell,index:unique.size});
-      const {index}=unique.get(key);
-      cell.tx=index%atlasColumns*this.tilePixels;
-      cell.ty=Math.floor(index/atlasColumns)*this.tilePixels;
-    }
-    this.atlas.width = atlasColumns * this.tilePixels;
-    this.atlas.height = Math.ceil(unique.size / atlasColumns) * this.tilePixels;
-    const atlasCtx = this.atlas.getContext('2d');
-    atlasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    this.prepare(atlasCtx);
-    for (const {cell,index} of unique.values()) {
-      this.paint(atlasCtx,cell,cell.tx/dpr+this.tileSize/2,cell.ty/dpr+this.tileSize/2,1,cell.color);
-      if (!(index%512)) yield .8+.12*index/unique.size;
-    }
+    this.spriteAtlas=new SpriteAtlas(this.fontSize,dpr);
+    for(const progress of this.spriteAtlas.prepare(movingCells))yield .8+.12*progress;
+    this.atlas=this.spriteAtlas.canvas;
+    this.tilePixels=this.spriteAtlas.tile;this.tileSize=this.tilePixels/dpr;
     for (const sprite of this.details) for (const cell of sprite.cells) {
       cell.free=sprite.shape.kind==='paper' ? clamp((cell.sy-sprite.shape.anchor[1])/sprite.shape.length)**2 : clamp((sprite.shape.anchor[1]-cell.sy)/63);
       cell.sinX=Math.sin(cell.sx*.07); cell.cosX=Math.cos(cell.sx*.07);
@@ -503,18 +489,15 @@ export class AsciiRenderer {
       const x=Math.floor(Math.min(...xs)-pad), y=Math.floor(Math.min(...ys)-pad);
       const width=Math.ceil(Math.max(...xs)-x+pad), height=Math.ceil(Math.max(...ys)-y+pad);
       const canvas=createCanvas(); canvas.width=Math.ceil(width*dpr); canvas.height=Math.ceil(height*dpr);
-      const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,-x*dpr,-y*dpr);
-      ctx.fillStyle='#080d13';
-      for (const cell of sprite.cells) ctx.fillRect(cell.sx*this.scale-this.cellW*.47*cell.size,cell.sy*this.scale-this.cellH*.44*cell.size,
-        this.cellW*.94*cell.size,this.cellH*.88*cell.size);
-      for (const cell of sprite.cells) this.stamp(cell,cell.sx*this.scale,cell.sy*this.scale,cell.size,ctx);
       sprite.texture={canvas,x,y,width,height};
+      this.refreshFloat(sprite,0);
       yield .99;
     }
     // Static glyphs are baked into their textures. Lighting gets a separate,
     // bounded LRU atlas rather than retaining/growing the full photo palette.
     this.palette=new GlyphAtlas(this.fontSize,Math.max(2,dpr),2048);
     this.glyphMotion=new GlyphMotion(this);
+    for(const progress of this.glyphMotion.prepare())yield .99+progress*.01;
   }
 
   cloudIndex(sx,sy,rgb) {
@@ -546,9 +529,20 @@ export class AsciiRenderer {
     else { ctx.save(); ctx.translate(x, y); ctx.scale(size, size); ctx.fillText(cell.glyph, 0, 0); ctx.restore(); }
   }
   stamp(cell, x, y, size, ctx=this.ctx) {
-    const side = this.tileSize * size;
-    ctx.drawImage(this.atlas, cell.tx, cell.ty, this.tilePixels, this.tilePixels,
-      x - side / 2, y - side / 2, side, side);
+    this.spriteAtlas.draw(ctx,cell,x,y,size);
+  }
+  refreshFloat(sprite,time){
+    const frame=Math.floor(time*4+sprite.cells[0].glyphOffset);
+    if(frame===sprite.glyphFrame)return false;
+    let changed=sprite.glyphFrame===undefined;sprite.glyphFrame=frame;
+    for(const cell of sprite.cells){const variant=glyphVariant(cell,time);if(variant!==cell.glyphVariant)changed=true;cell.glyphVariant=variant;}
+    if(!changed)return false;
+    const {canvas,x,y,width,height}=sprite.texture,ctx=canvas.getContext('2d'),dpr=this.pixelRatio;
+    ctx.setTransform(dpr,0,0,dpr,-x*dpr,-y*dpr);ctx.clearRect(x,y,width,height);ctx.fillStyle='#080d13';
+    for(const cell of sprite.cells)ctx.fillRect(cell.sx*this.scale-this.cellW*.47*cell.size,cell.sy*this.scale-this.cellH*.44*cell.size,
+      this.cellW*.94*cell.size,this.cellH*.88*cell.size);
+    for(const cell of sprite.cells)this.stamp(cell,cell.sx*this.scale,cell.sy*this.scale,cell.size,ctx);
+    return true;
   }
   drawClouds(time,present=true) {
     const ctx=this.cloudCtx;
@@ -590,7 +584,7 @@ export class AsciiRenderer {
     for (const light of this.lights) {
       const {emitter,cells,ctx}=light;
       const offset=emitter.id==='left-face'?0:1.6;
-      const key=emitter.kind==='face' ? `${Math.floor((time+offset)/3.8)%4}:${Math.round(eyeOpening(time,offset)*20)}` : frame;
+      const key=emitter.kind==='face' ? `${Math.floor((time+offset)/3.8)%4}:${Math.round(eyeOpening(time,offset)*20)}:${Math.floor(time*2)}` : frame;
       if (key!==light.frame) {
         light.frame=key;
         ctx.clearRect(light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
@@ -599,7 +593,8 @@ export class AsciiRenderer {
           const brightness=emitter.kind==='lamp'?.5+cell.intensity*.5:Math.sqrt(faceLight(emitter,cell.u,cell.v,time));
           const core=emitter.kind==='lamp'?clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*.7)**2):0;
           cell.rgb=tint.map((c,i)=>[10,21,28][i]+c*brightness*(1-core)+255*core);
-          cell.tile=this.palette.get(cell.glyph,cell.rgb);
+          cell.glyphVariant=glyphVariant(cell,time);
+          cell.tile=this.palette.get(cell.glyphVariant?alternatives[cell.glyph]:cell.glyph,cell.rgb);
         }
         for (const cell of cells) {
           if (cell.basis) {
@@ -614,6 +609,7 @@ export class AsciiRenderer {
   drawDetails(time,details=this.details,ctx=this.ctx) {
     for (const sprite of details) {
       if (sprite.texture) {
+        this.refreshFloat(sprite,time);
         const {canvas,x,y,width,height}=sprite.texture, [ax,ay]=sprite.shape.anchor;
         const p=detailPoint(sprite.shape,ax,ay,time), px=detailPoint(sprite.shape,ax+1,ay,time), py=detailPoint(sprite.shape,ax,ay+1,time);
         const a=px[0]-p[0], b=px[1]-p[1], c=py[0]-p[0], d=py[1]-p[1];
@@ -637,6 +633,7 @@ export class AsciiRenderer {
           this.cellW*.94*cell.size,this.cellH*.88*cell.size);
       }
       for (const cell of sprite.cells) {
+        cell.glyphVariant=glyphVariant(cell,time);
         this.stamp(cell,cell.dx,cell.dy,cell.size,ctx);
       }
     }
@@ -659,6 +656,7 @@ export class AsciiRenderer {
       } else {
         size = fontStep(cell.size+fontIncrement*Math.round(Math.sin(time*.75+cell.phase)));
       }
+      cell.glyphVariant=glyphVariant(cell,time);
       this.stamp(cell, x, y, size);
     }
     this.drawScreens(time);
@@ -698,6 +696,7 @@ export class AsciiRenderer {
       }
       for (const cell of sprite.cells) {
         const [x, y] = birdPoint(sprite.bird, cell.sx, cell.sy, time, pose);
+        cell.glyphVariant=glyphVariant(cell,time);
         this.stamp(cell, x * this.scale, y * this.scale, minFontSize);
       }
     }

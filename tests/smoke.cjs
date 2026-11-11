@@ -66,6 +66,8 @@ async function duckBodyPoint(page) {
       // Isolate object geometry here; global character substitutions have a
       // separate regression check and may legitimately alter stationary pixels.
       renderer.glyphMotion.enabled=false;
+      const drawGlyph=renderer.spriteAtlas.draw;
+      renderer.spriteAtlas.draw=function(ctx,cell,x,y,size){return drawGlyph.call(this,ctx,cell,x,y,size,0);};
       renderer.draw(0);
       const ctx = canvas.getContext('2d');
       const regions = { wall: [350,40,150,140], bird: [934,212,114,80], water: [1010,480,100,80],
@@ -83,11 +85,18 @@ async function duckBodyPoint(page) {
         // The lower part of the central monitor's left rim is occluded by the
         // foreground waveform monitor; test only the exposed upper frame.
         windowFrame: [840,110,11,260], sun: [1091,363,18,21], pot: [1310,140,38,21], rim: [420,353,8,40] };
+      const hairMask=renderer.headMask.getContext('2d').getImageData(0,0,renderer.headMask.width,renderer.headMask.height).data;
       const first = Object.fromEntries(Object.entries(regions).map(([key, box]) => [key, ctx.getImageData(...box).data]));
       renderer.draw(6.2);
       const changed = Object.fromEntries(Object.entries(regions).map(([key, box]) => {
         const pixels = ctx.getImageData(...box).data; let changed = 0;
         for (let i = 0; i < pixels.length; i += 4) {
+          // Real gaps between curls should show the changing monitor. Test
+          // occlusion on the opaque hair mask, not the surrounding rectangle.
+          if(key==='hair'||key==='looseHair'){
+            const x=box[0]+i/4%box[2]-renderer.headMaskBox[0],y=box[1]+Math.floor(i/4/box[2])-renderer.headMaskBox[1];
+            if(hairMask[(y*renderer.headMask.width+x)*4+3]!==255)continue;
+          }
           if (Math.abs(pixels[i] - first[key][i]) + Math.abs(pixels[i + 1] - first[key][i + 1]) + Math.abs(pixels[i + 2] - first[key][i + 2]) > 12) changed++;
         }
         return [key, changed / (pixels.length / 4)];

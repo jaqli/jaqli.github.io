@@ -3,6 +3,7 @@ import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 // avoids exponentiation, temporary arrays and string keys for every lit glyph.
 const bins=Uint8Array.from({length:4097},(_,i)=>Math.min(16,Math.round(255*(i/4096)**.84/16)));
 const channel=v=>bins[Math.max(0,Math.min(4096,Math.round(v*4096/255)))];
+export const glyphColor=rgb=>`rgb(${rgb.map(v=>Math.min(255,channel(v)*16)).join(' ')})`;
 // A bounded color/glyph cache shared by the sky and monitor layers. Reusing
 // rasterized letters keeps color changes from invoking fillText every frame.
 export class GlyphAtlas {

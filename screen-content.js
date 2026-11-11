@@ -44,17 +44,29 @@ function text(ctx, value, x, y, color = '#84d6cd') {
 function wave(ctx, time, x, y, width, amplitude, phase = 0, color = '#56dfd5') {
   for (let i = 0; i < width; i += 1.65) {
     const v = Math.sin(i * .12 - time * 1.8 + phase) + .32 * Math.sin(i * .3 + time * 2.1);
-    text(ctx, i % 5 < 2 ? '+' : ':', x + i, y + v * amplitude, color);
+    text(ctx, i % 5 < 2 ? (Math.floor(time/2+i*.37)%2?'=':'+') : (Math.floor(time/2+i*.37)%2?';':':'), x + i, y + v * amplitude, color);
   }
 }
 export function paintScreen(screen, time) {
   const { ctx, width: w, height: h, kind } = screen;
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0a1923'; ctx.fillRect(0, 0, w, h);
   ctx.font = `500 ${screen.fontSize}px monospace`; ctx.textBaseline = 'top';
-  // A dim character bed and a feathered perimeter integrate the fine display
-  // into the original reflection and rim without a sharp rectangular patch.
-  for (let y = 1; y < h; y += 4.8) text(ctx, '. : '.repeat(Math.ceil(w / 8)), 1, y, '#1e3440');
+  // The dim changing character bed is cached separately. Its long rows must
+  // not evict live code and waveforms from the small text cache every frame.
+  const bedFrame=`${screen.fontSize}:${Math.floor(time*2)}`;
+  if(screen.bedFrame!==bedFrame){
+    screen.bedFrame=bedFrame;
+    const canvas=screen.bed ||= createCanvas();
+    if(canvas.width!==w*3||canvas.height!==h*3){canvas.width=w*3;canvas.height=h*3;}
+    const paint=canvas.getContext('2d');paint.setTransform(3,0,0,3,0,0);
+    paint.fillStyle='#0a1923';paint.fillRect(0,0,w,h);
+    paint.font=ctx.font;paint.textBaseline='top';paint.fillStyle='#1e3440';
+    const moment=Math.floor(time*2)/2;
+    for(let y=1;y<h;y+=4.8){
+      let row='';for(let x=0;x<Math.ceil(w/8);x++)row+=Math.floor(moment/6+(x*.37+y*.19)%1)%2?', ; ':'. : ';
+      paint.fillText(row,1,y);
+    }
+  }
+  ctx.clearRect(0,0,w,h);ctx.drawImage(screen.bed,0,0,w,h);
   if (kind === 'code') {
     text(ctx, `main.ts  /  frame ${String(Math.floor(time * 30)).padStart(5, '0')}`, 3, 2, '#a9d6de');
     const top = Math.floor(time / 2.8), typed = Math.floor(time % 2.8 * 17);
@@ -79,7 +91,7 @@ export function paintScreen(screen, time) {
   } else if (kind === 'wave') {
     text(ctx, `SCOPE  ${time.toFixed(1)}s  CH1+CH2`, 3, 2, '#b5ddeb');
     for (let i = 0; i < 3; i++) text(ctx, `> ${['sample(field)', 'integrate(dt)', 'stream(buffer)'][(i + Math.floor(time / 2)) % 3]}`, 3, 9 + i * 5, '#86cda9');
-    for (let y = 29; y < h-15; y += 10) text(ctx, '- . '.repeat(10), 4, y, '#325568');
+    for (let y = 29; y < h-15; y += 10) text(ctx, (Math.floor(time/6+y*.13)%2?'~ , ':'- . ').repeat(10), 4, y, '#325568');
     wave(ctx, time, 4, h*.57, 96, h*.14, 0, '#50e4d4');
     wave(ctx, time * .7, 4, h*.6, 96, h*.085, 2.3, '#7badea');
     text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, h-7, '#a3d2b7');
