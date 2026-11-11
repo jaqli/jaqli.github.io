@@ -1,7 +1,7 @@
-import { waterSampleInterval } from './render-budget.js?v=20261111-space21';
-import { paintScreen } from './screen-content.js?v=20261111-space21';
-import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-space21';
-import { glyphVariant } from './glyph-rhythm.js?v=20261111-space21';
+import { waterSampleInterval } from './render-budget.js?v=20261111-rhythm22';
+import { paintScreen } from './screen-content.js?v=20261111-rhythm22';
+import { fontStep, fontIncrement } from './ascii-renderer.js?v=20261111-rhythm22';
+import { glyphVariant } from './glyph-rhythm.js?v=20261111-rhythm22';
 
 function screenMatrix(quad,w,h,scale){
   const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=quad,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
@@ -85,17 +85,18 @@ export class LayeredScene {
       this.ambientSizes[i]=size;
     }
     const head=this.targets.get('head');
-    r.glyphMotion.update(time,extra,(patch,{box:[x,y,w,h],dynamic},pixels)=>{
-      const source=[...pixels,x,y,w,h];
-      // Transfer just the updated pixels, not the entire mutable room texture.
-      this.baseCtx.drawImage(patch,...source);
+    r.glyphMotion.update(time,extra,patch=>{
+      const {box:[x,y,w,h],dynamic}=patch;
+      r.glyphMotion.paintPatch(this.baseCtx,patch);
       if(dynamic.length){
         this.baseCtx.save();this.baseCtx.beginPath();this.baseCtx.rect(x,y,w,h);this.baseCtx.clip();
         for(const cell of dynamic)r.stamp(cell,cell.x,cell.renderY,cell.renderSize,this.baseCtx);
         this.baseCtx.restore();
       }
       if(x<head.spec.x+head.spec.w&&x+w>head.spec.x&&y<head.spec.y+head.spec.h&&y+h>head.spec.y){
-        head.ctx.globalCompositeOperation='source-atop';head.ctx.drawImage(patch,...source);head.ctx.globalCompositeOperation='source-over';
+        head.ctx.globalCompositeOperation='source-atop';
+        head.ctx.drawImage(this.display,x*r.pixelRatio,y*r.pixelRatio,w*r.pixelRatio,h*r.pixelRatio,x,y,w,h);
+        head.ctx.globalCompositeOperation='source-over';
       }
     });
     // Slow cloud tint changes need fewer texture updates than water/wing motion.

@@ -44,7 +44,7 @@ function text(ctx, value, x, y, color = '#84d6cd') {
 function wave(ctx, time, x, y, width, amplitude, phase = 0, color = '#56dfd5') {
   for (let i = 0; i < width; i += 1.65) {
     const v = Math.sin(i * .12 - time * 1.8 + phase) + .32 * Math.sin(i * .3 + time * 2.1);
-    text(ctx, i % 5 < 2 ? (Math.floor(time/2+i*.37)%2?'=':'+') : (Math.floor(time/2+i*.37)%2?';':':'), x + i, y + v * amplitude, color);
+    text(ctx, i % 5 < 2 ? (Math.floor(time*2+i*.37)%2?'=':'+') : (Math.floor(time*2+i*.37)%2?';':':'), x + i, y + v * amplitude, color);
   }
 }
 export function paintScreen(screen, time) {
@@ -62,14 +62,14 @@ export function paintScreen(screen, time) {
     paint.font=ctx.font;paint.textBaseline='top';paint.fillStyle='#1e3440';
     const moment=Math.floor(time*2)/2;
     for(let y=1;y<h;y+=4.8){
-      let row='';for(let x=0;x<Math.ceil(w/8);x++)row+=Math.floor(moment/6+(x*.37+y*.19)%1)%2?', ; ':'. : ';
+      let row='';for(let x=0;x<Math.ceil(w/8);x++)row+=Math.floor(moment*(1.2+.3*((x*.37+y*.19)%1))+(x*.37+y*.19)%1)%2?', ; ':'. : ';
       paint.fillText(row,1,y);
     }
   }
   ctx.clearRect(0,0,w,h);ctx.drawImage(screen.bed,0,0,w,h);
   if (kind === 'code') {
     text(ctx, `main.ts  /  frame ${String(Math.floor(time * 30)).padStart(5, '0')}`, 3, 2, '#a9d6de');
-    const top = Math.floor(time / 2.8), typed = Math.floor(time % 2.8 * 17);
+    const top = Math.floor(time / .8), typed = Math.floor(time % .8 * 60);
     for (let row = 0; row < 14; row++) {
       const line = lines[(top + row) % lines.length];
       text(ctx, String(top + row + 1).padStart(2, '0'), 3, 11 + row * 6.4, '#4f7e92');
@@ -77,7 +77,7 @@ export function paintScreen(screen, time) {
         ['#7eebad','#b3d6eb','#f0c77b','#8ed6e1'][row % 4]);
     }
     if (time % 1 < .55) text(ctx, '_', 13 + Math.min(typed, lines[(top + 13) % lines.length].length) * 3, 94.2, '#ddffe8');
-    for (let y = 10; y < h - 12; y += 4) text(ctx, '|', 122, y, '#42616f');
+    for (let y = 10; y < h - 12; y += 4) text(ctx, Math.floor(time*1.5+y*.17)%2?':':'|', 122, y, '#42616f');
     text(ctx, 'CPU / MEM', 128, 11, '#9edce5');
     for (let i = 0; i < 5; i++) {
       const value = Math.round(3 + 2 * Math.sin(time * 1.2 + i));
@@ -86,12 +86,12 @@ export function paintScreen(screen, time) {
     wave(ctx, time, 128, 64, 37, 5);
     text(ctx, `dt ${(16 + Math.sin(time) * 2).toFixed(1)}`, 128, 79, '#c4e4d2');
     text(ctx, `${Math.floor(256 + time * 24)} KB/s`, 128, 93, '#b7dcd2');
-    text(ctx, `> ${['compile','running','syncing','ready'][Math.floor(time / 1.8) % 4]}  ${Math.floor(time * 61)} ops`, 4, h-10, '#e2bc77');
+    text(ctx, `> ${['compile','running','syncing','ready'][Math.floor(time / .8) % 4]}  ${Math.floor(time * 61)} ops`, 4, h-10, '#e2bc77');
     text(ctx, `${'='.repeat(1 + Math.floor(time * 3) % 10)}>`, 126, h-10, '#80d4c6');
   } else if (kind === 'wave') {
     text(ctx, `SCOPE  ${time.toFixed(1)}s  CH1+CH2`, 3, 2, '#b5ddeb');
-    for (let i = 0; i < 3; i++) text(ctx, `> ${['sample(field)', 'integrate(dt)', 'stream(buffer)'][(i + Math.floor(time / 2)) % 3]}`, 3, 9 + i * 5, '#86cda9');
-    for (let y = 29; y < h-15; y += 10) text(ctx, (Math.floor(time/6+y*.13)%2?'~ , ':'- . ').repeat(10), 4, y, '#325568');
+    for (let i = 0; i < 3; i++) text(ctx, `> ${['sample(field)', 'integrate(dt)', 'stream(buffer)'][(i + Math.floor(time / .8)) % 3]}`, 3, 9 + i * 5, '#86cda9');
+    for (let y = 29; y < h-15; y += 10) text(ctx, (Math.floor(time*1.5+y*.13)%2?'~ , ':'- . ').repeat(10), 4, y, '#325568');
     wave(ctx, time, 4, h*.57, 96, h*.14, 0, '#50e4d4');
     wave(ctx, time * .7, 4, h*.6, 96, h*.085, 2.3, '#7badea');
     text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, h-7, '#a3d2b7');
@@ -100,7 +100,7 @@ export function paintScreen(screen, time) {
     wave(ctx, time, 3, 20, w-8, 8, .8, '#8cd9e8');
     for (let col = 0; col < 14; col++) {
       const level = 1 + Math.floor((1 + Math.sin(time * 1.4 + col * .6)) * 2.5);
-      for (let y = 0; y < level; y++) text(ctx, '=', 3 + col * 6, h-9 - y * 2.8, '#90c8b1');
+      for (let y = 0; y < level; y++) text(ctx, Math.floor(time*1.5+col*.37+y*.17)%2?'+':'=', 3 + col * 6, h-9 - y * 2.8, '#90c8b1');
     }
     text(ctx, 'FFT  /  live', 2, h-5, '#edca86');
   }

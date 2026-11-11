@@ -4,8 +4,8 @@ const clamp = value => Math.max(0, Math.min(1, value));
 const stroke = (distance, thickness = .035) => clamp(1 - Math.abs(distance) / thickness);
 export function lampColor(time) {
   const palette = [[48,220,255],[156,116,255],[255,156,97],[88,246,197]];
-  const phase = time / 4, i = Math.floor(phase) % palette.length, blend = (1 - Math.cos(phase % 1 * Math.PI)) / 2;
-  const breath = .5 + .5 * (1 - Math.cos(time * Math.PI / 2.2)) / 2;
+  const phase = time / .8, i = Math.floor(phase) % palette.length, blend = (1 - Math.cos(phase % 1 * Math.PI)) / 2;
+  const breath = .65 + .35 * (1 - Math.cos(time * Math.PI * 2.5)) / 2;
   return palette[i].map((v,c) => (v * (1-blend) + palette[(i+1)%palette.length][c] * blend) * breath);
 }
 export function faceLight(emitter, u, v, time) {

@@ -1,30 +1,23 @@
-import { glyphColor } from './glyph-atlas.js?v=20261111-space21';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space21';
-import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
+import { glyphColor } from './glyph-atlas.js?v=20261111-rhythm22';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-rhythm22';
 
-import { alternatives } from './glyph-rhythm.js?v=20261111-space21';
+import { alternatives, glyphRateMin, glyphRateMax, glyphStep } from './glyph-rhythm.js?v=20261111-rhythm22';
 const random=i=>{const n=Math.sin(i*127.1+1729)*43758.5453;return n-Math.floor(n);};
-export const glyphUpdateLimit=12; // small blocks per draw, never queued behind input
-export const glyphPassSeconds=12;
-const blockSize=8;
+export const glyphUpdateLimit=32; // bounded blocks per draw, never queued behind input
+export const glyphBlockSize=16;
+const blockSize=glyphBlockSize;
 
-// Visit every part of the scene in twelve seconds, changing half of each small
-// block. The other half follows on the next pass: every letter changes in 24 s.
-// Three scattered passes alternate with one broadly staggered top-to-bottom pass.
+// Every retained letter changes at 1.2–1.5 Hz. Small blocks use staggered phases
+// and slightly different rates so the room does not pulse as one large surface.
 export class GlyphMotion {
   constructor(renderer){
-    this.r=renderer;this.enabled=true;this.cursor=0;this.round=0;this.time=0;this.credit=0;this.lastBatch={blocks:0,cells:0};
+    this.r=renderer;this.enabled=true;this.cursor=0;this.lastBatch={blocks:0,cells:0};
     this.base=renderer.base.getContext('2d');this.cloud=renderer.cloudBase.getContext('2d');
     this.palette=new SpriteAtlas(renderer.fontSize,Math.max(2,renderer.pixelRatio));
     // Include the largest allowed letters and their neighbors when replacing
     // ink; a 1.0-sized patch would crop the new 1.5-sized strokes.
     this.radiusX=renderer.fontSize*renderer.maxGlyphSize*.45+1/renderer.pixelRatio;
     this.radiusY=renderer.fontSize*renderer.maxGlyphSize*.65+1/renderer.pixelRatio;
-    this.scratch=createCanvas();
-    this.slotW=Math.ceil((blockSize*renderer.cellW+this.radiusX*2+3)*renderer.pixelRatio);
-    this.slotH=Math.ceil((blockSize*renderer.cellH+this.radiusY*2+3)*renderer.pixelRatio);
-    this.scratch.width=this.slotW*4;this.scratch.height=this.slotH*4;
-    this.paint=this.scratch.getContext('2d');
     this.blocks=[];
     for(let row=0;row<renderer.rows;row+=blockSize)for(let col=0;col<renderer.columns;col+=blockSize){
       const cells=[];
@@ -36,58 +29,60 @@ export class GlyphMotion {
       const x=Math.floor(col*renderer.cellW-this.radiusX),y=Math.floor(row*renderer.cellH-this.radiusY);
       const w=Math.ceil((col+blockSize)*renderer.cellW+this.radiusX)-x,h=Math.ceil((row+blockSize)*renderer.cellH+this.radiusY)-y;
       const layers=[...new Set(cells.map(c=>c.glyphLayer))];
-      this.blocks.push({cells,patches:layers.map(layer=>this.patchBox(x,y,w,h,layer)),y:row/renderer.rows});
+      const index=this.blocks.length;
+      this.blocks.push({cells,patches:layers.map(layer=>this.patchBox(x,y,w,h,layer)),step:0,
+        glyphRate:glyphRateMin+(glyphRateMax-glyphRateMin)*random(index+57),glyphOffset:random(index+911)});
     }
     this.order=Uint32Array.from(this.blocks,(_,i)=>i);
     for(let i=this.order.length-1;i>0;i--){const j=Math.floor(random(i)*(i+1));[this.order[i],this.order[j]]=[this.order[j],this.order[i]];}
-    // A wide random delay spreads the ordered pass across several rows. There
-    // is no brightness filter or moving band laid over the original picture.
-    this.downOrder=Uint32Array.from(this.order).sort((a,b)=>(this.blocks[a].y*.65+random(a)*.35)-(this.blocks[b].y*.65+random(b)*.35));
   }
   *prepare(){
     // Bake both characters once; the atlas is immutable during animation.
     // This avoids uploading a recolored texture for every scattered update.
     yield* this.palette.prepare(this.r.cells.filter(c=>c.occupied&&c.glyphLayer!=='dynamic'),c=>glyphColor(c.rgb));
+    for(const block of this.blocks)for(const cell of block.cells){cell.glyphRate=block.glyphRate;cell.glyphOffset=block.glyphOffset;}
   }
   update(time,extra=[],present){
-    const dt=Math.max(0,Math.min(.1,time-this.time));this.time=time;
     if(!this.enabled)return [];
-    this.credit=Math.min(glyphUpdateLimit,this.credit+dt*this.blocks.length/glyphPassSeconds);
-    const count=Math.floor(this.credit),dirty=[],patches=[];this.credit-=count;
-    this.lastBatch={blocks:count,cells:0};
-    for(let i=0;i<count;i++){
-      const order=this.round%4===3?this.downOrder:this.order,block=this.blocks[order[this.cursor]],half=this.round%2;
+    // A new renderer can begin midway through the scene after a resize. Resolve
+    // that instant directly, and discard old cycles after a long interruption.
+    const resync=this.time===undefined||time<this.time||time-this.time>1;
+    this.time=time;
+    const limit=resync?this.order.length:glyphUpdateLimit;
+    const dirty=[],patches=[];
+    this.lastBatch={blocks:0,cells:0,resync};
+    for(let checked=0;checked<this.order.length&&this.lastBatch.blocks<limit;checked++){
+      const block=this.blocks[this.order[this.cursor]];
+      this.cursor=(this.cursor+1)%this.order.length;
+      // Coalesce texture writes at 12 Hz while each letter still changes at
+      // 1.2–1.5 Hz. This avoids uploading changed sky/base textures every frame.
+      const step=glyphStep(block,Math.floor(time*12)/12);
+      if(step===block.step)continue;
+      const changed=(step%2)!==(block.step%2);block.step=step;
+      if(!changed)continue; // Skip missed cycles instead of queuing catch-up frames.
+      this.lastBatch.blocks++;
       for(const cell of block.cells){
-        if(((cell.seed*65536|0)&1)!==half)continue;
-        cell.glyphVariant=cell.glyphVariant?0:1;cell.liveGlyph=cell.glyphVariant?alternatives[cell.glyph]:null;
+        cell.glyphVariant=step%2;cell.liveGlyph=cell.glyphVariant?alternatives[cell.glyph]:null;
         this.lastBatch.cells++;
       }
       patches.push(...block.patches);
-      if(++this.cursor===this.order.length){this.cursor=0;this.round++;}
     }
     patches.push(...extra.map(cell=>this.patch(cell,'base')));
-    // Paint sixteen patches before reading the scratch texture. Alternating
-    // one tiny canvas write/read per letter forced repeated GPU uploads.
-    const dpr=this.r.pixelRatio,paint=this.paint;
-    for(let start=0;start<patches.length;start+=16){
-      const end=Math.min(patches.length,start+16);
-      paint.setTransform(1,0,0,1,0,0);paint.clearRect(0,0,this.scratch.width,this.scratch.height);
-      for(let i=start;i<end;i++){
-        const {cloud,box:[x,y,w,h],neighbors}=patches[i],slot=i-start,sx=slot%4*this.slotW,sy=Math.floor(slot/4)*this.slotH;
-        paint.setTransform(dpr,0,0,dpr,sx-x*dpr,sy-y*dpr);
-        paint.save();paint.beginPath();paint.rect(x,y,w,h);paint.clip();
-        if(!cloud){paint.fillStyle='#080d13';paint.fillRect(x,y,w,h);}
-        for(const cell of neighbors)this.palette.draw(paint,cell,cell.x,cell.y,cell.size);
-        paint.restore();
-      }
-      for(let i=start;i<end;i++){
-        const patch=patches[i],{cloud,box:[x,y,w,h]}=patch,ctx=cloud?this.cloud:this.base,slot=i-start;
-        const source=[slot%4*this.slotW,Math.floor(slot/4)*this.slotH,w*dpr,h*dpr];
-        if(cloud||!present){if(cloud)ctx.clearRect(x,y,w,h);ctx.drawImage(this.scratch,...source,x,y,w,h);}
-        if(!cloud){dirty.push(patch.box);present?.(this.scratch,patch,source);}
-      }
+    // Draw from the immutable glyph atlas straight into each final target.
+    // Fast substitutions made the old mutable scratch uploads cost more than
+    // the glyphs themselves; no full-scene variants or extra buffers are needed.
+    for(const patch of patches){
+      if(patch.cloud)this.paintPatch(this.cloud,patch);
+      else{dirty.push(patch.box);if(present)present(patch);else this.paintPatch(this.base,patch);}
     }
     return dirty;
+  }
+  paintPatch(ctx,{cloud,box:[x,y,w,h],neighbors}){
+    ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+    if(cloud)ctx.clearRect(x,y,w,h);
+    else{ctx.fillStyle='#080d13';ctx.fillRect(x,y,w,h);}
+    for(const cell of neighbors)this.palette.draw(ctx,cell,cell.x,cell.y,cell.size);
+    ctx.restore();
   }
   patch(cell,layer=cell.glyphLayer){
     const r=this.r;

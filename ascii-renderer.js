@@ -1,13 +1,13 @@
-import { scenePixelRatio } from './render-budget.js?v=20261111-space21';
+import { scenePixelRatio } from './render-budget.js?v=20261111-rhythm22';
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
 import { detailShapes, detailPoint, eyeOpening, cloudWindows, cloudSpeed, emitters } from './scene-details.js?v=20261110-depth6';
-import { GlyphAtlas } from './glyph-atlas.js?v=20261111-space21';
-import { screens, paintScreen } from './screen-content.js?v=20261111-space21';
-import { faceLight, lampColor } from './scene-lights.js?v=20261110-depth6';
+import { GlyphAtlas } from './glyph-atlas.js?v=20261111-rhythm22';
+import { screens, paintScreen } from './screen-content.js?v=20261111-rhythm22';
+import { faceLight, lampColor } from './scene-lights.js?v=20261111-rhythm22';
 import { quadPoint, drawQuad } from './scene-geometry.js?v=20261110-fps10';
-import { GlyphMotion } from './glyph-motion.js?v=20261111-space21';
-import { SpriteAtlas } from './sprite-atlas.js?v=20261111-space21';
-import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-space21';
+import { GlyphMotion } from './glyph-motion.js?v=20261111-rhythm22';
+import { SpriteAtlas } from './sprite-atlas.js?v=20261111-rhythm22';
+import { alternatives, prepareGlyph, glyphVariant } from './glyph-rhythm.js?v=20261111-rhythm22';
 
 // Source-image coordinates keep motion, perspective and hit targets in agreement.
 export const birds = [
@@ -615,14 +615,14 @@ export class AsciiRenderer {
     for (const light of this.lights) {
       const {emitter,cells,ctx}=light;
       const offset=emitter.id==='left-face'?0:1.6;
-      const key=emitter.kind==='face' ? `${Math.floor((time+offset)/3.8)%4}:${Math.round(eyeOpening(time,offset)*20)}:${Math.floor(time*2)}` : frame;
+      const key=emitter.kind==='face' ? `${Math.floor((time+offset)/3.8)%4}:${Math.round(eyeOpening(time,offset)*20)}:${Math.floor(time*8)}` : frame;
       if (key!==light.frame) {
         light.frame=key;
         ctx.clearRect(light.x,light.y,light.canvas.width/this.pixelRatio,light.canvas.height/this.pixelRatio);
         const tint=emitter.kind==='lamp'?lampColor(time):emitter.tint;
         for (const cell of cells) {
           const brightness=emitter.kind==='lamp'?.5+cell.intensity*.5:Math.sqrt(faceLight(emitter,cell.u,cell.v,time));
-          const core=emitter.kind==='lamp'?clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*.7)**2):0;
+          const core=emitter.kind==='lamp'?clamp((cell.intensity-.68)*2)*(.5+.5*Math.sin(time*Math.PI*1.25)**2):0;
           cell.rgb=tint.map((c,i)=>[10,21,28][i]+c*brightness*(1-core)+255*core);
           cell.glyphVariant=glyphVariant(cell,time);
           cell.tile=this.palette.get(cell.glyphVariant?alternatives[cell.glyph]:cell.glyph,cell.rgb);

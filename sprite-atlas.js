@@ -1,5 +1,5 @@
 import { createCanvas } from './canvas-factory.js?v=20261110-fps10';
-import { alternatives, prepareGlyph } from './glyph-rhythm.js?v=20261111-space21';
+import { alternatives, prepareGlyph } from './glyph-rhythm.js?v=20261111-rhythm22';
 
 // Two narrow monospace letters fit in approximately the old square tile area.
 // Keep the original subpixel phase, color and vertical raster resolution.
