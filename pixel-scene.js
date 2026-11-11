@@ -9,7 +9,7 @@ import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 import { SceneExtras } from './scene-extras.js?v=20261111-layer44';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge45';
 import { SceneTime } from './scene-time.js?v=20261111-layer44';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-clarity46';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261111-detail47';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 
 const W=1536,H=1024;

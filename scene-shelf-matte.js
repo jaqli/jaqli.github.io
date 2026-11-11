@@ -27,7 +27,9 @@ export function prepareShelfMatte(scene){
    const n=(py-y)*w+px-x,i=(py*1536+px)*4,r=src[i],g=src[i+1],b=src[i+2];
    let adjacent=false;for(let dy=-1;dy<=1&&!adjacent;dy++)for(let dx=-1;dx<=1;dx++)if(strong[n+dy*w+dx]){adjacent=true;break;}
    const priorCore=bracketRuns.some(([row,left,right])=>row===py&&px>=left&&px<=right);
-   const stem=priorCore&&Math.max(r,g,b)<175&&b<r*1.55;
+   // The traced prongs are geometry, not a brightness classification. Their
+   // pale edge pixels must survive restoration and different color palettes.
+   const stem=priorCore;
    const rim=adjacent&&(Math.max(r,g,b)<105||r>b*1.1&&r>g*.95);
    if(nearPrior(px,py)&&(px<left-1||strong[n]))coverage[n]=strong[n]||rim||stem?0:255;
   }

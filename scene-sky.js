@@ -1,5 +1,5 @@
-import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-clarity46';
-import { skyApertures, skyForeground, skyWires, sillSkyEdge } from './scene-sky-matte.js?v=20261111-clarity46';
+import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-detail47';
+import { skyApertures, skyForeground, skyWires, sillSkyEdge } from './scene-sky-matte.js?v=20261111-detail47';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
 // Lighting follows the complete visible sky. Motion has its own foreground
@@ -49,8 +49,8 @@ export function* prepareSky(scene){
  m.putImageData(alpha,0,0);yield .54;
  // Build the loop from unobstructed source-art patches. No columns from
  // behind a window frame, plant, desk or city can travel into the visible sky.
- // Adjacent patches overlap with a smooth crossfade, retaining pixel texture
- // instead of blurring/inpainting large hidden foreground regions.
+ // Join overlapping patches along their closest-color path. A wide crossfade
+ // superimposes two cloud contours and softens the restored pixels again.
  const patches=[
   {x:640,y:140,w:144,h:235}, {x:870,y:80,w:368,h:240},
   {x:640,y:140,w:144,h:235,flip:true}, {x:870,y:80,w:368,h:240,flip:true},
@@ -62,12 +62,29 @@ export function* prepareSky(scene){
   let rgb=cleanColors.get(i);if(!rgb){rgb=[0,0,0];let count=0;for(const offset of[-4,4,-1536*4,1536*4]){const j=i+offset;if(plate[j+1]<150||plate[j+2]<150)continue;for(let k=0;k<3;k++)rgb[k]+=plate[j+k];count++;}if(count)rgb=rgb.map(v=>v/count);else rgb=Array.from(plate.slice(i,i+3));cleanColors.set(i,rgb);}return rgb[c];
  };
  const sample=(p,x,y)=>((p.y+Math.floor(y*p.h/h))*1536+p.x+(p.flip?p.w-1-x:x))*4;
+ const seam=(p,previous)=>{
+  let cost=new Float64Array(overlap);const path=new Int8Array(h*overlap),cut=new Int16Array(h);
+  for(let y=0;y<h;y++){
+   const next=new Float64Array(overlap).fill(Infinity);
+   for(let x=1;x<overlap-1;x++){
+    const a=sample(p,x,y),b=sample(previous,previous.w-overlap+x,y);
+    let difference=0;for(let c=0;c<3;c++)difference+=(skyChannel(a,c)-skyChannel(b,c))**2;
+    let from=x,best=cost[x];
+    for(const dx of[-1,1])if(x+dx>0&&x+dx<overlap-1&&cost[x+dx]+12<best){from=x+dx;best=cost[from]+12;}
+    next[x]=best+difference;path[y*overlap+x]=from-x;
+   }
+   cost=next;
+  }
+  let x=1;for(let n=2;n<overlap-1;n++)if(cost[n]<cost[x])x=n;
+  for(let y=h-1;y>=0;y--){cut[y]=x;x+=path[y*overlap+x];}
+  return cut;
+ };
  let start=0;
  for(let n=0;n<patches.length;n++){
-  const p=patches[n],previous=patches[(n+patches.length-1)%patches.length],length=p.w-overlap;
+  const p=patches[n],previous=patches[(n+patches.length-1)%patches.length],length=p.w-overlap,cut=seam(p,previous);
   for(let y=0;y<h;y++)for(let x=0;x<length;x++){
-   const j=(y*sourceWidth+start+x)*4,i=sample(p,x,y),t=x<overlap?smooth(x/overlap):1,other=sample(previous,previous.w-overlap+x,y);
-   for(let c=0;c<3;c++)sourceImage.data[j+c]=t===1?skyChannel(i,c):skyChannel(other,c)*(1-t)+skyChannel(i,c)*t;
+   const j=(y*sourceWidth+start+x)*4,i=x<cut[y]?sample(previous,previous.w-overlap+x,y):sample(p,x,y);
+   for(let c=0;c<3;c++)sourceImage.data[j+c]=skyChannel(i,c);
    sourceImage.data[j+3]=255;
   }
   start+=length;yield .54+.24*(n+1)/patches.length;

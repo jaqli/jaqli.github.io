@@ -9,7 +9,7 @@ const alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#
 let pixels,points=[],width=0,height=0,progress=0,head=0,timer,frame,done=false,blocked=false,marked=false;
 const hash=i=>{const n=Math.sin(i*127.1+31.7)*43758.5453;return n-Math.floor(n);};
 const seed=new Image();
-seed.src=new URL('./assets/scene-seed.webp?v=20261111-clarity46',import.meta.url).href;
+seed.src=new URL('./assets/scene-seed.webp?v=20261111-detail47',import.meta.url).href;
 
 function schedule(delay=40){
   if(done||blocked||document.hidden||!pixels||timer||frame)return;
