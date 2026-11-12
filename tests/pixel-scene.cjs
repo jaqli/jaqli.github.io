@@ -13,7 +13,7 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
  });
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  assert.equal(await page.locator('#ascii-canvas').getAttribute('data-renderer'),'pixel');
- assert.equal(await page.locator('#ascii-canvas').getAttribute('data-pixel-unit'),'2');
+ assert.equal(await page.locator('#ascii-canvas').getAttribute('data-pixel-unit'),'1.5');
  const resources=await page.evaluate(()=>performance.getEntriesByType('resource').map(r=>r.name));
  assert(!resources.some(url=>/glyph-|ascii-renderer|scene-worker|scene-ambience|scene-preview/.test(url)),'full-room character machinery must not load');
  const still=await snapshot(page);await page.waitForTimeout(180);assert.equal(await snapshot(page),still,'reduced motion starts with a still picture');
@@ -24,11 +24,11 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
  assert.deepEqual(displays.size,[1260,570]);assert.equal(displays.sampling,'auto');
  assert(displays.code>240&&displays.hair<10&&displays.paper<10,'sharp displays stay behind hair and the paper');
  const regions=await page.evaluate(async()=>{
-  const {PixelScene}=await import('./pixel-scene.js?v=20261112-edge50');
+  const {PixelScene}=await import('./pixel-scene.js?v=20261112-pixel51');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas);
   const reference=document.createElement('canvas');reference.width=1536;reference.height=1024;reference.getContext('2d').drawImage(document.querySelector('#scene-image'),0,0);
   const nativeSource=reference.getContext('2d').getImageData(0,0,1536,1024).data;
-  const grid=document.createElement('canvas');grid.width=768;grid.height=512;const gc=grid.getContext('2d');gc.imageSmoothingEnabled=false;gc.drawImage(reference,0,0,768,512);
+  const grid=document.createElement('canvas');grid.width=1024;grid.height=683;const gc=grid.getContext('2d');gc.imageSmoothingEnabled=false;gc.drawImage(reference,0,0,1024,683);
   const rc=reference.getContext('2d');rc.imageSmoothingEnabled=false;rc.drawImage(grid,0,0,1536,1024);
   const source=rc.getImageData(0,0,1536,1024).data;
   r.draw(0);const before=r.ctx.getImageData(0,0,1536,1024).data;
@@ -38,11 +38,14 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
    water:[1020,575,85,30],duck:[305,805,99,50],paper:[400,265,30,25],
    eyes:[140,428,41,22],lamp:[155,56,48,43],redEye:[275,213,32,21],leftFace:[312,660,38,23],rightFace:[1464,391,52,35],cloud:[634,180,100,90],bird:[939,223,102,60]};
   const diff=(a,b,[x,y,w,h])=>{let sum=0;for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)for(let c=0;c<3;c++)sum+=Math.abs(a[(py*1536+px)*4+c]-b[(py*1536+px)*4+c]);return sum/(w*h*3);};
-  let gridError=0;for(let y=0;y<1024;y++)for(let x=0;x<1536;x++){const i=(y*1536+x)*4,j=((y-y%2)*1536+x-x%2)*4;for(let c=0;c<3;c++)gridError=Math.max(gridError,Math.abs(before[i+c]-before[j+c]));}
+  // A fractional source-pixel step uses an integer 1024×683 working grid.
+  // Verify the entire displayed image is its nearest-neighbor expansion.
+  rc.drawImage(r.pixelGrid,0,0,1536,1024);const expanded=rc.getImageData(0,0,1536,1024).data;
+  let gridError=0;for(let i=0;i<before.length;i++)gridError=Math.max(gridError,Math.abs(before[i]-expanded[i]));
   const result=Object.fromEntries(Object.entries(boxes).map(([name,box])=>[name,{motion:0,source:diff(before,source,box)}]));
   // These source landmarks were left behind by incomplete extraction masks.
   // Each must now belong completely to its prop, and leave water underneath.
-  result.gridError=gridError;result.edges={};
+  result.gridError=gridError;result.gridSize=[r.pixelGrid.width,r.pixelGrid.height];result.edges={};
   const landmarks={tablet:[[1081,812],[1094,822],[1107,832]],'foreground-page':[[506,905],[526,913]],
    'floating-pages':[[607,831],[618,837]],'blue-can':[[598,753],[603,779]],
    phone:[[823,957]],'yellow-card':[[536,896]],'water-controller':[[1244,974]]};
@@ -81,13 +84,14 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
   }
   r.dispose();reference.width=reference.height=1;return result;
  });
- for(const name of ['wall','person','city','frame']){assert.equal(regions[name].motion,0,`${name} remains still`);assert.equal(regions[name].source,0,`${name} preserves original colors on the requested 2×2 grid`);}
- assert.equal(regions.gridError,0,'all composited layers share an exact 2×2 pixel grid');
+ for(const name of ['wall','person','city','frame']){assert.equal(regions[name].motion,0,`${name} remains still`);assert.equal(regions[name].source,0,`${name} preserves original colors on the requested 1.5×1.5 grid`);}
+ assert.deepEqual(regions.gridSize,[1024,683],'fractional pixel grid has the expected dimensions');
+ assert.equal(regions.gridError,0,'all composited layers share an exact 1.5×1.5 pixel grid');
  assert.equal(regions.skyBleed,0,'moving sky must completely replace the original clouds');
  for(const[id,points]of Object.entries(regions.edges))for(const point of points){assert.equal(point.alpha,255,`${id} must carry its entire edge`);assert(point.removed>30,`${id} must not leave a stationary edge on the base`);}
  for(const [id,step] of Object.entries(regions.propSteps))assert(step<=32,`${id} must move continuously without a column snapping to another pixel row (jump ${step})`);
  for(const name of ['code','wave','plot','water','duck','paper','eyes','lamp','redEye','leftFace','rightFace','cloud','bird'])assert(regions[name].motion>.05,`${name} should move or change`);
- console.log('PASS uniform 2×2 pixels and source colors in wall/person/city; local screen, sky, water, object and light animation',JSON.stringify(regions));
+ console.log('PASS uniform 1.5×1.5 pixels and source colors in wall/person/city; local screen, sky, water, object and light animation',JSON.stringify(regions));
  await page.locator('#pause').click();await page.waitForTimeout(300);
  await page.evaluate(()=>{pixelFrames.length=0;pixelLongTasks.length=0;});await page.waitForTimeout(1800);
  const performanceData=await page.evaluate(()=>{const dt=pixelFrames.slice(1).map((t,i)=>t-pixelFrames[i]).sort((a,b)=>a-b);return {fps:Math.round((pixelFrames.length-1)*1000/(pixelFrames.at(-1)-pixelFrames[0])),p95Ms:Math.round(dt[Math.floor(dt.length*.95)]),longTasks:pixelLongTasks.length};});

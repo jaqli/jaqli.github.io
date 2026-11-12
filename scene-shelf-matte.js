@@ -29,7 +29,10 @@ export function prepareShelfMatte(scene){
    const priorCore=bracketRuns.some(([row,left,right])=>row===py&&px>=left&&px<=right);
    // The traced prongs are geometry, not a brightness classification. Their
    // pale edge pixels must survive restoration and different color palettes.
-   const stem=priorCore;
+   // The original has a pale inset between the two dark sides. It is an
+   // opaque face, not an opening through which the moving sky can pass.
+   const inset=px>=1407&&px<1415&&py>=336&&py<350;
+   const stem=priorCore||inset;
    const rim=adjacent&&(Math.max(r,g,b)<105||r>b*1.1&&r>g*.95);
    if(nearPrior(px,py)&&(px<left-1||strong[n]))coverage[n]=strong[n]||rim||stem?0:255;
   }

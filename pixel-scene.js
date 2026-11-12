@@ -9,11 +9,11 @@ import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 import { SceneExtras } from './scene-extras.js?v=20261112-edge50';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
 import { SceneTime } from './scene-time.js?v=20261111-edge48';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-edge50';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-pixel51';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
 
-const W=1536,H=1024;
+const W=1536,H=1024,PIXEL_UNIT=1.5,GRID_W=Math.round(W/PIXEL_UNIT),GRID_H=Math.round(H/PIXEL_UNIT);
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 const yieldFrame=()=>globalThis.scheduler?.yield?scheduler.yield():new Promise(resolve=>setTimeout(resolve,0));
@@ -35,8 +35,8 @@ export class PixelScene {
   }
   constructor(image,canvas,screenCanvas=null){
     this.image=image;this.canvas=canvas;canvas.width=W;canvas.height=H;
-    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';canvas.dataset.pixelUnit='2';
-    this.pixelGrid=surface(W/2,H/2);this.gridCtx=this.pixelGrid.getContext('2d',{alpha:false});this.gridCtx.imageSmoothingEnabled=false;
+    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';canvas.dataset.pixelUnit=String(PIXEL_UNIT);
+    this.pixelGrid=surface(GRID_W,GRID_H);this.gridCtx=this.pixelGrid.getContext('2d',{alpha:false});this.gridCtx.imageSmoothingEnabled=false;
     this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;
     this.base=surface(W,H);const ctx=this.base.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,W,H);
     this.original=ctx.getImageData(0,0,W,H);this.plate=new ImageData(this.original.data.slice(),W,H);
@@ -290,9 +290,9 @@ export class PixelScene {
     const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.timeOfDay.drawSky(ctx,time);this.drawWater(time);this.drawScreens(time);
     for(const sprite of this.details)this.drawDetail(sprite,time);
     this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
-    // Composite all moving layers first, then sample one shared 2×2 grid.
+    // Composite all moving layers first, then sample one shared 1.5px grid.
     // Native extraction/motion keeps its precision; no per-object grid seams.
-    this.gridCtx.drawImage(this.canvas,0,0,W/2,H/2);
+    this.gridCtx.drawImage(this.canvas,0,0,GRID_W,GRID_H);
     ctx.drawImage(this.pixelGrid,0,0,W,H);
   }
   dispose(){if(this.haze)this.haze.canvas.width=this.haze.canvas.height=1;this.haze=null;this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}

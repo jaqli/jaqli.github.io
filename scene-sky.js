@@ -1,8 +1,9 @@
 import { inside } from './scene-objects.js?v=20261111-sky43';
-import { refineSkyEdges } from './scene-edge-matte.js?v=20261112-edge50';
-import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261111-edge48';
+import { refineSkyEdges } from './scene-edge-matte.js?v=20261112-pixel51';
+import { prepareShelfMatte } from './scene-shelf-matte.js?v=20261112-pixel51';
 import { prepareSillMatte } from './scene-sill-matte.js?v=20261112-edge50';
-import { skyApertures, skyForeground, skyWires, rearCity } from './scene-sky-matte.js?v=20261112-edge50';
+import { prepareFrameMattes } from './scene-frame-matte.js?v=20261112-pixel51';
+import { skyApertures, skyForeground, skyWires, rearCity } from './scene-sky-matte.js?v=20261112-pixel51';
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const smooth=t=>t*t*(3-2*t);
 // Lighting follows the complete visible sky. Motion has its own foreground
@@ -18,6 +19,12 @@ export function* prepareSky(scene){
  const wirePixels=wire.getImageData(0,0,w,h).data,lightMask=new Uint8Array(w*h),mask=surface(w,h),m=mask.getContext('2d'),alpha=m.createImageData(w,h),destinations=[];
  const shelf=prepareShelfMatte(scene),sill=prepareSillMatte(scene);
  const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<430);
+ const wireAt=(wx,wy)=>{
+  const j=((wy-y0)*w+wx-x0)*4,i=(wy*1536+wx)*4;
+  return wirePixels[j+3]>32&&(original[i+1]<158||original[i]>original[i+1]*.88||original[i+2]<original[i+1]*.94);
+ };
+ const leafAt=(wx,wy,field)=>foliage.some(p=>wx>=p.x&&wx<p.x+p.w&&wy>=p.y&&wy<p.y+p.h&&p[field][(wy-p.y)*p.w+wx-p.x]);
+ const frames=prepareFrameMattes(scene,(wx,wy)=>wireAt(wx,wy)||leafAt(wx,wy,'fixed'),(wx,wy)=>wireAt(wx,wy)||leafAt(wx,wy,'foreground'));
  for(let y=0;y<h;y++){
   for(let x=0;x<w;x++){
    const wx=x+x0,wy=y+y0,n=y*w+x,j=n*4,i=(wy*1536+wx)*4;
@@ -26,13 +33,17 @@ export function* prepareSky(scene){
    for(const p of foliage){const px=wx-p.x,py=wy-p.y;if(px>=0&&px<p.w&&py>=0&&py<p.h){const k=py*p.w+px;fixedLeaf=!!p.fixed[k];originalLeaf=!!p.foreground[k];}}
    // Only a traced wire's local rim uses its color to separate it from sky.
    // No global RGB threshold can punch holes in buildings or bright desk trim.
-   const wireEdge=wirePixels[j+3]>32&&(original[i+1]<158||original[i]>original[i+1]*.88||original[i+2]<original[i+1]*.94);
+   const wireEdge=wireAt(wx,wy);
    let amount=area[j]>250&&!lamp&&!fixedLeaf&&!wireEdge?255:0;
    if(wx>=sill.x&&wx<sill.x+sill.w&&wy>=sill.y&&wy<sill.y+sill.h)amount=fixedLeaf?0:sill.coverage[(wy-sill.y)*sill.w+wx-sill.x];
    // The thin red aerial has no blue face: these local cyan edge pixels are
    // its old sky, not part of the filament or the dark cap below it.
    if(wx>=620&&wx<=630&&wy>=354&&wy<370&&original[i+1]>original[i]+3&&original[i+2]>original[i]+8)amount=255;
    if(wx>=shelf.x&&wx<shelf.x+shelf.w&&wy>=shelf.y&&wy<shelf.y+shelf.h){const a=shelf.coverage[(wy-shelf.y)*shelf.w+wx-shelf.x];if(a>=0)amount=inside(wx,wy,rearCity)?0:a;}
+   for(const f of frames)if(wx>=f.x&&wx<f.x+f.w&&wy>=f.y&&wy<f.y+f.h){
+    const k=(wy-f.y)*f.w+wx-f.x,a=f.coverage[k];if(a<0)continue;
+    amount=a;if(a>0&&a<255)for(let ch=0;ch<3;ch++)plate[i+ch]=f.colors[k*3+ch];
+   }
    // Calm distant water replaces the removed shore fragments. A two-pixel
    // transition joins the cloud layer to the water without a hard cutoff.
    const horizon=amount>0&&wy>=426&&((wx>=734&&wx<832)||(wx>=858&&wx<1115));
@@ -48,7 +59,7 @@ export function* prepareSky(scene){
   const sx=x<965?974+(x%17):x,sy=456+(y-430)%17,i=(y*1536+x)*4,k=(sy*1536+sx)*4;
   for(let ch=0;ch<3;ch++)plate[i+ch]=original[k+ch];
  }
- refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,sill);
+ refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,[sill,shelf,...frames]);
  for(let n=0;n<w*h;n++){if(alpha.data[n*4+3]===255)destinations.push(n);if(alpha.data[n*4+3]>0&&alpha.data[n*4+3]<255)lightMask[n]=0;}
  scene.base.getContext('2d').putImageData(scene.plate,0,0);
  m.putImageData(alpha,0,0);yield .54;

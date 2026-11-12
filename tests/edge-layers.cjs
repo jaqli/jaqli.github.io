@@ -3,11 +3,11 @@ const{chromium}=require('playwright');
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
  const page=await browser.newPage({reducedMotion:'reduce'});await page.goto(process.env.TEST_ORIGIN||'http://127.0.0.1:8081');await page.waitForSelector('.scene-ready');
  const result=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-edge50'),image=document.querySelector('#scene-image'),r=await PixelScene.create(image,document.createElement('canvas')),c=r.clouds[0],ctx=r.ctx;
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-pixel51'),image=document.querySelector('#scene-image'),r=await PixelScene.create(image,document.createElement('canvas')),c=r.clouds[0],ctx=r.ctx;
   const source=document.createElement('canvas');source.width=1536;source.height=1024;const sc=source.getContext('2d');sc.drawImage(image,0,0);const original=sc.getImageData(0,0,1536,1024).data,mask=c.mask.getContext('2d').getImageData(0,0,c.w,c.h).data;
-  const boxes={monitorRim:[594,365,12,2],boardRim:[579,214,2,13],deskVessel:[622,378,15,19],whiteDisplayRim:[679,426,45,3],shelfSupport:[1421,310,10,110],bracketBar:[1407,334,7,1],bracketLeftLeg:[1405,337,1,11],bracketRightLeg:[1415,337,1,11],robotHousing:[1448,383,10,42],rearTerminal:[1437,374,8,24],books:[1473,358,23,13],camera:[1518,336,8,8],cityCrown:[1185,359,10,8],cityAerial:[1191,330,1,15],restoredCity:[1415,356,3,25],narrowTower:[1225,388,10,12],hangingPot:[1320,132,20,20],sillPot:[1454,249,29,15],sillPotRight:[1485,248,1,12],sillToolTip:[1507,232,1,2],sillBoardFace:[1414,286,4,8],windowStrap:[800,180,2,28],windowLoop:[808,222,2,1],towerSupport:[1345,396,3,5],towerFixture:[1343,370,2,3],towerBase:[1334,407,18,4]},leaks={};
+  const boxes={leftWindowLitFace:[529,80,3,90],middleWindowFace:[836,190,10,210],rightWindowFace:[1367,190,10,210],monitorRim:[594,365,12,2],boardRim:[579,214,2,13],deskVessel:[622,378,15,19],whiteDisplayRim:[679,426,45,3],shelfSupport:[1421,310,10,110],bracketBar:[1407,334,7,1],bracketLeftLeg:[1405,337,1,11],bracketRightLeg:[1415,337,1,11],bracketInset:[1408,337,6,12],rearCityLightFace:[1411,351,3,28],robotHousing:[1448,383,10,42],rearTerminal:[1437,374,8,24],books:[1473,358,23,13],camera:[1518,336,8,8],cityCrown:[1185,359,10,8],cityAerial:[1191,330,1,15],restoredCity:[1415,356,3,25],narrowTower:[1225,388,10,12],hangingPot:[1320,132,20,20],sillPot:[1454,249,29,15],sillPotRight:[1485,248,1,12],sillToolTip:[1507,232,1,2],sillBoardFace:[1414,286,4,8],windowStrap:[800,180,2,28],windowLoop:[808,222,2,1],towerSupport:[1345,396,3,5],towerFixture:[1343,370,2,3],towerBase:[1334,407,18,4]},leaks={};
   for(const[key,[x,y,w,h]]of Object.entries(boxes)){let n=0;for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)if(mask[((py-c.y)*c.w+px-c.x)*4+3])n++;leaks[key]=n;}
-  const openSky={oldShore:[690,396,25,3],oldWhiteShape:[765,402,10,8],centerShore:[868,402,24,19],pillarBlueFringe:[1416,350,1,4],oldTowerHalo:[1173,377,3,13],vesselAerialFringe:[619,359,2,6],pillarTopRightFringe:[1435,310,2,20],blueBoardRim:[1400,280,1,1],paleBoardRim:[1394,290,1,1],sillLeftGap:[1423,245,1,5],sillTopGap:[1439,246,2,1],sillPotGap:[1444,249,2,3],sillStemGap:[1447,241,1,3],sillToolGap:[1490,246,3,8],sillLeafHole:[1431,261,1,1]},remaining={};
+  const openSky={movingLeafBackdrop:[1382,98,2,4],middleFrameCyan:[832,110,3,1],middleFramePink:[832,350,3,1],middleFrameLowerCyan:[832,400,2,1],middleRightCyan:[857,110,1,1],rightFrameOldSky:[1382,230,2,190],rightFramePink:[1381,251,1,1],oldShore:[690,396,25,3],oldWhiteShape:[765,402,10,8],centerShore:[868,402,24,19],pillarBlueFringe:[1416,350,1,4],oldTowerHalo:[1173,377,3,13],vesselAerialFringe:[619,359,2,6],pillarTopRightFringe:[1435,310,2,20],blueBoardRim:[1400,280,1,1],paleBoardRim:[1394,290,1,1],sillLeftGap:[1423,245,1,5],sillTopGap:[1439,246,2,1],sillPotGap:[1444,249,2,3],sillStemGap:[1447,241,1,3],sillToolGap:[1490,246,3,8],sillLeafHole:[1431,261,1,1]},remaining={};
   for(const[key,[x,y,w,h]]of Object.entries(openSky)){let n=0;for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)if(mask[((py-c.y)*c.w+px-c.x)*4+3]!==255)n++;remaining[key]=n;}
   const birdEdges={};for(const bird of r.birds){
    const pixels=bird.canvas.getContext('2d').getImageData(0,0,bird.w,bird.h).data;let cyanRim=0,solid=0;
@@ -18,11 +18,14 @@ const{chromium}=require('playwright');
    }
    birdEdges[bird.bird.id]={cyanRim,solid};
   }
+  const expectedSky=document.createElement('canvas');expectedSky.width=c.w;expectedSky.height=c.h;const expectedSkyContext=expectedSky.getContext('2d');
   const localSkyError={};for(const mode of['dusk','dawn','noon','night']){
    await r.setTimeOfDay(mode);let error=0;
    for(const t of[0,.7,3.4,6.5]){
-    ctx.drawImage(r.base,0,0);r.drawClouds(t);const backdrop=c.ctx.getImageData(0,0,c.w,c.h).data;
-    for(const name of['sillLeftGap','sillTopGap','sillPotGap','sillStemGap','sillToolGap','sillLeafHole']){
+    ctx.drawImage(r.base,0,0);r.drawClouds(t);
+    expectedSkyContext.clearRect(0,0,c.w,c.h);expectedSkyContext.drawImage(c.layer,0,0);if(r.haze)expectedSkyContext.drawImage(r.haze.canvas,r.haze.x-c.x,r.haze.y-c.y);
+    const backdrop=expectedSkyContext.getImageData(0,0,c.w,c.h).data;
+    for(const name of['movingLeafBackdrop','middleFrameCyan','middleFramePink','middleFrameLowerCyan','middleRightCyan','rightFrameOldSky','rightFramePink','sillLeftGap','sillTopGap','sillPotGap','sillStemGap','sillToolGap','sillLeafHole']){
      const[x,y,w,h]=openSky[name],rendered=ctx.getImageData(x,y,w,h).data;
      for(let py=0;py<h;py++)for(let px=0;px<w;px++)for(let ch=0;ch<3;ch++)error=Math.max(error,Math.abs(rendered[(py*w+px)*4+ch]-backdrop[((y+py-c.y)*c.w+x+px-c.x)*4+ch]));
     }
@@ -30,6 +33,12 @@ const{chromium}=require('playwright');
    localSkyError[mode]=error;
   }
   await r.setTimeOfDay('dusk');
+  const structureColors={};
+  for(const name of['bracketInset','bracketLeftLeg','bracketRightLeg','rearCityLightFace']){
+   const[x,y,w,h]=boxes[name],pixels=r.base.getContext('2d').getImageData(x,y,w,h).data;let error=0;
+   for(let py=0;py<h;py++)for(let px=0;px<w;px++)for(let ch=0;ch<3;ch++)error=Math.max(error,Math.abs(pixels[(py*w+px)*4+ch]-original[((y+py)*1536+x+px)*4+ch]));
+   structureColors[name]=error;
+  }
   const horizonAlpha=[427,428,429].map(y=>mask[((y-c.y)*c.w+1000-c.x)*4+3]);
   const horizonPixel=Array.from(r.base.getContext('2d').getImageData(1010,445,1,1).data);
   const duck=r.details.find(s=>s.shape.id==='duck'),duckAlpha=duck.canvas.getContext('2d').getImageData(0,0,duck.w,duck.h).data;let missingDuck=0;
@@ -59,12 +68,13 @@ const{chromium}=require('playwright');
    ctx.drawImage(r.base,0,0);const before=ctx.getImageData(105,11,144,132).data;beacon.draw(ctx,t,night);const after=ctx.getImageData(105,11,144,132).data;let sum=0,count=0;
    for(let y=0;y<132;y++)for(let x=0;x<144;x++){const d=Math.hypot(x-72,y-66);if(d<38||d>58)continue;const i=(y*144+x)*4;for(let ch=0;ch<3;ch++)sum+=after[i+ch]-before[i+ch];count+=3;}changes[key]=sum/count;
   }
-  r.dispose();return{leaks,remaining,birdEdges,localSkyError,leafSkyPixels,spriteEdges,horizonAlpha,horizonPixel,horizonSteps,missingDuck,aerialBackdropError,cableInteriorError,leafPixels,leafRestoreError,duplicates,clippedAlpha,haloEdge,haloGridError,haloLevels:levels.size,changes};
+  r.dispose();return{leaks,remaining,structureColors,birdEdges,localSkyError,leafSkyPixels,spriteEdges,horizonAlpha,horizonPixel,horizonSteps,missingDuck,aerialBackdropError,cableInteriorError,leafPixels,leafRestoreError,duplicates,clippedAlpha,haloEdge,haloGridError,haloLevels:levels.size,changes};
  });
  for(const[key,n]of Object.entries(result.leaks))assert.equal(n,0,`${key}: sky cuts through the foreground`);
  for(const[key,n]of Object.entries(result.remaining))assert.equal(n,0,`${key}: old scenery/fringe must be replaced by opaque moving sky`);
  for(const[id,edge]of Object.entries(result.birdEdges)){assert.equal(edge.cyanRim,0,`${id}: no old cyan sky attached to feathers`);assert(edge.solid>80,`${id}: bird keeps a complete body`);}
- for(const[mode,error]of Object.entries(result.localSkyError))assert.equal(error,0,`${mode}: plant gaps show the current moving sky`);
+ for(const[mode,error]of Object.entries(result.localSkyError))assert.equal(error,0,`${mode}: plant gaps and cleared window edges show the current moving sky`);
+ for(const[name,error]of Object.entries(result.structureColors))assert.equal(error,0,`${name}: retain the original filled surface and thin structure`);
  assert.equal(result.leafSkyPixels,0,'moving leaves do not carry cyan background pixels');
  for(const[id,edge]of Object.entries(result.spriteEdges)){assert.equal(edge.feather,0,`${id}: no broad translucent background attached to moving object`);assert.equal(edge.border,0,`${id}: complete contour fits inside cache`);}
  assert(result.horizonAlpha[0]===255&&result.horizonAlpha[1]<255&&result.horizonAlpha[1]>result.horizonAlpha[2]&&result.horizonAlpha[2]>0,'horizon uses a narrow monotonic transition');
