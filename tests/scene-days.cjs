@@ -8,7 +8,7 @@ const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.g
  await page.clock.setFixedTime(new Date('2026-11-12T17:30:00Z'));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const motion=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-face55'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261111-edge48');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-book56'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261112-book56');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas),ctx=r.ctx;
   const moving=r.details.filter(s=>additionalShapes.some(a=>a.id===s.shape.id));
   const draw=t=>{ctx.drawImage(r.base,0,0);for(const s of moving)r.drawDetail(s,t);r.additions.draw(ctx,t);r.extras.draw(ctx,t);};
@@ -16,7 +16,14 @@ const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.g
   draw(0);const first=ctx.getImageData(0,0,1536,1024).data;
   const diff=(a,b,[x,y,w,h])=>{let sum=0;for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)for(let c=0;c<3;c++)sum+=Math.abs(a[(py*1536+px)*4+c]-b[(py*1536+px)*4+c]);return sum/(w*h*3);};
   const changes=Object.fromEntries(Object.keys(regions).map(k=>[k,0]));let pot=0;
+  const book=r.details.find(s=>s.shape.id==='blue-book'),bookPixels=book.canvas.getContext('2d').getImageData(0,0,book.w,book.h).data;
+  const bookEdges=Object.fromEntries(Object.entries({backBevel:[139,868],diagonalBevel:[183,887],frontBlack:[89,911],lowerBlack:[124,920],whiteRim:[134,916],blueSpine:[175,922]}).map(([name,[x,y]])=>[name,bookPixels[((y-book.y)*book.w+x-book.x)*4+3]]));
+  let bookOcclusion=0;
   for(const t of[.7,1.5,2.8,4.4,6.1,9.2]){draw(t);const data=ctx.getImageData(0,0,1536,1024).data;for(const[k,box]of Object.entries(regions))changes[k]=Math.max(changes[k],diff(first,data,box));pot=Math.max(pot,diff(first,data,[1310,145,32,17]));}
+  for(const t of[0,1.8,3.6,5.4,7.2]){
+   ctx.drawImage(r.base,0,0);r.drawDetail(book,t);
+   for(const[x,y]of[[109,874],[90,885],[73,891]]){const a=r.base.getContext('2d').getImageData(x,y,1,1).data,b=ctx.getImageData(x,y,1,1).data;for(let c=0;c<3;c++)bookOcclusion=Math.max(bookOcclusion,Math.abs(a[c]-b[c]));}
+  }
   const fan=r.extras.fan,blade=fan.blade.getContext('2d').getImageData(0,0,88,88).data;let opaque=0;
   for(let i=3;i<blade.length;i+=4)if(blade[i])opaque++;
   const cage=fan.cage.toDataURL(),back=fan.back.toDataURL();for(let t=0;t<2;t+=.1)fan.draw(ctx,t);
@@ -40,13 +47,15 @@ const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.g
   // Captured theme sources are restored on return to dusk; no cumulative tint.
   const readback=CanvasRenderingContext2D.prototype.getImageData;CanvasRenderingContext2D.prototype.getImageData=()=>{throw new Error('animation pixel readback');};
   try{for(let n=0;n<30;n++)r.draw(n/60);}finally{CanvasRenderingContext2D.prototype.getImageData=readback;}
-  r.dispose();return{changes,pot,bladeCoverage:opaque/(88*88),staticFan,steps,colors,backupCount,backupBytes};
+  r.dispose();return{changes,pot,bladeCoverage:opaque/(88*88),staticFan,steps,colors,backupCount,backupBytes,bookEdges,bookOcclusion};
  });
  assert.equal(Object.keys(motion.changes).length,18);
  for(const[id,v]of Object.entries(motion.changes))assert(v>.01,`${id} must visibly change (${v})`);
  assert.equal(motion.pot,0,'hanging plant pot stays anchored');
  assert(motion.bladeCoverage>.035&&motion.bladeCoverage<.18,'rotating source is one isolated blade, not a disk');assert(motion.staticFan,'backdrop and grille never rotate');
  for(const[id,v]of Object.entries(motion.steps))assert(v<32,`${id} must not scan or split (${v})`);
+ for(const[id,alpha]of Object.entries(motion.bookEdges))assert.equal(alpha,255,`${id} must travel with the complete blue book`);
+ assert.equal(motion.bookOcclusion,0,'overlapping blue stack stays fixed in front of the floating book');
  assert(motion.colors.night.skyLuma<motion.colors.dusk.skyLuma*.55,'night sky must become dark');
  assert(motion.colors.noon.skyLuma>motion.colors.night.skyLuma*2.5,'noon and night should be distinct');
  assert(motion.colors.dawn.change>5&&motion.colors.noon.change>5,JSON.stringify(motion.colors));

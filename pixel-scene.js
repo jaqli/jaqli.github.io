@@ -7,8 +7,8 @@ import { faceLight } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
 import { SceneExtras } from './scene-extras.js?v=20261112-edge50';
-import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
-import { SceneTime } from './scene-time.js?v=20261112-motion54';
+import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261112-book56';
+import { SceneTime } from './scene-time.js?v=20261112-book56';
 import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-screen53';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
@@ -49,7 +49,7 @@ export class PixelScene {
       this.displayCtx=screenCanvas.getContext('2d');
     }
   }
-  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false,backgroundKey=null,repairBackdrop=null){
+  cut(polygon,accept,erase=true,pad=0,background,waterRepair=false,softEdge=false,backgroundKey=null,repairBackdrop=null,repairRadius=3){
     const [x,y,w,h]=bounds(polygon,pad),canvas=surface(w,h),ctx=canvas.getContext('2d'),bitmap=ctx.createImageData(w,h);
     const source=this.original.data,plate=this.plate.data;
     let coverage,repairCoverage;
@@ -90,7 +90,7 @@ export class PixelScene {
       for(let n=0;n<empty.length;n++){
         const edge=nearest[n];if(edge<0)continue;
         const distance=Math.hypot(n%w-edge%w,Math.floor(n/w)-Math.floor(edge/w));
-        repairCoverage[n]=Math.round(255*clamp(3-distance));
+        repairCoverage[n]=Math.round(255*clamp(repairRadius-distance));
       }
     }
     if(erase&&!background){
@@ -148,9 +148,9 @@ export class PixelScene {
     const hem={id:'hem',kind:'paper',anchor:[830,615],length:24,phase:0,polygon:hemArea};
     const movingShapes=[...detailShapes.filter(shape=>shape.id!=='leaves'),...additionalShapes,...accentShapes,hem];
     for(const shape of movingShapes){
-      const accept=(r,g,b)=>shape.id==='paper-cream'?!(g-r>15&&b-r>20):shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
+      const accept=(r,g,b,x,y)=>shape.occluder?!inside(x,y,shape.occluder):shape.id==='paper-cream'?!(g-r>15&&b-r>20):shape.kind==='eye'?g-r>45&&b-r>45&&g>125:shape.kind==='leaves'?g>r*1.2&&g>b*.9&&g>40:true;
       const soft=shape.kind==='float'||shape.kind==='paper'||shape.kind==='hinge';
-      const backgroundKey=shape.id==='duck'?(r,g,b,x,y)=>y<834?g>45&&g-r>15&&b-r>25:g>125&&g-r>24&&b-r>32:null;
+      const backgroundKey=shape.backgroundKey??(shape.id==='duck'?(r,g,b,x,y)=>y<834?g>45&&g-r>15&&b-r>25:g>125&&g-r>24&&b-r>32:null);
       // The paper behind the duck is a fixed occluder, not blue water. Keep its
       // visible edge and continue its short corner when the head moves down.
       const backdrop=shape.id==='duck'?(x,y,source,object)=>{
@@ -159,7 +159,9 @@ export class PixelScene {
         const i=(y*W+(object?Math.min(x,302):x))*4;
         return source.subarray(i,i+3);
       }:null;
-      this.details.push({...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft,backgroundKey,backdrop),shape});
+      const sprite={...this.cut(shape.polygon,accept,true,soft?8:0,shape.background,shape.waterRepair,soft,backgroundKey,backdrop,shape.repairRadius),shape};
+      if(shape.occluder)sprite.occluder=this.cut(shape.occluder,()=>true,false);
+      this.details.push(sprite);
       yield .12+.28*this.details.length/movingShapes.length;
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
@@ -269,6 +271,7 @@ export class PixelScene {
     }
     const [ax,ay]=shape.anchor,p=detailPoint(shape,ax,ay,time),px=detailPoint(shape,ax+1,ay,time),py=detailPoint(shape,ax,ay+1,time);
     ctx.translate(...p);ctx.transform(px[0]-p[0],px[1]-p[1],py[0]-p[0],py[1]-p[1],0,0);ctx.drawImage(canvas,x-ax,y-ay);ctx.restore();
+    if(sprite.occluder){const s=sprite.occluder;ctx.drawImage(s.canvas,s.x,s.y);}
   }
   drawBird(sprite,time){
     const {bird,canvas,x,y,w,h}=sprite,pose=birdPose(bird,time),ctx=this.ctx,[cx,cy]=bird.center;

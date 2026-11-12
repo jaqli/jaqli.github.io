@@ -25,6 +25,7 @@ export class SceneTime {
   add({canvas:r.base},'room');this.room=this.assets[0];
   add(r.sun,'sun');if(r.haze)add(r.haze,'sky');
   for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,a.probe,a.aerial])add(sprite);
+  for(const sprite of r.details)if(sprite.occluder)add(sprite.occluder);
   for(const leaf of e.leaves)add(leaf,'foliage');
   add(r.accents.plant,'foliage');
   add(e.cable);add(a.wire);

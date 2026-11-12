@@ -24,7 +24,7 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
  assert.deepEqual(displays.size,[1260,570]);assert.equal(displays.sampling,'auto');
  assert(displays.code>240&&displays.hair<10&&displays.paper<10,'sharp displays stay behind hair and the paper');
  const regions=await page.evaluate(async()=>{
-  const {PixelScene}=await import('./pixel-scene.js?v=20261112-face55');
+  const {PixelScene}=await import('./pixel-scene.js?v=20261112-book56');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas);
   const reference=document.createElement('canvas');reference.width=1536;reference.height=1024;reference.getContext('2d').drawImage(document.querySelector('#scene-image'),0,0);
   const nativeSource=reference.getContext('2d').getImageData(0,0,1536,1024).data;
