@@ -73,7 +73,7 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261111-order35', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261112-cycle52', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {

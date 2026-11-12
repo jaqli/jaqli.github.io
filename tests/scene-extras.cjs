@@ -6,7 +6,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const result=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-pixel51'),canvas=document.createElement('canvas');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-cycle52'),canvas=document.createElement('canvas');
   const r=await PixelScene.create(document.querySelector('#scene-image'),canvas),e=r.extras,ctx=r.ctx;
   const regions={steam:[628,475,26,39],fan:[1213,560,59,78],tag:[299,79,35,37],plant:[1415,213,86,33],
    greenRobot:[324,332,29,20],roundRobot:[1349,776,33,30],leftRack:[165,345,105,16],rightRack:[1447,541,65,12],cable:[611,885,124,78],dust:[900,250,162,81]};

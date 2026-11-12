@@ -2,7 +2,13 @@ import { refreshWarp } from './scene-deform.js?v=20261111-layer44';
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const yieldTask=()=>globalThis.scheduler?.yield?scheduler.yield():new Promise(resolve=>setTimeout(resolve,0));
 export const sceneTimes=['dawn','noon','dusk','night'];
-// Lighting is baked into the existing small textures only on a user selection.
+export const sceneLabels={dawn:'清晨',noon:'中午',dusk:'黄昏',night:'夜晚'};
+export function localSceneTime(date=new Date()){
+ const hour=date.getHours();
+ return hour<5||hour>=20?'night':hour<10?'dawn':hour<17?'noon':'dusk';
+}
+export const nextSceneTime=mode=>sceneTimes[(sceneTimes.indexOf(mode)+1)%sceneTimes.length];
+// Lighting is baked into the existing small textures only when the time changes.
 // There is one source backup, not four scene renderers or a per-frame color pass.
 export class SceneTime {
  constructor(scene){this.scene=scene;this.mode='dusk';this.assets=null;this.stars=Array.from({length:42},(_,i)=>({x:875+(i*137)%470,y:90+(i*59)%235,phase:i*1.73}));}

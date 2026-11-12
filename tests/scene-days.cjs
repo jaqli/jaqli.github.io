@@ -3,11 +3,12 @@ const{chromium}=require('playwright');
 const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
 const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.getElementById(id).toDataURL()).join('|'));
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
- const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'}),errors=[];
+ const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce',timezoneId:'UTC'}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
+ await page.clock.setFixedTime(new Date('2026-11-12T17:30:00Z'));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const motion=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-pixel51'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261111-edge48');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-cycle52'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261111-edge48');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas),ctx=r.ctx;
   const moving=r.details.filter(s=>additionalShapes.some(a=>a.id===s.shape.id));
   const draw=t=>{ctx.drawImage(r.base,0,0);for(const s of moving)r.drawDetail(s,t);r.additions.draw(ctx,t);r.extras.draw(ctx,t);};
@@ -53,19 +54,21 @@ const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.g
  assert(motion.backupBytes<13*1024*1024,'store one scene source backup, not four full scenes');
  console.log('PASS 15 additional motions, observer, flexible foliage, isolated fan blades, continuous props and reversible lighting',JSON.stringify(motion));
  const pictures=[];for(const mode of['night','dawn','noon','dusk']){
-  await page.locator(`[data-time="${mode}"]`).click();await page.waitForFunction(m=>document.body.dataset.sceneTime===m&&!document.querySelector('.scene-time').hasAttribute('aria-busy'),mode);
-  assert.equal(await page.locator(`[data-time="${mode}"]`).getAttribute('aria-pressed'),'true');
+  await page.locator('#time-lamp').click();await page.waitForFunction(m=>document.body.dataset.sceneTime===m&&!document.querySelector('#time-lamp').hasAttribute('aria-busy'),mode);
+  assert.equal(await page.locator('#time-lamp').getAttribute('data-time'),mode);
   const before=await shot(page);await page.waitForTimeout(100);assert.equal(await shot(page),before,'changing time while paused stays paused');pictures.push(before);
  }
  assert.equal(new Set(pictures).size,4);
- await page.locator('[data-time="night"]').click();await page.waitForFunction(()=>document.body.dataset.sceneTime==='night');
- await page.reload();await page.waitForSelector('.scene-ready');assert.equal(await page.locator('body').getAttribute('data-scene-time'),'night');
- assert.equal(await page.evaluate(()=>localStorage.getItem('jaqli.scene-time')),'night');
- await page.locator('[data-hotspot="cv"] .hotspot-label').click();await page.waitForURL(`${origin}/cv/`);await page.goBack();await page.waitForSelector('.scene-ready');assert.equal(await page.locator('body').getAttribute('data-scene-time'),'night');
+ await page.locator('#time-lamp').click();await page.waitForFunction(()=>document.body.dataset.sceneTime==='night');
+ await page.reload();await page.waitForSelector('.scene-ready');assert.equal(await page.locator('body').getAttribute('data-scene-time'),'dusk');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('jaqli.scene-time')),null);
+ await page.locator('#time-lamp').click();await page.waitForFunction(()=>document.body.dataset.sceneTime==='night');
+ await page.locator('[data-hotspot="cv"] .hotspot-label').click();await page.waitForURL(`${origin}/cv/`);await page.goBack();await page.waitForSelector('.scene-ready');await page.waitForFunction(()=>document.body.dataset.sceneTime==='dusk');
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
- const controls=await page.locator('.scene-time').boundingBox();assert(controls.x>=0&&controls.x+controls.width<=390);
- // A denied storage backend must not prevent a manual selection.
- const blocked=await browser.newPage({reducedMotion:'reduce'});await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('denied');}});});
- await blocked.goto(origin);await blocked.waitForSelector('.scene-ready');await blocked.locator('[data-time="dawn"]').click();await blocked.waitForFunction(()=>document.body.dataset.sceneTime==='dawn');await blocked.close();
- assert.deepEqual(errors,[]);console.log('PASS four selectable scenes, pause, remembered choice, history, mobile controls and denied-storage fallback');
+ await page.locator('#time-lamp').scrollIntoViewIfNeeded();await page.locator('#time-lamp').click();await page.waitForFunction(()=>document.body.dataset.sceneTime==='night');
+ // Storage must not be required, consulted or used for time selection.
+ const blocked=await browser.newPage({reducedMotion:'reduce',timezoneId:'UTC'});await blocked.clock.setFixedTime(new Date('2026-11-12T17:30:00Z'));
+ await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('denied');}});});
+ await blocked.goto(origin);await blocked.waitForSelector('.scene-ready');await blocked.locator('#time-lamp').click();await blocked.waitForFunction(()=>document.body.dataset.sceneTime==='night');await blocked.close();
+ assert.deepEqual(errors,[]);console.log('PASS lamp cycle, pause, fresh local time on reload/history, mobile lamp and zero storage dependency');
 }finally{await browser.close();}})().catch(error=>{console.error(error);process.exitCode=1;});

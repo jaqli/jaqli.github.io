@@ -117,12 +117,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .is-leaving .document-main, .is-entering .document-main, .is-leaving .scene-viewport, .is-entering .scene-viewport { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .route-arriving body > :not(script) { opacity: 1; } }
 
-.scene-time { position:fixed; top:max(25px,env(safe-area-inset-top)); right:max(25px,env(safe-area-inset-right)); display:flex; gap:2px; padding:3px; border:1px solid #a4c5cc55; border-radius:5px; background:#08121ad4; }
-.scene-time button { border:0; border-radius:2px; padding:8px 10px; background:transparent; color:#a3b5bd; font-size:11px; letter-spacing:1px; }
-.scene-time button:hover { color:#e1f2e7; background:#b5e7d517; }
-.scene-time button[aria-pressed="true"] { color:#d8f7e8; background:#45696585; }
-.scene-time button:disabled { cursor:wait; }
-.scene-time[aria-busy="true"] { border-color:#b5e7d5; }
+/* The hit target follows the actual pendant lamp in scene coordinates. */
+.time-lamp { position:absolute; left:66.15%; top:1.56%; width:11.2%; height:7%; min-height:44px; padding:0; border:0; background:transparent; color:#e8ebcf; }
+.time-lamp::after { content:''; position:absolute; inset:5px; border:1px solid transparent; border-radius:40% 40% 25% 25%; }
+.time-lamp:hover::after, .time-lamp:focus-visible::after { border-color:#fff0b87a; background:#fff0b80b; }
+.time-lamp:disabled { cursor:wait; }
+.time-lamp-hint { position:absolute; top:100%; left:50%; transform:translateX(-50%); white-space:nowrap; padding:6px 9px; border:1px solid #a4c5cc55; border-radius:3px; background:#08121ade; color:#d8e6df; font-size:10px; letter-spacing:1px; opacity:0; pointer-events:none; transition:opacity .15s; }
+.time-lamp:hover .time-lamp-hint, .time-lamp:focus-visible .time-lamp-hint { opacity:1; }
+.scene-time-fade { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated; }
+.time-lamp-edge { top:max(25px,env(safe-area-inset-top)); bottom:auto; width:40px; height:40px; display:grid; place-items:center; }
+.time-lamp-edge:disabled { cursor:wait; }
 .home[data-scene-time="night"] #scene-intro { filter:brightness(.48) saturate(.75); }
 .home[data-scene-time="dawn"] #scene-intro { filter:saturate(.86); }
-@media(max-width:700px){ .scene-time { top:max(23px,env(safe-area-inset-top)); right:18px; } .scene-time button { padding:8px 7px; font-size:10px; } }

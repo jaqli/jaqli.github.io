@@ -7,16 +7,16 @@
   <meta name="description" content="jaq/li 的个人博客：技术、生活与研究。" />
   <title>jaq/li</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=20261111-days42" />
+  <link rel="stylesheet" href="./styles.css?v=20261112-cycle52" />
   <link rel="preload" href="./assets/scene-seed.webp?v=20261111-edge48" as="image" fetchpriority="high" />
   <script type="module" src="./scene-intro.js?v=20261111-edge48"></script>
   <link rel="preload" href="./assets/scene.webp?v=20261111-edge48" as="fetch" crossorigin="anonymous" fetchpriority="low" />
-  <link rel="modulepreload" href="./pixel-scene.js?v=20261112-pixel51" />
+  <link rel="modulepreload" href="./pixel-scene.js?v=20261112-cycle52" />
   <link rel="modulepreload" href="./scene-extras.js?v=20261112-edge50" />
   <link rel="modulepreload" href="./scene-additions.js?v=20261111-edge48" />
   <link rel="modulepreload" href="./scene-deform.js?v=20261111-layer44" />
   <link rel="modulepreload" href="./scene-fan.js?v=20261111-sky43" />
-  <link rel="modulepreload" href="./scene-time.js?v=20261111-edge48" />
+  <link rel="modulepreload" href="./scene-time.js?v=20261112-cycle52" />
   <link rel="modulepreload" href="./scene-beacon.js?v=20261111-layer44" />
   <link rel="modulepreload" href="./scene-sky-matte.js?v=20261112-pixel51" />
   <link rel="modulepreload" href="./scene-shelf-matte.js?v=20261112-pixel51" />
@@ -34,7 +34,7 @@
   <link rel="modulepreload" href="./scene-lights.js?v=20261111-flow28" />
   <link rel="modulepreload" href="./water-ripples.js?v=20261111-flow28" />
   <link rel="modulepreload" href="./navigation.js?v=20261111-detail39" />
-  <script type="module" src="./app.js?v=20261112-pixel51"></script>
+  <script type="module" src="./app.js?v=20261112-cycle52"></script>
 </head>
 <body class="home pixel-home">
   <main id="scene-viewport" class="scene-viewport" aria-label="可探索的海边工作室">
@@ -48,18 +48,18 @@
       <canvas id="screen-canvas" aria-hidden="true"></canvas>
       </div>
       <svg id="hotspots" class="hotspots" viewBox="0 0 1536 1024" aria-label="场景中的页面入口"></svg>
+      <button id="time-lamp" class="time-lamp" type="button" aria-label="点击吊灯切换时段" hidden>
+        <span class="time-lamp-hint" aria-hidden="true"></span>
+      </button>
     </div>
   </main>
   <header class="scene-header"><a class="wordmark" href="./" aria-label="jaq/li 首页">jaq<span>/</span>li</a></header>
   <h1 class="visually-hidden">jaq/li 的个人博客</h1>
   <p class="pan-hint" id="pan-hint" hidden><span aria-hidden="true">↔</span> 左右滑动</p>
-  <nav class="scene-time" aria-label="场景时段" hidden>
-    <button type="button" data-time="dawn" aria-pressed="false">清晨</button>
-    <button type="button" data-time="noon" aria-pressed="false">中午</button>
-    <button type="button" data-time="dusk" aria-pressed="true">黄昏</button>
-    <button type="button" data-time="night" aria-pressed="false">夜晚</button>
-  </nav>
   <span id="time-status" class="visually-hidden" role="status"></span>
+  <button id="time-lamp-edge" class="motion-toggle time-lamp-edge" type="button" aria-label="点击电灯切换时段" hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M10 2h4v3h3v3h2v3h2v3H3v-3h2V8h2V5h3z" fill="#8eabb3"/><path d="M5 14h14v3h-4v2H9v-2H5z" fill="#f5d38b"/><path d="M11 20h2v3h-2z" fill="#f5d38b"/></svg>
+  </button>
   <button id="pause" class="motion-toggle" type="button" aria-label="暂停场景动效" aria-pressed="false" title="暂停动效">Ⅱ</button>
   <div id="scene-status" class="scene-status">
     <div class="progress-caption"><span id="scene-progress-text">加载场景</span><span id="scene-progress-number">0%</span></div>

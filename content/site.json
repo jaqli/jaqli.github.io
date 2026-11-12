@@ -3666,7 +3666,7 @@
       "tagline": "Generative AI / World Models / 3D Vision",
       "contacts": {
         "email": "lijiaqi.work@outlook.com",
-        "github": "https://github.com/lijia7"
+        "github": "https://github.com/jaqli"
       },
       "research": [
         {
@@ -3841,7 +3841,7 @@
           "links": [
             {
               "label": "GitHub",
-              "url": "https://github.com/lijia7/SDDR"
+              "url": "https://github.com/jaqli/SDDR"
             }
           ],
           "media": {
@@ -3849,7 +3849,7 @@
             "width": 1100,
             "height": 774,
             "alt": "SDDR depth-refinement teaser from the official repository",
-            "source": "https://raw.githubusercontent.com/lijia7/SDDR/master/assets/neurips2024.png",
+            "source": "https://raw.githubusercontent.com/jaqli/SDDR/master/assets/neurips2024.png",
             "caption": "Official teaser ↗"
           },
           "verifiedAt": "2026-11-11",

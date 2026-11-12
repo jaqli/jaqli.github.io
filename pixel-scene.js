@@ -8,7 +8,7 @@ import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 
 import { SceneExtras } from './scene-extras.js?v=20261112-edge50';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
-import { SceneTime } from './scene-time.js?v=20261111-edge48';
+import { SceneTime } from './scene-time.js?v=20261112-cycle52';
 import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-pixel51';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
@@ -289,7 +289,8 @@ export class PixelScene {
   draw(time){
     const ctx=this.ctx;ctx.drawImage(this.base,0,0);this.drawClouds(time);this.timeOfDay.drawSky(ctx,time);this.drawWater(time);this.drawScreens(time);
     for(const sprite of this.details)this.drawDetail(sprite,time);
-    this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);for(const sprite of this.birds)this.drawBird(sprite,time);
+    this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);
+    if(this.timeOfDay.mode!=='night')for(const sprite of this.birds)this.drawBird(sprite,time);
     // Composite all moving layers first, then sample one shared 1.5px grid.
     // Native extraction/motion keeps its precision; no per-object grid seams.
     this.gridCtx.drawImage(this.canvas,0,0,GRID_W,GRID_H);

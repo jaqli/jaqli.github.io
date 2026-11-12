@@ -4,7 +4,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
  const page=await browser.newPage({reducedMotion:'reduce'});await page.goto(origin);await page.waitForSelector('.scene-ready');
  const result=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-pixel51'),r=await PixelScene.create(document.querySelector('#scene-image'),document.createElement('canvas')),ctx=r.ctx,c=r.clouds[0];
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-cycle52'),r=await PixelScene.create(document.querySelector('#scene-image'),document.createElement('canvas')),ctx=r.ctx,c=r.clouds[0];
   const skyPoints=[[788,390],[765,405],[880,415],[800,315],[820,350],[810,375],[818,397],[866,300],[1392,190],[650,380],[1040,80],[1165,81]],foregroundPoints=[[838,320],[844,120],[1368,240],[1317,144],[1448,254],[1185,393],[572,250],[630,397],[1100,70],[1422,340],[1452,409],[1515,340]];
   const palette={};
   for(const mode of['dawn','noon','night']){
