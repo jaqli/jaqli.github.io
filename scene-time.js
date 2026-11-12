@@ -26,6 +26,7 @@ export class SceneTime {
   add(r.sun,'sun');if(r.haze)add(r.haze,'sky');
   for(const sprite of [...r.details,...r.birds,r.head,e.tag,e.roundEye,a.probe,a.aerial])add(sprite);
   for(const leaf of e.leaves)add(leaf,'foliage');
+  add(r.accents.plant,'foliage');
   add(e.cable);add(a.wire);
   for(const key of ['back','cage'])add({canvas:e.fan[key],x:1205,y:548});
   add({canvas:e.fan.blade},'object',(x,y)=>[1243+(x-44)*31/40-(y-44)*6/40,599+y-44]);

@@ -8,7 +8,7 @@ const shot=p=>p.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>document.g
  await page.clock.setFixedTime(new Date('2026-11-12T17:30:00Z'));
  await page.goto(origin);await page.waitForSelector('.scene-ready');
  const motion=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-screen53'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261111-edge48');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-motion54'),{additionalMotionRegions,additionalShapes}=await import('./scene-additions.js?v=20261111-edge48');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas),ctx=r.ctx;
   const moving=r.details.filter(s=>additionalShapes.some(a=>a.id===s.shape.id));
   const draw=t=>{ctx.drawImage(r.base,0,0);for(const s of moving)r.drawDetail(s,t);r.additions.draw(ctx,t);r.extras.draw(ctx,t);};

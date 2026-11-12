@@ -24,14 +24,14 @@ const snapshot=page=>page.evaluate(()=>['ascii-canvas','screen-canvas'].map(id=>
  assert.deepEqual(displays.size,[1260,570]);assert.equal(displays.sampling,'auto');
  assert(displays.code>240&&displays.hair<10&&displays.paper<10,'sharp displays stay behind hair and the paper');
  const regions=await page.evaluate(async()=>{
-  const {PixelScene}=await import('./pixel-scene.js?v=20261112-screen53');
+  const {PixelScene}=await import('./pixel-scene.js?v=20261112-motion54');
   const canvas=document.createElement('canvas'),r=await PixelScene.create(document.querySelector('#scene-image'),canvas);
   const reference=document.createElement('canvas');reference.width=1536;reference.height=1024;reference.getContext('2d').drawImage(document.querySelector('#scene-image'),0,0);
   const nativeSource=reference.getContext('2d').getImageData(0,0,1536,1024).data;
   const source=nativeSource;
   r.draw(0);const before=r.ctx.getImageData(0,0,1536,1024).data;
   // Keep the skyline sample inside the building, excluding its moving sky.
-  const boxes={wall:[15,95,30,40],person:[810,520,30,35],city:[1180,380,23,40],frame:[837,85,12,300],
+  const boxes={wall:[10,15,22,28],person:[810,520,30,35],city:[1180,380,23,40],frame:[837,85,12,300],
    code:[445,385,145,80],wave:[342,422,88,52],plot:[648,448,53,35],
    water:[1020,575,85,30],duck:[305,805,99,50],paper:[400,265,30,25],
    eyes:[140,428,41,22],lamp:[155,56,48,43],redEye:[275,213,32,21],leftFace:[312,660,38,23],rightFace:[1464,391,52,35],cloud:[634,180,100,90],bird:[939,223,102,60]};

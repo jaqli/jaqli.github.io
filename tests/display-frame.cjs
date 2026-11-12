@@ -3,7 +3,7 @@ const{chromium}=require('playwright');
 (async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
  const p=await b.newPage({reducedMotion:'reduce'});await p.goto(process.env.TEST_ORIGIN||'http://127.0.0.1:8081');await p.waitForSelector('.scene-ready');
  const result=await p.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-screen53'),{plotFrame}=await import('./scene-display-frame.js?v=20261112-screen53'),{quadPoint}=await import('./scene-geometry.js?v=20261110-fps10');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-motion54'),{plotFrame}=await import('./scene-display-frame.js?v=20261112-screen53'),{quadPoint}=await import('./scene-geometry.js?v=20261110-fps10');
   const im=document.querySelector('#scene-image'),hd=document.createElement('canvas'),r=await PixelScene.create(im,document.createElement('canvas'),()=>{},hd),q=r.screens[2].quad,outer=plotFrame.outer;
   const parallel=[],gaps=[];
   for(let i=0;i<4;i++){

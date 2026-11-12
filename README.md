@@ -63,6 +63,8 @@ ASCII 仅用于三块电脑屏幕中的代码、波形、频谱与状态信息�
 
 首屏由独立的 `scene-intro.js` 读取约 9 KiB 的 `assets/scene-seed.webp`，用实际字符逐步形成轮廓。真实下载与物体准备进度驱动生成目标；每次最多新增 280 字、刷新最近 180 字。完整场景就绪后释放临时画布和数组，不强制等待开场动画。正常访问只下载色彩图和约 1.00 MiB 的无损 `scene.webp`；不加载原始 PNG、ASCII 预览、色彩底光、字形图集或旧 Worker 模块。加载失败或禁用 JavaScript 时才下载约 1.00 MiB 的 `scene-poster.webp`，其 1536×1024 原生像素与正式场景一致，入口仍可访问。
 
+`scene-accents.js` 为此前静止的角落新增 [18 处动态](docs/pixel-accents.md)：墙面纸张与小终端、桌下读写状态、右侧笔记本/音箱/机箱、蓝杯蒸汽、窗下小盆栽和灰色手柄等。屏幕和反光复用小纹理，发光仅限原灯珠，物理物件保持原色裁片及固定端，新增画布总计约 133 KiB。全部共用场景时钟和四种光照，不新增定时器、图片请求或逐帧画布读取。
+
 旧 `ascii-renderer.js`、Worker 与图集代码暂保留为历史参考及旧画面导出工具，首页不加载它们。`tools/prepare-scene.cjs` 调用全局像素整理流程更新 WebP 和加载色彩图；其中 ASCII 预览/底光输出不参与当前首页。
 
 可使用 `node tools/review-pixel-scene.cjs BEFORE AFTER OUTPUT_DIRECTORY` 导出覆盖全图的 4×4 对照网格，每块都以同样的 2 倍最近邻放大检查。清晰化改善已有像素过渡，不凭空补绘原图未记录的细节；离线处理不增加逐帧计算或画布缓存。
@@ -104,6 +106,7 @@ About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 ```sh
 node tests/pixel-scene.cjs
 node tests/display-frame.cjs
+node tests/scene-accents.cjs
 node tests/scene-extras.cjs
 node tests/scene-days.cjs
 node tests/time-cycle.cjs
