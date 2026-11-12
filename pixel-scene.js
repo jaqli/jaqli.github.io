@@ -1,7 +1,7 @@
 import { birds, birdPose, inside, waterAreas, screenOccluder, hemArea } from './scene-objects.js?v=20261111-sky43';
 import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
 import { detailShapes, detailPoint, eyeOpening, emitters } from './scene-details.js?v=20261111-edge48';
-import { screens, paintScreen } from './screen-content.js?v=20261111-detail39';
+import { screens, paintScreen } from './screen-content.js?v=20261112-screen53';
 import { drawQuad } from './scene-geometry.js?v=20261110-fps10';
 import { faceLight } from './scene-lights.js?v=20261111-flow28';
 import { rippleSources } from './water-ripples.js?v=20261111-flow28';
@@ -9,11 +9,12 @@ import { rippleSources } from './water-ripples.js?v=20261111-flow28';
 import { SceneExtras } from './scene-extras.js?v=20261112-edge50';
 import { SceneAdditions, additionalShapes } from './scene-additions.js?v=20261111-edge48';
 import { SceneTime } from './scene-time.js?v=20261112-cycle52';
-import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-pixel51';
+import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-screen53';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
+import { prepareDisplayFrame, plotContentQuad } from './scene-display-frame.js?v=20261112-screen53';
 
-const W=1536,H=1024,PIXEL_UNIT=1.5,GRID_W=Math.round(W/PIXEL_UNIT),GRID_H=Math.round(H/PIXEL_UNIT);
+const W=1536,H=1024;
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 const yieldFrame=()=>globalThis.scheduler?.yield?scheduler.yield():new Promise(resolve=>setTimeout(resolve,0));
@@ -35,8 +36,7 @@ export class PixelScene {
   }
   constructor(image,canvas,screenCanvas=null){
     this.image=image;this.canvas=canvas;canvas.width=W;canvas.height=H;
-    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';canvas.dataset.pixelUnit=String(PIXEL_UNIT);
-    this.pixelGrid=surface(GRID_W,GRID_H);this.gridCtx=this.pixelGrid.getContext('2d',{alpha:false});this.gridCtx.imageSmoothingEnabled=false;
+    canvas.dataset.renderer='pixel';canvas.dataset.raster='native';canvas.dataset.pixelUnit='1';
     this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;
     this.base=surface(W,H);const ctx=this.base.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,W,H);
     this.original=ctx.getImageData(0,0,W,H);this.plate=new ImageData(this.original.data.slice(),W,H);
@@ -177,11 +177,12 @@ export class PixelScene {
     for(const _ of this.extras.prepare(this))yield .4+.004*++extraStep;
     this.additions=new SceneAdditions();let additionStep=0;
     for(const _ of this.additions.prepare(this))yield .416+.024*++additionStep/3;
+    this.displayFrame=prepareDisplayFrame(this);
     this.base.getContext('2d').putImageData(this.plate,0,0);yield .44;
     yield* this.prepareSky();
     this.screenLayer=surface(1260,570);this.screenCtx=this.screenLayer.getContext('2d');this.screenCtx.scale(3,3);
-    const quads=[screens[0].quad,[[335,407],[438,413],[440,481],[336,480]],[[640,435],[730,441],[734,501],[644,495]]];
-    this.screens=screens.map((screen,i)=>{const canvas=surface(screen.width*3,screen.height*3),ctx=canvas.getContext('2d');ctx.scale(3,3);return {...screen,quad:quads[i],fontSize:[5.6,6.2,5.8][i],fontWeight:500,canvas,ctx};});
+    const quads=[screens[0].quad,[[335,407],[438,413],[440,481],[336,480]],plotContentQuad];
+    this.screens=screens.map((screen,i)=>{const canvas=surface(screen.width*3,screen.height*3),ctx=canvas.getContext('2d');ctx.scale(3,3);return {...screen,quad:quads[i],fontSize:[5.6,6.2,5.8][i],fontWeight:500,edgeFeather:i===2?0:3,padding:i===2?2:0,canvas,ctx};});
     this.monitorPaper=this.details.find(sprite=>sprite.shape.id==='paper-monitor');
     this.monitorPaperOccluder={...this.cut(this.monitorPaper.shape.polygon,()=>true,false),shape:this.monitorPaper.shape};
     this.water=surface(W/2,H/2);this.waterCtx=this.water.getContext('2d');
@@ -291,10 +292,7 @@ export class PixelScene {
     for(const sprite of this.details)this.drawDetail(sprite,time);
     this.drawLights(time);this.extras.draw(ctx,time);this.additions.draw(ctx,time);this.timeOfDay.drawLights(ctx,time);
     if(this.timeOfDay.mode!=='night')for(const sprite of this.birds)this.drawBird(sprite,time);
-    // Composite all moving layers first, then sample one shared 1.5px grid.
-    // Native extraction/motion keeps its precision; no per-object grid seams.
-    this.gridCtx.drawImage(this.canvas,0,0,GRID_W,GRID_H);
-    ctx.drawImage(this.pixelGrid,0,0,W,H);
+    // All layers are already composited at the native 1× source resolution.
   }
-  dispose(){if(this.haze)this.haze.canvas.width=this.haze.canvas.height=1;this.haze=null;this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
+  dispose(){if(this.haze)this.haze.canvas.width=this.haze.canvas.height=1;this.haze=null;this.beacon?.dispose();this.beacon=null;this.foliageMattes=null;this.displayFrame=null;this.waterDonorField=null;for(const c of this.clouds)for(const canvas of [c.layer,c.mask,c.sourceCanvas])canvas.width=canvas.height=1;if(this.sun)this.sun.canvas.width=this.sun.canvas.height=1;this.timeOfDay?.dispose();this.timeOfDay=null;this.additions?.dispose();this.additions=null;this.extras?.dispose();this.extras=null;for(const value of Object.values(this))if(value instanceof HTMLCanvasElement)value.width=value.height=1;this.details=[];this.birds=[];this.clouds=[];this.lights=[];}
 }

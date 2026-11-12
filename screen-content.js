@@ -96,23 +96,27 @@ export function paintScreen(screen, time) {
     wave(ctx, time * .7, 4, h*.6, 96, h*.085, 2.3, '#7badea');
     text(ctx, `f ${(42 + Math.sin(time) * 5).toFixed(1)}Hz   ${Math.floor(time * 30)} samples`, 3, h-7, '#a3d2b7');
   } else {
-    text(ctx, `FIELD / ${Math.floor(time * 12)}`, 2, 1, '#bededa');
+    const padding=screen.padding||0;
+    text(ctx, `FIELD / ${Math.floor(time * 12)}`, 2+padding, 1+padding, '#bededa');
     wave(ctx, time, 3, 20, w-8, 8, .8, '#8cd9e8');
     for (let col = 0; col < 14; col++) {
       const level = 1 + Math.floor((1 + Math.sin(time * 1.4 + col * .6)) * 2.5);
-      for (let y = 0; y < level; y++) text(ctx, Math.floor(time*1.5+col*.37+y*.17)%2?'+':'=', 3 + col * 6, h-9 - y * 2.8, '#90c8b1');
+      for (let y = 0; y < level; y++) text(ctx, Math.floor(time*1.5+col*.37+y*.17)%2?'+':'=', 3 + col * 6, h-9-padding - y * 2.8, '#90c8b1');
     }
-    text(ctx, 'FFT  /  live', 2, h-5, '#edca86');
+    text(ctx, 'FFT  /  live', 2+padding, h-5-padding*2, '#edca86');
   }
   // Dim the texture without weakening its occlusion or losing waveform detail.
   if(screen.brightness<1){
     ctx.globalCompositeOperation='source-atop';ctx.fillStyle=`rgb(0 0 0 / ${1-screen.brightness})`;
     ctx.fillRect(0,0,w,h);ctx.globalCompositeOperation='source-over';
   }
-  // Alpha ramps at all four edges retain the original edge pixels/reflections.
+  // Unmodified monitors retain their original reflections. A defined bezel
+  // has an opaque inset instead, so old artwork cannot bleed through its rim.
+  const edgeFeather=screen.edgeFeather??3;
+  if(edgeFeather<=0)return;
   ctx.globalCompositeOperation = 'destination-in';
   for (const horizontal of [true, false]) {
-    const end = horizontal ? w : h, feather = Math.min(3 / end, .12);
+    const end = horizontal ? w : h, feather = Math.min(edgeFeather / end, .12);
     const fade = ctx.createLinearGradient(0, 0, horizontal ? w : 0, horizontal ? 0 : h);
     fade.addColorStop(0, '#0000'); fade.addColorStop(feather, '#000');
     fade.addColorStop(1 - feather, '#000'); fade.addColorStop(1, '#0000');

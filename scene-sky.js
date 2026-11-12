@@ -17,7 +17,7 @@ export function* prepareSky(scene){
  const wires=surface(w,h),wire=wires.getContext('2d');wire.translate(-x0,-y0);wire.strokeStyle='#fff';wire.lineCap='round';wire.lineJoin='round';
  for(const {points,width}of skyWires){wire.lineWidth=width;wire.beginPath();points.forEach(([x,y],i)=>i?wire.lineTo(x,y):wire.moveTo(x,y));wire.stroke();}
  const wirePixels=wire.getImageData(0,0,w,h).data,lightMask=new Uint8Array(w*h),mask=surface(w,h),m=mask.getContext('2d'),alpha=m.createImageData(w,h),destinations=[];
- const shelf=prepareShelfMatte(scene),sill=prepareSillMatte(scene);
+ const shelf=prepareShelfMatte(scene),sill=prepareSillMatte(scene),display=scene.displayFrame;
  const plate=scene.plate.data,original=scene.original.data,foliage=scene.foliageMattes.filter(p=>p.y<430);
  const wireAt=(wx,wy)=>{
   const j=((wy-y0)*w+wx-x0)*4,i=(wy*1536+wx)*4;
@@ -44,6 +44,7 @@ export function* prepareSky(scene){
     const k=(wy-f.y)*f.w+wx-f.x,a=f.coverage[k];if(a<0)continue;
     amount=a;if(a>0&&a<255)for(let ch=0;ch<3;ch++)plate[i+ch]=f.colors[k*3+ch];
    }
+   if(display&&wx>=display.x&&wx<display.x+display.w&&wy>=display.y&&wy<display.y+display.h&&display.coverage[(wy-display.y)*display.w+wx-display.x]===0)amount=0;
    // Calm distant water replaces the removed shore fragments. A two-pixel
    // transition joins the cloud layer to the water without a hard cutoff.
    const horizon=amount>0&&wy>=426&&((wx>=734&&wx<832)||(wx>=858&&wx<1115));
@@ -59,7 +60,7 @@ export function* prepareSky(scene){
   const sx=x<965?974+(x%17):x,sy=456+(y-430)%17,i=(y*1536+x)*4,k=(sy*1536+sx)*4;
   for(let ch=0;ch<3;ch++)plate[i+ch]=original[k+ch];
  }
- refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,[sill,shelf,...frames]);
+ refineSkyEdges(scene,alpha,x0,y0,w,h,lightMask,[sill,shelf,...frames,...(display?[display]:[])]);
  for(let n=0;n<w*h;n++){if(alpha.data[n*4+3]===255)destinations.push(n);if(alpha.data[n*4+3]>0&&alpha.data[n*4+3]<255)lightMask[n]=0;}
  scene.base.getContext('2d').putImageData(scene.plate,0,0);
  m.putImageData(alpha,0,0);yield .54;
@@ -70,6 +71,7 @@ export function* prepareSky(scene){
  for(let c=0;c<3;c++)horizon[c]=Math.round(horizon[c]/samples);
  for(let y=0;y<60;y++)for(let x=0;x<w;x++){
   const wx=x+x0,wy=y+400,skyIndex=(wy-y0)*w+x;
+  if(display&&wx>=display.x&&wx<display.x+display.w&&wy>=display.y&&wy<display.y+display.h&&display.coverage[(wy-display.y)*display.w+wx-display.x]===0)continue;
   const seaWindow=(wx>=858&&wx<=1361)||(wx>=734&&wx<832&&wy<443);
   const above=wy<430&&(alpha.data[skyIndex*4+3]===255||(wy>=424&&seaWindow&&!skyForeground.some(p=>inside(wx,wy,p))));
   const below=wy>=430&&seaWindow&&!skyForeground.some(p=>inside(wx,wy,p));
