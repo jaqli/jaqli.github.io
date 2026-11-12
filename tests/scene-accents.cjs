@@ -4,7 +4,7 @@ const assert=require('node:assert/strict'),{chromium}=require('playwright');
  p.setDefaultTimeout(30000);
  await p.clock.setFixedTime(new Date('2026-11-12T17:30:00Z'));await p.goto(process.env.TEST_ORIGIN||'http://127.0.0.1:8081');await p.waitForSelector('.scene-ready');
  const result=await p.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-motion54'),{accentShapes,accentRegions}=await import('./scene-accents.js?v=20261112-motion54');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-face55'),{accentShapes,accentRegions}=await import('./scene-accents.js?v=20261112-motion54');
   const image=document.querySelector('#scene-image'),r=await PixelScene.create(image,document.createElement('canvas')),a=r.accents,c=r.ctx;
   const shapes=r.details.filter(s=>accentShapes.some(shape=>shape.id===s.shape.id));
   const draw=t=>{c.drawImage(r.base,0,0);for(const s of shapes)r.drawDetail(s,t);a.draw(c,t);};

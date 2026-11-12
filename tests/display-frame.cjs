@@ -3,7 +3,7 @@ const{chromium}=require('playwright');
 (async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});try{
  const p=await b.newPage({reducedMotion:'reduce'});await p.goto(process.env.TEST_ORIGIN||'http://127.0.0.1:8081');await p.waitForSelector('.scene-ready');
  const result=await p.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-motion54'),{plotFrame}=await import('./scene-display-frame.js?v=20261112-screen53'),{quadPoint}=await import('./scene-geometry.js?v=20261110-fps10');
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-face55'),{plotFrame,faceFrame}=await import('./scene-display-frame.js?v=20261112-face55'),{quadPoint}=await import('./scene-geometry.js?v=20261110-fps10');
   const im=document.querySelector('#scene-image'),hd=document.createElement('canvas'),r=await PixelScene.create(im,document.createElement('canvas'),()=>{},hd),q=r.screens[2].quad,outer=plotFrame.outer;
   const parallel=[],gaps=[];
   for(let i=0;i<4;i++){
@@ -23,6 +23,18 @@ const{chromium}=require('playwright');
    hairPixels++;const i=(y*1536+x)*4;for(let c=0;c<3;c++)hairError=Math.max(hairError,Math.abs(base[i+c]-original[i+c]));
   }
   const maskAlpha=hd.getContext('2d').getImageData((722-325)*3,(472-335)*3,1,1).data[3];
+  const face=r.lights.find(s=>s.emitter.id==='left-face'),faceParallel=[];
+  for(let n=0;n<4;n++){
+   const k=(n+1)%4,a=faceFrame.outer,z=face.emitter.polygon,dx=a[k][0]-a[n][0],dy=a[k][1]-a[n][1],ux=z[k][0]-z[n][0],uy=z[k][1]-z[n][1];
+   faceParallel.push(Math.abs(dx*uy-dy*ux)/(Math.hypot(dx,dy)*Math.hypot(ux,uy)));
+  }
+  const fixedFaceBoxes=[[287,654,4,55],[298,644,40,4],[359,651,3,38],[297,669,6,28],[311,699,42,8]];
+  let faceSourceError=0,faceMotionLeak=0,faceCornerAlpha=0;
+  for(const[x,y,w,h]of fixedFaceBoxes)for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)for(let ch=0;ch<3;ch++){
+   const i=(yy*1536+xx)*4+ch;faceSourceError=Math.max(faceSourceError,Math.abs(base[i]-original[i]));
+  }
+  const expressions=new Set();
+  for(const t of[0,4,8,12]){r.draw(t);expressions.add(face.plane.toDataURL());const data=face.plane.getContext('2d').getImageData(0,0,face.plane.width,face.plane.height).data;for(const[x,y]of[[0,0],[face.plane.width-1,0],[0,face.plane.height-1],[face.plane.width-1,face.plane.height-1]])faceCornerAlpha=Math.max(faceCornerAlpha,data[(y*face.plane.width+x)*4+3]);}
   const lights={};let cloudError=0;
   for(const mode of['night','dawn','noon','dusk']){
    await r.setTimeOfDay(mode);let total=0;
@@ -32,9 +44,13 @@ const{chromium}=require('playwright');
     r.ctx.drawImage(r.base,0,0);r.drawClouds(t);
     for(const[x,y]of points){const a=native.getImageData(x,y,1,1).data,z=r.ctx.getImageData(x,y,1,1).data;for(let c=0;c<3;c++)cloudError=Math.max(cloudError,Math.abs(a[c]-z[c]));}
    }
+   for(const t of[0,4,8,12]){
+    r.ctx.drawImage(r.base,0,0);r.drawLights(t);
+    for(const[x,y,w,h]of fixedFaceBoxes){const a=native.getImageData(x,y,w,h).data,z=r.ctx.getImageData(x,y,w,h).data;for(let i=0;i<a.length;i++)faceMotionLeak=Math.max(faceMotionLeak,Math.abs(a[i]-z[i]));}
+   }
   }
   r.draw(0);const before=plot.canvas.toDataURL();r.draw(.8);const moves=before!==plot.canvas.toDataURL();
-  r.dispose();return{parallel,gaps,white,bezelAlpha,minAlpha,hairError,hairPixels,maskAlpha,lights,cloudError,moves};
+  r.dispose();return{parallel,gaps,white,bezelAlpha,minAlpha,hairError,hairPixels,maskAlpha,lights,cloudError,moves,faceParallel,faceSourceError,faceMotionLeak,faceCornerAlpha,expressions:expressions.size};
  });
  assert(result.parallel.every(n=>n<1e-10),'content and white frame have parallel corresponding sides');
  assert(Math.abs(result.gaps[0]-result.gaps[2])<1e-10&&Math.abs(result.gaps[1]-result.gaps[3])<1e-10,'opposite frame margins are equal');
@@ -43,5 +59,7 @@ const{chromium}=require('playwright');
  assert.equal(result.bezelAlpha,0,'animated content never spills onto the frame');assert.equal(result.minAlpha,255,'old panel content cannot bleed through a transparent screen edge');
  assert(result.hairPixels>500);assert.equal(result.hairError,0,'the original hair is preserved');assert(result.maskAlpha<10,'high-resolution content stays behind the head');
  assert.equal(result.cloudError,0,'clouds and horizon haze never cut through the frame');assert(result.lights.night<result.lights.dusk*.6,'white bezel follows room lighting at night');assert(result.moves,'waveform and spectrum still animate');
- console.log('PASS aligned white bezel, opaque animated inset, preserved hair and four lighting modes',JSON.stringify(result));
+ assert(result.faceParallel.every(n=>n<1e-10),'face axes must follow the CRT frame');assert.equal(result.faceSourceError,0,'CRT housing, side indicators and footer retain original pixels');
+ assert.equal(result.faceMotionLeak,0,'all four expressions stay away from the frame, side indicators and footer in every lighting mode');assert.equal(result.faceCornerAlpha,0,'face animation must not repaint a dark rectangular patch');assert.equal(result.expressions,4);
+ console.log('PASS aligned white bezel and CRT face, preserved housings/hair/indicators/footer, transparent face background and four lighting modes',JSON.stringify(result));
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

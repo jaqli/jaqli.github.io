@@ -1,4 +1,6 @@
 import { quadPoint } from './scene-geometry.js?v=20261110-fps10';
+import { inside } from './scene-objects.js?v=20261111-sky43';
+import { exteriorField, reflectedSample } from './pixel-surface.js?v=20261111-surface37';
 
 // One plane defines both the white housing and the inset display. The content
 // cannot acquire a different tilt or drift into the bezel as it animates.
@@ -31,4 +33,36 @@ export function prepareDisplayFrame(scene){
   const i=(wy*1536+wx)*4;for(let ch=0;ch<3;ch++)plate[i+ch]=color[ch];
  }
  return{x,y,w,h,coverage};
+}
+
+// The small CRT has a much gentler tilt than the previous face patch. Derive
+// both face axes from the opening, preserving its icons, footer and housing.
+export const faceFrame={outer:[[291,653],[356,647],[357,710],[292,716]],width:65,height:63};
+export const faceContentQuad=[[17,7],[63,7],[63,44],[17,44]]
+ .map(([x,y])=>quadPoint(faceFrame.outer,x/faceFrame.width,y/faceFrame.height));
+
+export function prepareFaceDisplay(scene,emitter){
+ const x=306,y=648,w=54,h=49,source=scene.original.data,plate=scene.plate.data;
+ const lit=new Uint8Array(w*h),remove=new Uint8Array(w*h),blocked=new Uint8Array(w*h);
+ // Remove only the old cyan face and its one-pixel color fringe. Dark glass
+ // stays original, so a differently tilted opaque rectangle cannot reappear.
+ for(let py=0;py<h;py++)for(let px=0;px<w;px++){
+  const wx=x+px,wy=y+py,n=py*w+px,i=(wy*1536+wx)*4;
+  const inFace=inside(wx,wy,emitter.polygon),r=source[i],g=source[i+1],b=source[i+2];
+  lit[n]=inFace&&g>45&&b>55&&g-r>25&&b-r>30?1:0;
+  // Bright footer/side pixels cannot serve as glass-repair donors.
+  blocked[n]=!inFace||Math.max(r,g,b)>75?1:0;
+ }
+ for(let py=1;py<h-1;py++)for(let px=1;px<w-1;px++){
+  const n=py*w+px;if(!inside(x+px,y+py,emitter.polygon))continue;
+  for(let dy=-1;dy<=1&&!remove[n];dy++)for(let dx=-1;dx<=1;dx++)if(lit[n+dy*w+dx]){remove[n]=1;break;}
+  if(remove[n])blocked[n]=1;
+ }
+ const field=exteriorField(blocked,w,h);
+ for(let n=0;n<remove.length;n++)if(remove[n]){
+  const donor=reflectedSample(n,field,blocked,w,h);if(donor<0)continue;
+  const i=((y+Math.floor(n/w))*1536+x+n%w)*4,j=((y+Math.floor(donor/w))*1536+x+donor%w)*4;
+  for(let c=0;c<3;c++)plate[i+c]=source[j+c];
+ }
+ return{...emitter,box:[308,654,48,42],polygon:faceContentQuad,plane:{width:46,height:37},transparent:true};
 }

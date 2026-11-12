@@ -12,7 +12,7 @@ import { SceneTime } from './scene-time.js?v=20261112-motion54';
 import { prepareSky, drawSkyLayer } from './scene-sky.js?v=20261112-screen53';
 import { SceneBeacon } from './scene-beacon.js?v=20261111-layer44';
 import { cleanBirdMatte } from './scene-bird-matte.js?v=20261112-edge50';
-import { prepareDisplayFrame, plotContentQuad } from './scene-display-frame.js?v=20261112-screen53';
+import { prepareDisplayFrame, plotContentQuad, prepareFaceDisplay } from './scene-display-frame.js?v=20261112-face55';
 import { SceneAccents, accentShapes } from './scene-accents.js?v=20261112-motion54';
 
 const W=1536,H=1024;
@@ -164,10 +164,11 @@ export class PixelScene {
     }
     this.head=this.cut(screenOccluder,(r,g,b)=>Math.max(r,g,b)<135||(r>g*1.08&&r>b*1.5),false,2);
     this.beacon=new SceneBeacon(this);
-    for(const emitter of emitters.filter(e=>e.kind!=='lamp')){
+    for(const originalEmitter of emitters.filter(e=>e.kind!=='lamp')){
+      const emitter=originalEmitter.id==='left-face'?prepareFaceDisplay(this,originalEmitter):originalEmitter;
       const sprite=this.cut(emitter.polygon,()=>true,false);
       this.lights.push({...sprite,emitter,plane:surface(emitter.plane?.width||sprite.w,emitter.plane?.height||sprite.h)});
-      const p=this.plate.data;for(let y=sprite.y;y<sprite.y+sprite.h;y++)for(let x=sprite.x;x<sprite.x+sprite.w;x++)if(inside(x,y,emitter.polygon)){const i=(y*W+x)*4;p[i]=12;p[i+1]=25;p[i+2]=33;}
+      if(!emitter.transparent){const p=this.plate.data;for(let y=sprite.y;y<sprite.y+sprite.h;y++)for(let x=sprite.x;x<sprite.x+sprite.w;x++)if(inside(x,y,emitter.polygon)){const i=(y*W+x)*4;p[i]=12;p[i+1]=25;p[i+2]=33;}}
     }
     // A small cached mask dims only the pendant's glowing underside. Its dark
     // shade and the room stay still; the shared clock handles pause/background.
@@ -283,7 +284,8 @@ export class PixelScene {
     this.beacon.draw(this.ctx,time,this.timeOfDay.mode==='night');
     for(const light of this.lights){
       const {emitter}=light;
-      const c=light.plane.getContext('2d'),pw=light.plane.width,ph=light.plane.height;c.fillStyle='#0c1921';c.fillRect(0,0,pw,ph);
+      const c=light.plane.getContext('2d'),pw=light.plane.width,ph=light.plane.height;
+      if(emitter.transparent)c.clearRect(0,0,pw,ph);else{c.fillStyle='#0c1921';c.fillRect(0,0,pw,ph);}
       if(emitter.kind==='red-eye'){
         const blink=eyeOpening(time,.8);c.fillStyle='#ff5943';c.fillRect(Math.round(pw*.23+Math.sin(time*.8)),Math.round(ph*.52-3*blink),7,Math.max(1,Math.round(6*blink)));
         drawQuad(this.ctx,light.plane,emitter.polygon,pw,ph);continue;

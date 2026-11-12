@@ -39,7 +39,7 @@ const mode=p=>p.locator('body').getAttribute('data-scene-time');
  assert.equal(await page.locator('#ascii-canvas').evaluate(c=>c.toDataURL()),paused,'explicit switch preserves pause');
 
  const birdPresence=await page.evaluate(async()=>{
-  const{PixelScene}=await import('./pixel-scene.js?v=20261112-motion54'),r=await PixelScene.create(document.querySelector('#scene-image'),document.createElement('canvas')),birds=r.birds,result={};
+  const{PixelScene}=await import('./pixel-scene.js?v=20261112-face55'),r=await PixelScene.create(document.querySelector('#scene-image'),document.createElement('canvas')),birds=r.birds,result={};
   for(const mode of['night','dawn','noon','dusk']){
    await r.setTimeOfDay(mode);r.birds=birds;r.draw(1.3);const withBirds=r.canvas.toDataURL();
    r.birds=[];r.draw(1.3);result[mode]=withBirds!==r.canvas.toDataURL();
