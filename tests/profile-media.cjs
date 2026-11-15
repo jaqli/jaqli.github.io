@@ -14,6 +14,11 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert.equal(await page.locator('#paper-ch3depth .profile-badge').last().innerText(),'Highlight');
   assert.equal(await page.locator('#paper-gamecraft .profile-badge').last().innerText(),'#3 on Hugging Face Trending');
   assert.equal(await page.locator('#paper-gamecraft .profile-badge').last().getAttribute('href'),'https://huggingface.co/tencent/Hunyuan-GameCraft-1.0');
+  const badges=await page.locator('.publication-meta .profile-badge').evaluateAll(nodes=>nodes.map(node=>{
+   const style=getComputedStyle(node);return {text:node.textContent,size:style.fontSize,font:style.fontFamily,color:style.color,lineHeight:style.lineHeight};
+  }));
+  assert(badges.length>=4);
+  for(const badge of badges){assert.equal(badge.size,'10px',badge.text);assert(badge.font.includes('Courier New'),badge.text);assert.equal(badge.color,'rgb(212, 195, 154)',badge.text);assert.equal(badge.lineHeight,'18px',badge.text);}
   const video=page.locator('#paper-gamecraft video');await video.scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>{const v=document.querySelector('#paper-gamecraft video');return !v.paused&&v.currentTime>.1;});
   const info=await video.evaluate(v=>({loop:v.loop,muted:v.muted,inline:v.playsInline,duration:v.duration,source:v.currentSrc}));
