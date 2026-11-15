@@ -28,6 +28,7 @@ function publication(paper){
   if(paper.shortTitle)meta.append(el('span',paper.shortTitle,'publication-name'));
   meta.append(el('span',[paper.venue,year].filter(Boolean).join(' / ')));
   if(paper.role)meta.append(el('span',paper.role,'profile-badge'));
+  for(const distinction of paper.distinctions||[])meta.append(url(distinction.url)?link(distinction.label,distinction.url,'profile-badge'):el('span',distinction.label,'profile-badge'));
   const heading=el('h3');heading.append(link(paper.title,paper.url,''));
   body.append(meta,heading);
   if(paper.authors){
@@ -101,7 +102,7 @@ export function renderProfile(profile){
   if(about.awards?.length){
     const list=el('ul',null,'honor-list');
     for(const entry of about.awards){
-      const item=el('li');item.append(el('span',entry.year,'profile-date'),el('span',entry.displayTitle||entry.title,'honor-title'));list.append(item);
+      const item=el('li');item.append(el('span',entry.year,'profile-date'),url(entry.source)?link(entry.displayTitle||entry.title,entry.source,'honor-title'):el('span',entry.displayTitle||entry.title,'honor-title'));list.append(item);
     }
     section('honors','Honors',list);
   }

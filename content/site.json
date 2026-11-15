@@ -3799,7 +3799,37 @@
             "previewDuration": 12
           },
           "verifiedAt": "2026-11-11",
-          "role": "First Author"
+          "role": "First Author",
+          "distinctions": [
+            {
+              "label": "#3 on Hugging Face Trending",
+              "url": "https://huggingface.co/tencent/Hunyuan-GameCraft-1.0",
+              "provenance": "Author-reported historical rank; no dated official ranking record independently verified."
+            }
+          ]
+        },
+        {
+          "id": "tacodepth",
+          "shortTitle": "TacoDepth",
+          "title": "TacoDepth: Towards Efficient Radar-Camera Depth Estimation with One-stage Fusion",
+          "authors": "Y Wang, J Li, C Hong, R Li, L Sun, X Song, Z Wang, Z Cao, G Lin",
+          "year": "2025",
+          "venue": "CVPR 2025",
+          "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC",
+          "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC",
+          "description": "Efficient radar-camera depth estimation with one-stage fusion.",
+          "distinctions": [
+            {
+              "label": "Best Paper Candidate · Oral",
+              "url": "https://github.com/RaymondWang987/TacoDepth"
+            }
+          ],
+          "links": [
+            {
+              "label": "Author repository",
+              "url": "https://github.com/RaymondWang987/TacoDepth"
+            }
+          ]
         },
         {
           "id": "ch3depth",
@@ -3826,7 +3856,13 @@
             "caption": "Paper · Figure 1 ↗"
           },
           "verifiedAt": "2026-11-11",
-          "role": "Co-first Author"
+          "role": "Co-first Author",
+          "distinctions": [
+            {
+              "label": "Highlight",
+              "provenance": "Author-confirmed; conference page could not be accessed from this environment."
+            }
+          ]
         },
         {
           "id": "sddr",
@@ -3922,6 +3958,11 @@
         }
       ],
       "awards": [
+        {
+          "year": "2025",
+          "title": "Best Paper Candidate, CVPR — TacoDepth",
+          "source": "https://github.com/RaymondWang987/TacoDepth"
+        },
         {
           "year": "2023",
           "title": "Honours Degree",

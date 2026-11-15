@@ -38,3 +38,9 @@ ffmpeg -ss 8 -i gamecraft-source.mov -t 12 -vf 'fps=24,scale=480:-2:flags=lanczo
 ffmpeg -i heroic-storm-dragon.mov -vf 'fps=24,scale=480:-2:flags=lanczos' -an -c:v libx264 -preset veryslow -crf 35 -pix_fmt yuv420p -movflags +faststart gamecraft2-loop.mp4
 ffmpeg -ss 48 -i nomas-source.mp4 -t 12 -vf 'fps=24,scale=480:-2:flags=lanczos' -an -c:v libx264 -preset veryslow -crf 35 -pix_fmt yuv420p -movflags +faststart nomas-loop.mp4
 ```
+
+## Research distinctions (2026-11-15)
+
+- TacoDepth: the [author repository](https://github.com/RaymondWang987/TacoDepth), HEAD `af78b896af6f015d80c6feb4e3c7b4abc6507284`, explicitly states “CVPR 2025 Award Candidate & Oral”. The author requested the Best Paper Candidate label and its 2025 Honors entry. Title/authors and Scholar link reuse the existing publication snapshot. No preview image was added. The conference page was inaccessible under the current network policy.
+- CH3Depth: Highlight designation confirmed by the site author in this update; not independently checked against the conference program because `cvpr.thecvf.com` is inaccessible from this environment.
+- Hunyuan-GameCraft-1.0: historical Hugging Face Trending #3 rank supplied by the site author. The UI says “#3 on Hugging Face Trending” and links to the model page, which is not evidence of a historical ranking. Neither the current official GitHub README nor its available README history yielded a dated ranking record. `huggingface.co` was inaccessible from this environment. A dated Hugging Face announcement or archived leaderboard is still needed before describing the rank as independently verified or adding a ranking date.

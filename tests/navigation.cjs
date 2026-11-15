@@ -19,8 +19,8 @@ const settled=page=>page.waitForFunction(()=>!document.querySelector('.page-tran
   assert.notEqual(await page.locator('#scene-viewport').evaluate(e=>getComputedStyle(e).transform),before,'camera moves during departure');
   await page.waitForFunction(()=>{const m=new DOMMatrix(getComputedStyle(document.querySelector('#scene-viewport')).transform);return m.a>1.35&&Math.abs(m.e)+Math.abs(m.f)>40;});
   await page.waitForURL(`${origin}/cv/`);await page.waitForSelector('#experience');await settled(page);
-  assert.equal(await page.locator('.publication').count(),7);
-  assert.deepEqual(await page.locator('.publication-name').allTextContents(),['Hy-Nomas','GameCraft 2','GameCraft','CH3Depth','SDDR','DADP','NVDS']);
+  assert.equal(await page.locator('.publication').count(),8);
+  assert.deepEqual(await page.locator('.publication-name').allTextContents(),['Hy-Nomas','GameCraft 2','GameCraft','TacoDepth','CH3Depth','SDDR','DADP','NVDS']);
   assert.equal(await page.locator('#education,#competitions,.contact-codes,.profile-portrait figcaption').count(),0);
   assert.equal(await page.locator('video').count(),3);
   assert.equal(await page.locator('video[src]').count(),0,'below-fold videos do not preload');
