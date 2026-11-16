@@ -12,8 +12,13 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert.match(await page.locator('#honors li').first().innerText(),/2025.*Best Paper Candidate.*TacoDepth/s);
   assert.equal(await page.locator('#paper-tacodepth .profile-badge').innerText(),'Best Paper Candidate · Oral');
   assert.equal(await page.locator('#paper-ch3depth .profile-badge').last().innerText(),'Highlight');
-  assert.equal(await page.locator('#paper-gamecraft .profile-badge').last().innerText(),'#3 on Hugging Face Trending');
-  assert.equal(await page.locator('#paper-gamecraft .profile-badge').last().getAttribute('href'),'https://huggingface.co/tencent/Hunyuan-GameCraft-1.0');
+  const ranking=page.locator('#paper-gamecraft .profile-badge').filter({hasText:'#3 on Hugging Face Trending'});
+  assert.equal(await ranking.getAttribute('href'),'https://x.com/victormustar/status/1957867251060593058');
+  const snapshot=page.locator('#paper-gamecraft .profile-badge').last();
+  assert.equal(await snapshot.innerText(),'Wayback snapshot ↗');
+  assert.equal(await snapshot.getAttribute('href'),'https://web.archive.org/web/20250819033711/https://huggingface.co/models');
+  const rankBounds=await ranking.boundingBox(),snapshotBounds=await snapshot.boundingBox();
+  assert(Math.abs(rankBounds.y-snapshotBounds.y)<1,'ranking and archived evidence appear side by side');
   const badges=await page.locator('.publication-meta .profile-badge').evaluateAll(nodes=>nodes.map(node=>{
    const style=getComputedStyle(node);return {text:node.textContent,size:style.fontSize,font:style.fontFamily,color:style.color,lineHeight:style.lineHeight};
   }));

@@ -73,11 +73,11 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261116-tacodepth-fig3', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261116-ranking-sources', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {
-    const { renderProfile } = await import('./profile.js?v=20261115-honors');
+    const { renderProfile } = await import('./profile.js?v=20261116-ranking-sources');
     renderProfile(data.profile);
   }
   else if (section === 'post') renderPost(data);

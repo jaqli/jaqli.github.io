@@ -28,7 +28,14 @@ function publication(paper){
   if(paper.shortTitle)meta.append(el('span',paper.shortTitle,'publication-name'));
   meta.append(el('span',[paper.venue,year].filter(Boolean).join(' / ')));
   if(paper.role)meta.append(el('span',paper.role,'profile-badge'));
-  for(const distinction of paper.distinctions||[])meta.append(url(distinction.url)?link(distinction.label,distinction.url,'profile-badge'):el('span',distinction.label,'profile-badge'));
+  for(const distinction of paper.distinctions||[]){
+    const badge=url(distinction.url)?link(distinction.label,distinction.url,'profile-badge'):el('span',distinction.label,'profile-badge');
+    if(url(distinction.snapshot?.url)){
+      const group=el('span',null,'publication-distinction');
+      group.append(badge,link(distinction.snapshot.label,distinction.snapshot.url,'profile-badge'));
+      meta.append(group);
+    }else meta.append(badge);
+  }
   const heading=el('h3');heading.append(link(paper.title,paper.url,''));
   body.append(meta,heading);
   if(paper.authors){

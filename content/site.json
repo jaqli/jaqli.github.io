@@ -3803,8 +3803,12 @@
           "distinctions": [
             {
               "label": "#3 on Hugging Face Trending",
-              "url": "https://huggingface.co/tencent/Hunyuan-GameCraft-1.0",
-              "provenance": "Author-reported historical rank; no dated official ranking record independently verified."
+              "url": "https://x.com/victormustar/status/1957867251060593058",
+              "provenance": "Author-provided X post for the historical rank; linked content not independently verified in this update.",
+              "snapshot": {
+                "label": "Wayback snapshot ↗",
+                "url": "https://web.archive.org/web/20250819033711/https://huggingface.co/models"
+              }
             }
           ]
         },
