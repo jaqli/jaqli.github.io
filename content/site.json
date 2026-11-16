@@ -3819,12 +3819,12 @@
           "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC",
           "description": "Efficient radar-camera depth estimation with one-stage fusion.",
           "media": {
-            "url": "../assets/publications/tacodepth.webp",
-            "width": 744,
-            "height": 453,
-            "alt": "TacoDepth accuracy and inference speed comparison on nuScenes, paper Figure 1",
-            "source": "https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_TacoDepth_Towards_Efficient_Radar-Camera_Depth_Estimation_with_One-stage_Fusion_CVPR_2025_paper.pdf",
-            "caption": "Paper · Figure 1 ↗"
+            "url": "../assets/publications/tacodepth-fig3.webp",
+            "width": 1100,
+            "height": 492,
+            "alt": "TacoDepth architecture overview with Radar structure extraction, pyramidal fusion and flexible inference, paper Figure 3",
+            "source": "https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_TacoDepth_Towards_Efficient_Radar-Camera_Depth_Estimation_with_One-stage_Fusion_CVPR_2025_paper.pdf#page=3",
+            "caption": "Paper · Figure 3 ↗"
           },
           "distinctions": [
             {

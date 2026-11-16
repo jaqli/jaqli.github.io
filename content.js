@@ -73,7 +73,7 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261116-tacodepth', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261116-tacodepth-fig3', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {
