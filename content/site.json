@@ -3652,7 +3652,7 @@
     ],
     "source": "https://scholar.google.com/citations?user=i-2ghuYAAAAJ&hl=zh-CN",
     "syncedAt": "2026-11-10T05:26:47+00:00",
-    "bio": "I am a Senior Research Scientist on the Visual Generation team at Tencent Hunyuan. My research focuses on generative world models, interactive video generation, and 3D visual understanding. I work on models that connect controllable generation with spatial and temporal consistency, including Hunyuan-GameCraft and Hy-Nomas. My earlier research spans depth foundation models, video depth stabilization, and diffusion-based depth prediction, with work published at CVPR, ICCV, NeurIPS, and TPAMI.",
+    "bio": "I am a Senior Researcher on the Visual Generation team at Tencent Hunyuan. My research focuses on generative world models, interactive video generation, and 3D visual understanding. I work on models that connect controllable generation with spatial and temporal consistency, including Hunyuan-GameCraft and Hy-Nomas. My earlier research spans depth foundation models, video depth stabilization, and diffusion-based depth prediction, with work published at CVPR, ICCV, NeurIPS, and TPAMI.",
     "avatar": {
       "url": "../assets/profile/jiaqi-li.jpg",
       "alt": "Jiaqi Li",
@@ -3818,6 +3818,14 @@
           "url": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC",
           "scholarURL": "https://scholar.google.com/citations?view_op=view_citation&hl=zh-CN&oe=GB&user=i-2ghuYAAAAJ&pagesize=100&citation_for_view=i-2ghuYAAAAJ:KlAtU1dfN6UC",
           "description": "Efficient radar-camera depth estimation with one-stage fusion.",
+          "media": {
+            "url": "../assets/publications/tacodepth.webp",
+            "width": 744,
+            "height": 453,
+            "alt": "TacoDepth accuracy and inference speed comparison on nuScenes, paper Figure 1",
+            "source": "https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_TacoDepth_Towards_Efficient_Radar-Camera_Depth_Estimation_with_One-stage_Fusion_CVPR_2025_paper.pdf",
+            "caption": "Paper · Figure 1 ↗"
+          },
           "distinctions": [
             {
               "label": "Best Paper Candidate · Oral",
@@ -3982,7 +3990,7 @@
       "bioSource": "Author-provided role and verified publication history; updated 2026-11-11",
       "experience": [
         {
-          "title": "Senior Research Scientist",
+          "title": "Senior Researcher",
           "organization": "Tencent Hunyuan / 腾讯混元",
           "team": "Visual Generation Team / 视觉生成团队",
           "period": "CURRENT",
