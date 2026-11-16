@@ -77,7 +77,7 @@ ASCII 仅用于三块电脑屏幕中的代码、波形、频谱与状态信息�
 
 当前快照收录 11 篇已发布文章（技术 2 篇、生活 9 篇）、111 张本地配图，以及 Scholar 的 18 条论文记录。
 
-About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74)、Scholar 与作者确认的最新工作信息。介绍围绕视觉生成、世界模型和 3D 视觉，工作经历为腾讯混元视觉生成团队 Senior Researcher，放在论文之前，不推断入职日期。页面只展示 Hy-Nomas、GameCraft 2、GameCraft、TacoDepth、CH3Depth、SDDR、DADP、NVDS 八个项目，按首次发表时间从新到旧排列（同年也按时间排序）；荣誉展示 CVPR 2025 TacoDepth 最佳论文候选、国家奖学金、HUST 荣誉学士三条简短信息，移除教育、竞赛、微信/QQ 及对应图片。Contact 章节和论文末尾的 Scholar 按钮已删除，顶部保留 Scholar、GitHub、邮箱。完整 Scholar 记录仅保存在快照中，不再在网页展开。
+About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74)、Scholar 与作者确认的最新工作信息。介绍围绕视觉生成、世界模型和 3D 视觉，工作经历为腾讯混元视觉生成团队与视频世界模型团队 Senior Researcher，放在论文之前，不推断入职日期。页面只展示 Hy-Nomas、GameCraft 2、GameCraft、TacoDepth、CH3Depth、SDDR、DADP、NVDS 八个项目，按首次发表时间从新到旧排列（同年也按时间排序）；荣誉展示 CVPR 2025 TacoDepth 最佳论文候选、国家奖学金、HUST 荣誉学士三条简短信息，移除教育、竞赛、微信/QQ 及对应图片。Contact 章节和论文末尾的 Scholar 按钮已删除，顶部保留 Scholar、GitHub、邮箱。完整 Scholar 记录仅保存在快照中，不再在网页展开。
 
 每项论文提供论文、GitHub、项目页或视频链接，详情见 [素材来源](assets/publications/SOURCES.md)。七张预览图合计约 488 KiB，延迟加载；GameCraft 与 Hy-Nomas 使用各 12 秒的本地静音循环预览，GameCraft 2 使用约 5.3 秒的完整官方演示；三段视频总计 450,731 字节（约 440 KiB），480 px 宽、24 fps，H.264 高压缩编码并启用 faststart。视频进入视口才加载并自动循环，离屏、后台和页面转场期间暂停，手动暂停状态会保留；减少动态效果时保持静态，可手动播放。完整官方视频由预览下方的 Full video / Demo video 链接打开。CH3Depth 和 DADP 方法图从公开论文的对应 Figure 渲染，保留原有颜色和文字。未核实到可公开访问的 CH3Depth 代码库以及 DADP 官方代码库/独立项目页，因此只保留对应论文、图示和已公开材料。
 
