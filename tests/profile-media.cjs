@@ -19,6 +19,9 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:8081';
   assert.equal(await snapshot.getAttribute('href'),'https://web.archive.org/web/20250819033711/https://huggingface.co/models');
   const rankBounds=await ranking.boundingBox(),snapshotBounds=await snapshot.boundingBox();
   assert(Math.abs(rankBounds.y-snapshotBounds.y)<1,'ranking and archived evidence appear side by side');
+  const metaRows=await page.locator('#paper-gamecraft .publication-meta > *, #paper-gamecraft .publication-distinction > *').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().y));
+  assert(Math.max(...metaRows)-Math.min(...metaRows)<1,'all GameCraft metadata stays on one line');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'metadata does not overflow the page');
   const badges=await page.locator('.publication-meta .profile-badge').evaluateAll(nodes=>nodes.map(node=>{
    const style=getComputedStyle(node);return {text:node.textContent,size:style.fontSize,font:style.fontFamily,color:style.color,lineHeight:style.lineHeight};
   }));
