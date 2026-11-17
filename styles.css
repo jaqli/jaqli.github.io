@@ -82,7 +82,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .article-card p { font-size: 12px; line-height: 1.8; color: #8fa5ad; margin: 0; }
 .article-card:hover h2, .article-arrow { color: var(--accent); }
 .article-body { font-family: Arial, "PingFang SC", sans-serif; color: #bacace; line-height: 1.95; font-size: 16px; overflow-wrap: anywhere; }
-.article-body h2, .article-body h3 { color: #e4efeb; font-weight: 500; line-height: 1.4; margin: 2em 0 1em; }
+.article-body h2, .article-body h3, .article-body h4 { color: #e4efeb; font-weight: 500; line-height: 1.4; margin: 2em 0 1em; }
 .article-body a { color: var(--accent); text-decoration: underline; }
 .article-body pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 22px; background: #101c27; border: 1px solid var(--line); border-radius: 4px; font-size: 13px; }
 .article-body blockquote { margin-left: 0; padding-left: 22px; border-left: 2px solid #76bdc1; color: #94acb5; }
@@ -91,6 +91,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .article-body figure img { display: block; margin: auto; border-radius: 4px; }
 .article-body figcaption { text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px; }
 .article-body > p { white-space: pre-line; }
+.article-table { max-width: 100%; overflow-x: auto; margin: 28px 0; border: 1px solid var(--line); border-radius: 4px; }
+.article-table table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.7; }
+.article-table th, .article-table td { min-width: 100px; padding: 11px 14px; border: 1px solid var(--line); text-align: left; vertical-align: top; white-space: pre-line; }
+.article-table th { background: #101c27; color: #e4efeb; font-weight: 600; }
+.article-body video { display: block; width: 100%; max-height: 75vh; background: #080d13; }
+.article-body :not(pre) > code { padding: 2px 4px; background: #101c27; border-radius: 3px; font-size: .9em; }
 .profile-section { display: grid; grid-template-columns: 170px 1fr; gap: 35px; padding: 28px 0; border-bottom: 1px solid var(--line); }
 .profile-section h2 { font-size: 11px; font-weight: 400; color: var(--accent); letter-spacing: 1px; }
 .profile-section p { color: #a4b8bf; line-height: 1.9; margin: 0; font-size: 14px; }

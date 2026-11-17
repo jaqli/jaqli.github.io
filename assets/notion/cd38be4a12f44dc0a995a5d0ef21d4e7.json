@@ -1,0 +1,121 @@
+{
+  "checkpoint": "/apdcephfs_bjzf/share_305000619/jaqli/CWM/1012-AnyIDM/training/outputs/train_runs/20261027-153916_idm_v1_1_vpt_bf16_w8_bs4_gbs32_ep40_hosts34/idm_v1_1_vpt_ep000.pt",
+  "epoch": 0,
+  "step": 3282,
+  "videos": 969,
+  "label_pairs": 7679,
+  "classes": 15,
+  "raw_fingerprint": "9140af63f842b75b30ae82824ccacacc1ec6cff28cd2e59e826059fda527c16f",
+  "raw_to_saved_score_max_abs_diff": 0.0,
+  "mAP": 0.8114226075230436,
+  "mean_ROC_AUC": 0.9478225204311528,
+  "matches_original_summary": true,
+  "source_result_dir": "/apdcephfs_bjzf/share_305000619/jaqli/CWM/1012-AnyIDM/eval-camerabench/vpt-data-versions/vpt_v1_1/idm_v1_1_vpt_ep000-9140af63f842b75b",
+  "per_class": {
+    "Move_Down": {
+      "AP": 0.7155466352652142,
+      "AUC": 0.8951241317653533,
+      "samples": 430,
+      "positive": 37,
+      "negative": 393
+    },
+    "Move_In": {
+      "AP": 0.9090001404715687,
+      "AUC": 0.9565137350323366,
+      "samples": 549,
+      "positive": 161,
+      "negative": 388
+    },
+    "Move_Left": {
+      "AP": 0.9155124824196236,
+      "AUC": 0.9772445436507936,
+      "samples": 488,
+      "positive": 56,
+      "negative": 432
+    },
+    "Move_Out": {
+      "AP": 0.6876987962389777,
+      "AUC": 0.9059837188070604,
+      "samples": 549,
+      "positive": 53,
+      "negative": 496
+    },
+    "Move_Right": {
+      "AP": 0.8240274200643358,
+      "AUC": 0.9511561609122585,
+      "samples": 487,
+      "positive": 77,
+      "negative": 410
+    },
+    "Move_Up": {
+      "AP": 0.3857577184978013,
+      "AUC": 0.8371313096568923,
+      "samples": 430,
+      "positive": 29,
+      "negative": 401
+    },
+    "Pan_Left": {
+      "AP": 0.9110586372852795,
+      "AUC": 0.9794632677522144,
+      "samples": 512,
+      "positive": 79,
+      "negative": 433
+    },
+    "Pan_Right": {
+      "AP": 0.944587063623566,
+      "AUC": 0.9779668607254814,
+      "samples": 512,
+      "positive": 77,
+      "negative": 435
+    },
+    "Roll_Clockwise": {
+      "AP": 0.8854706944019288,
+      "AUC": 0.9622552291944815,
+      "samples": 470,
+      "positive": 42,
+      "negative": 428
+    },
+    "Roll_Counterclockwise": {
+      "AP": 0.9177116002243265,
+      "AUC": 0.9747975908372828,
+      "samples": 470,
+      "positive": 48,
+      "negative": 422
+    },
+    "Static": {
+      "AP": 0.7743028656075654,
+      "AUC": 0.9550922311145813,
+      "samples": 966,
+      "positive": 94,
+      "negative": 872
+    },
+    "Tilt_Down": {
+      "AP": 0.8307227239681072,
+      "AUC": 0.969324737020699,
+      "samples": 456,
+      "positive": 35,
+      "negative": 421
+    },
+    "Tilt_Up": {
+      "AP": 0.8892394417518934,
+      "AUC": 0.9784698275862068,
+      "samples": 458,
+      "positive": 58,
+      "negative": 400
+    },
+    "Zoom_In": {
+      "AP": 0.7582726073405948,
+      "AUC": 0.9400249999999999,
+      "samples": 450,
+      "positive": 50,
+      "negative": 400
+    },
+    "Zoom_Out": {
+      "AP": 0.8224302856848719,
+      "AUC": 0.9567894624116513,
+      "samples": 452,
+      "positive": 46,
+      "negative": 406
+    }
+  }
+}

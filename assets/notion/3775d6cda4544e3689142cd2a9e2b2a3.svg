@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1350"
+viewBox="0 0 1280 1350" role="img" aria-labelledby="title desc">
+<title id="title">OmniShotCut 0724 模型结构</title>
+<desc id="desc">100帧RGB输入经过逐帧ResNet-18、通道投影和时空展开，再经6层编码器和6层解码器，输出24个query的三个分类头，最后生成镜头和转场区间。</desc>
+<defs>
+  <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5"
+    orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0L9 4.5L0 9Z" fill="#5e718d"/>
+  </marker>
+  <style>
+    text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+    .mono { font-family: "DejaVu Sans Mono", monospace; }
+    .edge { fill:none; stroke:#5e718d; stroke-width:2.2; stroke-linejoin:round;
+      stroke-linecap:round; marker-end:url(#arrow); }
+  </style>
+</defs>
+<rect width="1280" height="1350" fill="#f7f9fc"/>
+<rect x="16" y="290" width="1248" height="884" rx="22" fill="#ffffff"
+  stroke="#d6dfe9" stroke-width="1.5" stroke-dasharray="8 6"/>
+
+<text x="40" y="58" font-size="36" fill="#172b49" font-weight="700" text-anchor="start">OmniShotCut · 模型结构</text>
+<text x="42" y="99" font-size="20" fill="#52647c" font-weight="400" text-anchor="start">0724 ep38  ·  40.99M 参数  ·  100 帧窗口</text>
+<text x="42" y="128" font-size="15" fill="#66788f" font-weight="400" text-anchor="start">三个输出头均含 no-object；训练另有中间解码层辅助损失</text>
+<rect x="910" y="30" width="332" height="77" rx="14" fill="#e9eef8" stroke="#d1dbee"/>
+<text x="1076" y="61" font-size="20" fill="#172b49" font-weight="700" text-anchor="middle">ResNet-18 + Transformer</text>
+<text x="1076" y="88" font-size="18" fill="#52647c" font-weight="400" text-anchor="middle">FP32 权重 · 156.55 MiB</text>
+<text x="40" y="316" font-size="16" fill="#7c8b9e" font-weight="400" text-anchor="start">模型前向</text>
+<path d="M640 250V320" class="edge"/>
+<path d="M640 412V450" class="edge"/>
+<path d="M640 542V580" class="edge"/>
+<path d="M640 672V720" class="edge"/>
+<path d="M640 820V870" class="edge"/>
+<path d="M950 366H1127V450" class="edge"/>
+<path d="M1127 542V770H950" class="edge"/>
+<path d="M1127 770V920H950" class="edge"/>
+<path d="M282 920H330" class="edge"/>
+<path d="M640 970V1000H220V1030" class="edge"/>
+<path d="M640 970V1030" class="edge"/>
+<path d="M640 1000H1060V1030" class="edge"/>
+<path d="M220 1130V1195H640V1220" class="edge"/>
+<path d="M640 1130V1195H640V1220" class="edge"/>
+<path d="M1060 1130V1195H640V1220" class="edge"/>
+<rect x="330" y="150" width="620" height="100" rx="14" fill="#e9f3ff" stroke="#bdd4f2" stroke-width="1.5"/>
+<text x="640.0" y="181" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">100 帧 RGB 窗口</text>
+<text x="640.0" y="208" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">ImageNet 归一化 · 默认推理 B=1</text>
+<text x="640.0" y="238" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">B × 100 × 3 × 96 × 128</text>
+<rect x="330" y="320" width="620" height="92" rx="14" fill="#eef3fc" stroke="#cbd9ee" stroke-width="1.5"/>
+<text x="640.0" y="351" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">逐帧 ResNet-18</text>
+<text x="640.0" y="378" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">提取 layer4 特征 · 空间降至 3 × 4</text>
+<text x="640.0" y="400" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">(B·100) × 512 × 3 × 4</text>
+<rect x="330" y="450" width="620" height="92" rx="14" fill="#eef3fc" stroke="#cbd9ee" stroke-width="1.5"/>
+<text x="640.0" y="481" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">1 × 1 Conv 通道投影</text>
+<text x="640.0" y="508" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">512 → 384</text>
+<text x="640.0" y="530" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">(B·100) × 384 × 3 × 4</text>
+<rect x="330" y="580" width="620" height="92" rx="14" fill="#eef3fc" stroke="#cbd9ee" stroke-width="1.5"/>
+<text x="640.0" y="611" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">时空特征展开</text>
+<text x="640.0" y="638" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">100 × 3 × 4 = 1200 个时空 token</text>
+<text x="640.0" y="660" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">1200 × B × 384</text>
+<rect x="330" y="720" width="620" height="100" rx="14" fill="#eeedff" stroke="#cdc9f2" stroke-width="1.5"/>
+<text x="640.0" y="751" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">Transformer Encoder × 6</text>
+<text x="640.0" y="778" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">8 heads · hidden=384 · FFN=2048</text>
+<text x="640.0" y="808" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">1200 × B × 384</text>
+<rect x="330" y="870" width="620" height="100" rx="14" fill="#eeedff" stroke="#cdc9f2" stroke-width="1.5"/>
+<text x="640.0" y="901" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">Transformer Decoder × 6</text>
+<text x="640.0" y="928" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">24 个 Query 通过 cross-attention 读取时空特征</text>
+<text x="640.0" y="958" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">B × 24 × 384</text>
+<rect x="1005" y="450" width="245" height="92" rx="14" fill="#f3effc" stroke="#d8cfee" stroke-width="1.5"/>
+<text x="1127.5" y="481" font-size="21" fill="#172b49" font-weight="700" text-anchor="middle">3D 位置编码</text>
+<text x="1127.5" y="508" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">时间 T + 空间 H / W</text>
+<text x="1127.5" y="530" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">sine · 384 dims</text>
+<rect x="32" y="870" width="250" height="100" rx="14" fill="#f3effc" stroke="#d8cfee" stroke-width="1.5"/>
+<text x="157.0" y="901" font-size="20" fill="#172b49" font-weight="700" text-anchor="middle">24 个可学习 Query</text>
+<text x="157.0" y="928" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">DETR 式端点预测</text>
+<text x="157.0" y="958" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">24 × 384</text>
+<rect x="40" y="1030" width="360" height="100" rx="14" fill="#eaf7f1" stroke="#bcded0" stroke-width="1.5"/>
+<text x="220.0" y="1061" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">片段内部类型</text>
+<text x="220.0" y="1088" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">intra_clip_logits</text>
+<text x="220.0" y="1118" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">B × 24 × 10</text>
+<rect x="460" y="1030" width="360" height="100" rx="14" fill="#eaf7f1" stroke="#bcded0" stroke-width="1.5"/>
+<text x="640.0" y="1061" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">片段间关系</text>
+<text x="640.0" y="1088" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">inter_clip_logits</text>
+<text x="640.0" y="1118" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">B × 24 × 7</text>
+<rect x="880" y="1030" width="360" height="100" rx="14" fill="#eaf7f1" stroke="#bcded0" stroke-width="1.5"/>
+<text x="1060.0" y="1061" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">片段结束位置</text>
+<text x="1060.0" y="1088" font-size="17" fill="#52647c" font-weight="400" text-anchor="middle">pred_shot_logits</text>
+<text x="1060.0" y="1118" font-size="18" fill="#304b70" font-weight="400" text-anchor="middle" class="mono">B × 24 × 102</text>
+<rect x="170" y="1220" width="940" height="90" rx="15" fill="#fff5df" stroke="#e9d49e" stroke-width="1.5"/>
+<text x="640" y="1255" font-size="24" fill="#172b49" font-weight="700" text-anchor="middle">后处理 → 单视频结构化结果</text>
+<text x="640" y="1285" font-size="19" fill="#735d2c" font-weight="400" text-anchor="middle">softmax / Query 解码 → 跨窗合并 → scenes / transitions（JSON）</text>
+<text x="640" y="1338" font-size="15" fill="#6c7c92" font-weight="400" text-anchor="middle">形状顺序：B=batch，T=帧数，C=通道，H/W=高/宽；基于 0724 实际权重配置</text>
+</svg>

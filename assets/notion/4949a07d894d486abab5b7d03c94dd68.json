@@ -1,0 +1,115 @@
+{
+  "checkpoint": "/apdcephfs_bjzf/share_305000619/jaqli/CWM/1012-AnyIDM/training/outputs/train_runs/20261027-153916_idm_v1_1_vpt_bf16_w8_bs4_gbs32_ep40_hosts34/idm_v1_1_vpt_ep000.pt",
+  "checkpoint_sha256": "0e98088a15d91f1b3d129d32d57b385cf12f355365107e22c394b1c90256635a",
+  "host": "29.207.48.211",
+  "gpus": "8 x NVIDIA H20",
+  "precision": "FP32 parameters / BF16 autocast",
+  "completed_rounds_used": 1,
+  "optional_second_repeat_stopped": true,
+  "unique_videos": 160,
+  "unique_windows": 233,
+  "mean_video_sec": 5.564506334072001,
+  "sample_seed": 1103,
+  "passes_per_video": 24,
+  "baseline_batch_size": 2,
+  "optimized_batch_size": 16,
+  "cache_bytes": 1236881408,
+  "sample_manifest_sha256": "e6ba3127ef9a9cc6bab924b20c7f04d64ede89761bfd1e7684937fc41d80187f",
+  "benchmark_script_sha256": "ee8a7449588999464fe9550ded965a319cb538ea5a6378c2d6b402e251a063a3",
+  "scope": "shared-Ceph MP4 decode versus node-local NPY + cross-video batching + prefetch; both five-head BF16, CPU copies and per-video JSON serialization",
+  "measurements": [
+    {
+      "round": 0,
+      "mode": "mp4_e2e",
+      "seconds": 394.3437621816993,
+      "controller_seconds": 394.34809374809265,
+      "videos": 3840,
+      "windows": 5592,
+      "total_video_QPM": 584.2618093546514,
+      "per_gpu_video_QPM": 73.03272616933143,
+      "per_gpu_6sec_window_QPM": 106.35390748408891,
+      "gpu_utilization_mean": 16.109283625730995,
+      "worker_count": 8,
+      "input_wait_fraction_worker_walltime": 0.7960473559095858,
+      "worker_component_seconds_mean": {
+        "seconds": 324.6273062187247,
+        "input_wait_sec": 258.4187087714672,
+        "forward_with_transfers_sec": 66.01011703442782,
+        "postprocess_sec": 0.17337438510730863
+      },
+      "gpu_utilization_per_card": {
+        "0": 17.43859649122807,
+        "1": 15.008771929824562,
+        "2": 16.44736842105263,
+        "3": 14.023391812865498,
+        "4": 16.394736842105264,
+        "5": 18.43859649122807,
+        "6": 14.786549707602338,
+        "7": 16.33625730994152
+      }
+    },
+    {
+      "round": 0,
+      "mode": "npy_optimized",
+      "seconds": 64.10928624868393,
+      "controller_seconds": 64.22385229170322,
+      "videos": 3840,
+      "windows": 5592,
+      "total_video_QPM": 3593.863127819954,
+      "per_gpu_video_QPM": 449.23289097749426,
+      "per_gpu_6sec_window_QPM": 654.1953974859761,
+      "gpu_utilization_mean": 90.51271186440678,
+      "worker_count": 8,
+      "input_wait_fraction_worker_walltime": 0.0007003012024767175,
+      "worker_component_seconds_mean": {
+        "seconds": 62.42807742301375,
+        "input_wait_sec": 0.04371845768764615,
+        "forward_with_transfers_sec": 62.01403060089797,
+        "postprocess_sec": 0.11206566914916039
+      },
+      "gpu_utilization_per_card": {
+        "0": 98.49152542372882,
+        "1": 88.40677966101696,
+        "2": 90.23728813559322,
+        "3": 91.27118644067797,
+        "4": 87.52542372881356,
+        "5": 88.38983050847457,
+        "6": 90.03389830508475,
+        "7": 89.7457627118644
+      }
+    }
+  ],
+  "agreement": {
+    "prob18": {
+      "max_abs_diff": 0.005859375,
+      "max_normalized_diff": 0.005859375,
+      "threshold_0_5_changed": 0
+    },
+    "zoom_prob": {
+      "max_abs_diff": 0.00390625,
+      "max_normalized_diff": 0.00390625,
+      "threshold_0_5_changed": 0
+    },
+    "velocity6": {
+      "max_abs_diff": 0.5,
+      "max_normalized_diff": 0.01953125,
+      "threshold_0_5_changed": 2
+    },
+    "shake_prob": {
+      "max_abs_diff": 0.00390625,
+      "max_normalized_diff": 0.00390625,
+      "threshold_0_5_changed": 0
+    },
+    "motion_scores": {
+      "max_abs_diff": 0.0078125,
+      "max_normalized_diff": 0.0066225165501236916,
+      "threshold_0_5_changed": 0
+    },
+    "paired_videos": 32,
+    "paired_pixel_equal": true,
+    "all_160_cache_readback_equal": true
+  },
+  "all_modes_complete": true,
+  "raw_results_path": "/apdcephfs_bjzf/share_305000619/jaqli/WMv2/1103_VPT_IDM_doc/benchmark_results.json",
+  "video_QPM_speedup": 6.151117650132856
+}

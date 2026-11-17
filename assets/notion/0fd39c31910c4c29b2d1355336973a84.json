@@ -1,0 +1,100 @@
+{
+  "jpeg_precision": {
+    "qpm_per_gpu": 101.79503880005619,
+    "total_qpm": 814.3603104004495,
+    "mean_gpu_util_percent": 17.102544910179642,
+    "requests": 1500,
+    "elapsed_seconds": 110.51619148254395,
+    "scenes_matches": 1500,
+    "framediff_matches": 1500,
+    "config": {
+      "batch": 1,
+      "source": "jpeg",
+      "rounds": 10
+    },
+    "source_summary": "/apdcephfs_bjzf/share_305000619/jaqli/Tools/transition_operator_1103/run_0724_h20_8gpu_20261103_01/summary.json"
+  },
+  "environment": {
+    "rank": 0,
+    "gpu": "NVIDIA H20",
+    "torch": "2.4.0+cu121",
+    "cuda": "12.1",
+    "cpu_threads": 1,
+    "tf32_matmul": false,
+    "tf32_cudnn": true,
+    "delivery_postprocess_checked": true
+  },
+  "npy_best": {
+    "qpm_per_gpu": 833.1633745755338,
+    "total_qpm": 6665.30699660427,
+    "mean_gpu_util_percent": 91.90301724137932,
+    "requests": 4500,
+    "elapsed_seconds": 40.50826168060303,
+    "scenes_matches": 4500,
+    "framediff_matches": 4500,
+    "config": {
+      "batch": 32,
+      "source": "npy",
+      "rounds": 30,
+      "prefetch_pinned_batches": 2,
+      "forward_pipeline_s": 37.43107915762812,
+      "read_seconds_sum": 10.261613914743066,
+      "phase_worker_s": 38.87841023877263,
+      "max_memory_allocated_mib": 7876.26123046875
+    },
+    "source_summary": "/apdcephfs_bjzf/share_305000619/jaqli/Tools/transition_operator_1103/run_0724_prefetch_h20_8gpu_20261103_01/summary.json"
+  },
+  "ram_best": {
+    "qpm_per_gpu": 867.619425036376,
+    "total_qpm": 6940.955400291008,
+    "mean_gpu_util_percent": 97.44318181818181,
+    "requests": 4500,
+    "elapsed_seconds": 38.89954400062561,
+    "scenes_matches": 4500,
+    "framediff_matches": 4500,
+    "config": {
+      "batch": 32,
+      "source": "ram",
+      "rounds": 30,
+      "prefetch_pinned_batches": 2,
+      "forward_pipeline_s": 37.15942437015474,
+      "read_seconds_sum": 0.00043158046901226044,
+      "phase_worker_s": 37.649234153330326,
+      "max_memory_allocated_mib": 7876.26123046875
+    },
+    "source_summary": "/apdcephfs_bjzf/share_305000619/jaqli/Tools/transition_operator_1103/run_0724_prefetch_h20_8gpu_20261103_01/summary.json"
+  },
+  "node_ip": "29.210.132.242",
+  "gpus": 8,
+  "checkpoint": "0724_best_check_ep38_f195.37.pth",
+  "clips": 150,
+  "frames": 109248,
+  "mean_frames_per_clip": 728.32,
+  "qpm_definition": "Completed clips / concurrent wall-clock minutes / 8 GPUs",
+  "scope": "FP32 model inference and full postprocessing including framediff. JPEG mode includes PIL decoding from prepared tmpfs JPEGs. NPY/RAM modes use RGB uint8 frames from the same JPEG/PIL pipeline, cross-video window batching and asynchronous pinned input preparation. Excludes cloud transcoding, download, tar extraction and cache construction; RAM preloading excluded. NPY is local hot-cache repeated read, not remote cold I/O.",
+  "io_probe": {
+    "node_ip": "29.210.132.242",
+    "workers": 8,
+    "clips": 150,
+    "notes": "CPU decode only; warm shared inputs after GPU benchmark; JPEG temp files in /tmp; staging time excluded from decode throughput",
+    "staging_s": 1.6450957171618938,
+    "input_bytes": 2383591284,
+    "shared_file": {
+      "elapsed_s": 40.151329080574214,
+      "clips_per_second": 3.735866369429154,
+      "mean_load_s": 2.03478434725975,
+      "mean_ffmpeg_s": 1.7963207935231427,
+      "mean_ffprobe_s": 0.11825474052379528,
+      "frames": 109248
+    },
+    "local_file": {
+      "elapsed_s": 38.96629750356078,
+      "clips_per_second": 3.8494804384813013,
+      "mean_load_s": 1.9757080343303581,
+      "mean_ffmpeg_s": 1.752077030899624,
+      "mean_ffprobe_s": 0.104394196861734,
+      "frames": 109248
+    }
+  }
+}
+

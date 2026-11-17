@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1200" viewBox="0 0 1500 1200"><rect width="1500" height="1200" fill="#f7f9fc"/><defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#64748b"/></marker></defs>
+<text x="52" y="62" font-size="34" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">VPT-IDM · v1.1 five-head · ep000</text>
+<text x="52" y="105" font-size="23" font-family="Noto Sans CJK SC, sans-serif" fill="#52637b">24 fps / 144 frames / 96×128 → 24 buckets × 250 ms</text>
+<rect x="52" y="145" width="650" height="110" rx="16" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="76" y="183" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">输入 RGB uint8</text>
+<text x="76" y="217" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">[B,144,3,96,128]；采样窗口 6.0 秒</text>
+<polyline points="377,255 377,285" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="52" y="285" width="650" height="110" rx="16" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="76" y="323" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">时间 Conv3D Stem</text>
+<text x="76" y="357" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">3→128 通道；kernel=5×1×1；padding=2×0×0</text>
+<polyline points="377,395 377,425" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="52" y="425" width="650" height="145" rx="16" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="76" y="463" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">逐帧 Impala 残差 CNN</text>
+<text x="76" y="497" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">256 / 512 / 512 通道，三次空间下采样</text>
+<text x="76" y="527" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">96×128 → 12×16；Flatten → Dense 256 → 4096</text>
+<polyline points="377,570 377,600" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="52" y="600" width="650" height="145" rx="16" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="76" y="638" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">非因果时间 Transformer ×2</text>
+<text x="76" y="672" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">hidden=4096，32 heads，FFN ratio=4</text>
+<text x="76" y="702" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">同窗可见过去/未来；输出 [B,144,4096]</text>
+<polyline points="377,745 377,775" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="52" y="775" width="650" height="110" rx="16" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="76" y="813" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">每 6 帧平均池化</text>
+<text x="76" y="847" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">共享桶特征 [B,24,4096]</text>
+<polyline points="702,830 760,830 760,245 824,245" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<polyline points="760,405 824,405" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<polyline points="760,565 824,565" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<polyline points="760,725 824,725" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<polyline points="760,830 760,885 824,885" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="824" y="185" width="620" height="120" rx="16" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="848" y="223" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">主动作 motion18 · Linear 4096→18</text>
+<text x="848" y="257" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">[B,24,18] logits；平移/转向/special/shake/roll</text>
+<text x="848" y="287" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">逐桶 masked BCE + clip 级弱监督</text>
+<rect x="824" y="345" width="620" height="120" rx="16" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="848" y="383" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">相机速度 velocity6 · Linear 4096→6</text>
+<text x="848" y="417" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">[B,24,6]；x / y / z / yaw / pitch / roll</text>
+<text x="848" y="447" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">逐桶 masked Smooth-L1</text>
+<rect x="824" y="505" width="620" height="120" rx="16" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="848" y="543" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">MotionScore · Linear 4096→1</text>
+<text x="848" y="577" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">桶特征全窗平均 → [B]</text>
+<text x="848" y="607" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">窗口级 masked Smooth-L1</text>
+<rect x="824" y="665" width="620" height="120" rx="16" fill="#fff4e7" stroke="#e5be89" stroke-width="2"/>
+<text x="848" y="703" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">人工 shake · Linear 4096→1</text>
+<text x="848" y="737" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">桶特征全窗平均 → [B] logits</text>
+<text x="848" y="767" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">epoch 尾冻结主干，独立拟合 60 轮</text>
+<rect x="824" y="825" width="620" height="120" rx="16" fill="#fff4e7" stroke="#e5be89" stroke-width="2"/>
+<text x="848" y="863" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">变焦 zoom · Linear 4096→2</text>
+<text x="848" y="897" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">[B,24,2] logits；zoom-in / zoom-out</text>
+<text x="848" y="927" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">主循环 clip 监督；轮末人工拟合 60 轮</text>
+<rect x="52" y="955" width="650" height="100" rx="16" fill="#eef0f4" stroke="#bdc4cf" stroke-width="2"/>
+<text x="76" y="993" font-size="24" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f" font-weight="700">原 Minecraft pi_head 保留并冻结</text>
+<text x="76" y="1027" font-size="20" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">不参与本项目五头 forward</text>
+<text x="52" y="1115" font-size="22" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">初始化：4x_idm；128²→96×128 的 dense / norm 参数做空间插值。</text>
+<text x="52" y="1155" font-size="22" font-family="Noto Sans CJK SC, sans-serif" fill="#15253f">主训练：backbone + motion / velocity / score / zoom；轮末人工 shake / zoom 独立拟合。</text>
+</svg>

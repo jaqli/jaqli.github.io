@@ -1,0 +1,77 @@
+{
+  "scope": "All canonical formal generation manifests in the full-category frozen/moving sets, both Clock generation versions, and six jaqli special-purpose generation sets. Excludes preview/gallery/smoke manifests and excludes split/train mapping copies to prevent double counting. Counts generated records, not checkpoint sampling.",
+  "sources": [
+    {
+      "name": "全类型 frozen",
+      "manifest": "/apdcephfs_cq11/share_302435597/yuhaliu/Code/ShotTransition/Synthetic_Data_Gen_For_Transition/outputs/full_default_256/clips_manifest.jsonl",
+      "rows": 75980,
+      "unique_clip_ids_in_manifest": 75969,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "全类型 moving",
+      "manifest": "/apdcephfs_cq11/share_302435597/yuhaliu/Code/ShotTransition/Synthetic_Data_Gen_For_Transition/outputs/full_default_256_moving/clips_manifest.jsonl",
+      "rows": 75980,
+      "unique_clip_ids_in_manifest": 75962,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "Clock 早期版",
+      "manifest": "/apdcephfs_cq11/share_302435597/yuhaliu/Code/ShotTransition/Synthetic_Data_Gen_For_Transition/outputs/train_single_kind_256/clock_wipe/moving/clips_manifest.jsonl",
+      "rows": 4506,
+      "unique_clip_ids_in_manifest": 4506,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "Clock 后续池",
+      "manifest": "/apdcephfs_cq11/share_302435597/yuhaliu/Code/ShotTransition/Synthetic_Data_Gen_For_Transition/outputs/pool_clock_wipe_v1_256/clock_wipe/moving/clips_manifest.jsonl",
+      "rows": 6240,
+      "unique_clip_ids_in_manifest": 6240,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "wipe_left",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/wipe_left/moving/clips_manifest.jsonl",
+      "rows": 4512,
+      "unique_clip_ids_in_manifest": 4512,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "wipe_right",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/wipe_right/moving/clips_manifest.jsonl",
+      "rows": 4512,
+      "unique_clip_ids_in_manifest": 4512,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "wipe_up",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/wipe_up/moving/clips_manifest.jsonl",
+      "rows": 4512,
+      "unique_clip_ids_in_manifest": 4512,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "wipe_down",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/wipe_down/moving/clips_manifest.jsonl",
+      "rows": 4512,
+      "unique_clip_ids_in_manifest": 4512,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "gradual_similar",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/gradual_similar/moving/clips_manifest.jsonl",
+      "rows": 7480,
+      "unique_clip_ids_in_manifest": 7480,
+      "rows_without_clip_id": 0
+    },
+    {
+      "name": "hard_cut",
+      "manifest": "/apdcephfs_cq11/share_302435597/jaqli/WMv2/detector/transition/data/Synth_yuhao/hard_cut/moving/clips_manifest.jsonl",
+      "rows": 7556,
+      "unique_clip_ids_in_manifest": 7556,
+      "rows_without_clip_id": 0
+    }
+  ],
+  "total_generated": 195790,
+  "clock_effective_train": 5034
+}

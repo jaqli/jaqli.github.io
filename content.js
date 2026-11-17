@@ -20,22 +20,66 @@ function externalLink(label, href) {
   a.target = '_blank'; a.rel = 'noopener noreferrer';
   return a;
 }
-function renderBlock(block) {
-  const tags = { paragraph: 'p', heading: 'h2', subheading: 'h3', quote: 'blockquote', code: 'pre' };
-  if (tags[block.type]) {
-    const node = el(tags[block.type], block.text || '');
-    if (Array.isArray(block.runs) && block.type !== 'code') {
-      node.replaceChildren();
-      for (const run of block.runs) {
-        const url = safeURL(run.url);
-        if (url) { const a = el('a', run.text || ''); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; node.append(a); }
-        else node.append(document.createTextNode(run.text || ''));
-      }
+function appendRich(node, block) {
+  if (!Array.isArray(block.runs)) { node.textContent = block.text || ''; return; }
+  for (const run of block.runs) {
+    let part = document.createTextNode(run.text || '');
+    for (const [flag, tag] of [['code', 'code'], ['bold', 'strong'], ['italic', 'em'], ['strike', 's']]) {
+      if (run[flag]) { const wrapper = el(tag); wrapper.append(part); part = wrapper; }
     }
-    if (block.type === 'code') { const code = el('code', block.text || ''); node.replaceChildren(code); }
+    const href = safeURL(run.url);
+    if (href) { const a = externalLink('', href); a.append(part); part = a; }
+    node.append(part);
+  }
+}
+function renderBlock(block) {
+  const tags = { paragraph: 'p', heading: 'h2', subheading: 'h3', smallheading: 'h4', quote: 'blockquote', code: 'pre' };
+  if (tags[block.type]) {
+    const node = el(tags[block.type]);
+    if (block.type === 'code') node.append(el('code', block.text || ''));
+    else appendRich(node, block);
     return node;
   }
-  if (block.type === 'list') { const list = el(block.ordered ? 'ol' : 'ul'); for (const item of block.items || []) list.append(el('li', item)); return list; }
+  if (block.type === 'list') {
+    const list = el(block.ordered ? 'ol' : 'ul');
+    for (const item of block.items || []) {
+      const li = el('li');
+      appendRich(li, typeof item === 'string' ? { text: item } : item);
+      if (typeof item === 'object') for (const child of item.children || []) li.append(renderBlock(child));
+      list.append(li);
+    }
+    return list;
+  }
+  if (block.type === 'table') {
+    const wrapper = el('div', null, 'article-table');
+    wrapper.tabIndex = 0; wrapper.setAttribute('role', 'region'); wrapper.setAttribute('aria-label', '文章数据表');
+    const table = el('table'), body = el('tbody');
+    (block.rows || []).forEach((row, index) => {
+      const tr = el('tr');
+      row.cells.forEach((cell, column) => {
+        const header = (block.columnHeader && index === 0) || (block.rowHeader && column === 0);
+        const td = el(header ? 'th' : 'td');
+        if (header) td.scope = block.columnHeader && index === 0 ? 'col' : 'row';
+        appendRich(td, cell); tr.append(td);
+      });
+      body.append(tr);
+    });
+    table.append(body); wrapper.append(table); return wrapper;
+  }
+  if (block.type === 'file' && safeURL(block.url)) {
+    const p = el('p'), a = externalLink(block.text || '下载附件', block.url);
+    a.download = block.text || ''; p.append(a);
+    if (block.caption) p.append(document.createTextNode(` — ${block.caption}`));
+    return p;
+  }
+  if (block.type === 'video' && safeURL(block.url)) {
+    const figure = el('figure'), video = el('video');
+    video.src = safeURL(block.url); video.controls = true; video.playsInline = true; video.preload = 'none';
+    video.setAttribute('aria-label', block.caption || block.text || '文章演示视频');
+    if (safeURL(block.poster)) video.poster = safeURL(block.poster);
+    const caption = el('figcaption'); caption.append(externalLink(block.caption || '打开演示视频 ↗', block.url));
+    figure.append(video, caption); return figure;
+  }
   if (block.type === 'divider') return el('hr', null, 'doc-divider');
   if (block.type === 'link') return externalLink(block.text || '原文 ↗', block.url);
   if (block.type === 'image' && safeURL(block.url)) {
@@ -73,7 +117,7 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261116-teams', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261118-tech', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {

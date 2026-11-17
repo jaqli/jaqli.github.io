@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="2170" viewBox="0 0 1700 2170" role="img" aria-labelledby="title desc">
+<title id="title">v003_r5 ViPE 到 IDM 伪标签映射策略流程图</title>
+<desc id="desc">位姿与稠密光流并行提取证据，准备基础量化和冻结 pre-r5 输入，联合校验后按三种数据源修正，消解相反方向冲突。最终主运动可与 SHK 共存，输出主18维、保留的有符号速度和独立 zoom 目标。</desc>
+<rect width="1700" height="2170" fill="#f7f9fc"/>
+<defs><marker id="arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L8 4 L0 8 Z" fill="#6b7f99"/></marker></defs>
+<polyline points="440,420 440,465" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1260,420 1260,465" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="440,645 440,677 850,677" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1260,645 1260,677 850,677" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="850,677 850,710" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,902 850,947" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,1127 850,1170" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="310,1170 1390,1170" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="310,1170 310,1210" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="310,1455 310,1498" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="850,1170 850,1210" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,1455 850,1498" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1390,1170 1390,1210" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1390,1455 1390,1498" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="310,1498 1390,1498" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="850,1498 850,1540" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,1785 850,1827" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="310,1827 1390,1827" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="310,1827 310,1870" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,1827 850,1870" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1390,1827 1390,1870" fill="none" stroke="#6b7f99" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="60" y="72" font-size="44" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">v003_r5 · ViPE → IDM 伪标签映射</text>
+<text x="60" y="117" font-size="27" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#52637b">位姿与光流联合校验 · 分源冻结规则 · 250 ms 逐桶输出</text>
+<rect x="60" y="150" width="1580" height="90" rx="14" fill="#eef0f4" stroke="#bdc4cf" stroke-width="2"/>
+<text x="84" y="187" font-size="27" font-weight="600" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">冻结规则：source + 数值特征 + 固定参数；继承 v003_r4</text>
+<text x="84" y="220" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#52637b">人工审核用于校准规则；映射判定不查视频 key、意见文本或 verdict。</text>
+<rect x="60" y="288" width="760" height="132" rx="18" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="84" y="331" font-size="32" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">输入 A · ViPE 相机轨迹</text>
+<text x="84" y="374" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">c2w 位姿序列 + pose fps + 数据源类别</text>
+<text x="84" y="406" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#52637b">来源：ViPE-simple / ViPE-full / MotionScore</text>
+<rect x="880" y="288" width="760" height="132" rx="18" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="904" y="331" font-size="32" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">输入 B · 对应视频 / 光流缓存</text>
+<text x="904" y="374" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">相邻帧稠密光流；与同一源片段时间对齐</text>
+<text x="904" y="406" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#52637b">取桶内帧对，保留整体运动与往复证据</text>
+<rect x="60" y="465" width="760" height="180" rx="18" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="84" y="509" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">① 相邻位姿求局部运动</text>
+<text x="84" y="551" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">Δt_local = R_i^T (p_{i+1} − p_i)</text>
+<text x="84" y="588" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">x→右 / y→下 / z→前；yaw / pitch / roll</text>
+<text x="84" y="625" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">250 ms 聚合；原始幅度 + 有符号 velocity6</text>
+<rect x="880" y="465" width="760" height="180" rx="18" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="904" y="509" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">① NeuFlow 稠密光流特征</text>
+<text x="904" y="551" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">768×432；鲁棒全局仿射 + 径向拟合</text>
+<text x="904" y="588" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">fmag / fdir_cons / fsf / fglob / 遮挡与残差</text>
+<text x="904" y="625" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">全局运动 + 桶内往复 + 径向缩放证据</text>
+<rect x="160" y="710" width="1380" height="192" rx="18" fill="#eaf1ff" stroke="#a6bee9" stroke-width="2"/>
+<text x="184" y="753" font-size="32" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">② 基础量化与 pre-r5 输入准备</text>
+<text x="184" y="793" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">平移：幅度门 + 分量占比；yaw / pitch：八方向；roll：pose × 光流</text>
+<text x="184" y="830" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">状态清理前基础标签 + 初始 18 维动作；有效冻结 pre-r5 标签优先继承</text>
+<text x="184" y="867" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">配套保留 velocity6；从径向光流生成独立 zoom 目标</text>
+<rect x="160" y="947" width="1380" height="180" rx="18" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="184" y="990" font-size="32" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">③ 光流 × 时间一致性联合校验与修正</text>
+<text x="184" y="1030" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">抑制伪平移 / 伪旋转；保护持续同向主运动</text>
+<text x="184" y="1067" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">静止与 SHK 候选 → 连续段过滤 / 补洞 → 高置信运动恢复</text>
+<text x="184" y="1104" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">联合检查 pose 幅度、光流、drift 与整段占比，避免单阈值误判</text>
+<rect x="60" y="1210" width="500" height="245" rx="18" fill="#fff4e7" stroke="#e5be89" stroke-width="2"/>
+<text x="84" y="1255" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">④ ViPE-simple</text>
+<text x="84" y="1300" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">左右旋符号校正</text>
+<text x="84" y="1339" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">W 中弱 / 乱跳旋转 → W + SHK</text>
+<text x="84" y="1378" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">长片局部旋转平滑 / 吸收</text>
+<text x="84" y="1417" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">短 SHK 强 yaw → 转向 + SHK</text>
+<rect x="600" y="1210" width="500" height="245" rx="18" fill="#fff4e7" stroke="#e5be89" stroke-width="2"/>
+<text x="624" y="1255" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">④ ViPE-full</text>
+<text x="624" y="1300" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">继承 r4 分源校验</text>
+<text x="624" y="1339" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">稳定 W 前缀内旋转异常</text>
+<text x="624" y="1378" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">清除旋转 / roll</text>
+<text x="624" y="1417" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">保留 W + SHK</text>
+<rect x="1140" y="1210" width="500" height="245" rx="18" fill="#eef0f4" stroke="#bdc4cf" stroke-width="2"/>
+<text x="1164" y="1255" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">④ MotionScore</text>
+<text x="1164" y="1300" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">r5 不新增修正规则</text>
+<text x="1164" y="1339" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">保持 r4 深度方向恢复</text>
+<text x="1164" y="1378" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">沿用短片 fallback 处理</text>
+<rect x="160" y="1540" width="1380" height="245" rx="18" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="184" y="1583" font-size="32" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">⑤ 方向冲突消解与最终状态表达</text>
+<text x="184" y="1624" font-size="26" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">W/S、A/D、up/down、双 roll 冲突 → 按有符号速度裁决</text>
+<text x="184" y="1661" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">SHK 可独立激活，也可与可靠的主运动共同激活：</text>
+<rect x="184" y="1684" width="252" height="76" rx="12" fill="#ffffff" stroke="#bed8ca" stroke-width="1"/>
+<text x="310" y="1715" font-size="24" font-weight="600" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">静止</text>
+<text x="310" y="1745" font-size="21" font-weight="400" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">主动作=0 / SHK=0</text>
+<rect x="454" y="1684" width="252" height="76" rx="12" fill="#ffffff" stroke="#bed8ca" stroke-width="1"/>
+<text x="580" y="1715" font-size="24" font-weight="600" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">抖动</text>
+<text x="580" y="1745" font-size="21" font-weight="400" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">SHK</text>
+<rect x="724" y="1684" width="252" height="76" rx="12" fill="#ffffff" stroke="#bed8ca" stroke-width="1"/>
+<text x="850" y="1715" font-size="24" font-weight="600" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">平移伴随抖动</text>
+<text x="850" y="1745" font-size="21" font-weight="400" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">平移 + SHK</text>
+<rect x="994" y="1684" width="252" height="76" rx="12" fill="#ffffff" stroke="#bed8ca" stroke-width="1"/>
+<text x="1120" y="1715" font-size="24" font-weight="600" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">旋转伴随抖动</text>
+<text x="1120" y="1745" font-size="21" font-weight="400" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">转向 + SHK</text>
+<rect x="1264" y="1684" width="252" height="76" rx="12" fill="#ffffff" stroke="#bed8ca" stroke-width="1"/>
+<text x="1390" y="1715" font-size="24" font-weight="600" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">复合伴随抖动</text>
+<text x="1390" y="1745" font-size="21" font-weight="400" text-anchor="middle" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">平移 + 转向 + SHK</text>
+<rect x="60" y="1870" width="500" height="174" rx="18" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="84" y="1912" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">⑥ labels18 [N,18]</text>
+<text x="84" y="1951" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">WASD / 八向转向 / special / 升降</text>
+<text x="84" y="1988" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">SHK / 顺逆 roll</text>
+<text x="84" y="2025" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">末两维是 roll；zoom 不占主18维</text>
+<rect x="600" y="1870" width="500" height="174" rx="18" fill="#eaf7f0" stroke="#9dceb3" stroke-width="2"/>
+<text x="624" y="1912" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">⑥ velocity6 [N,6]</text>
+<text x="624" y="1951" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">x / y / z / yaw / pitch / roll</text>
+<text x="624" y="1988" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">来自位姿或有效 pre-r5 目标</text>
+<text x="624" y="2025" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">保留有符号速度；动作修正不改写</text>
+<rect x="1140" y="1870" width="500" height="174" rx="18" fill="#f0ecfb" stroke="#bdb0df" stroke-width="2"/>
+<text x="1164" y="1912" font-size="30" font-weight="700" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">⑥ zoom_targets [N,2]</text>
+<text x="1164" y="1951" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">独立 zoom-in / zoom-out</text>
+<text x="1164" y="1988" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">沿用原目标 / 径向光流规则生成</text>
+<text x="1164" y="2025" font-size="24" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">不因 zoom 自动清除 W/S</text>
+<text x="60" y="2097" font-size="27" font-weight="600" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#15253f">固定 schema 落盘 + strategy_version / implementation SHA256</text>
+<text x="60" y="2138" font-size="25" font-weight="400" text-anchor="start" font-family="Noto Sans CJK SC, Microsoft YaHei, PingFang SC, sans-serif" fill="#52637b">先在完整源片段映射，再截取 6 秒训练窗；v1.1 为数据版本，映射策略仍为 v003_r5。</text>
+</svg>
