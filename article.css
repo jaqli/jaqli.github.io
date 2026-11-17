@@ -1,0 +1,89 @@
+/* Reading styles shared by the article view and technical index. */
+.post-page .document-main { max-width: 1150px; padding: 64px 36px 100px; }
+.post-heading { max-width: 780px; margin-bottom: 36px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.post-heading .doc-kicker { letter-spacing: 1.8px; margin-bottom: 18px; }
+.post-page .post-heading h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.35; font-weight: 600; letter-spacing: -.6px; margin: 0; overflow-wrap: anywhere; text-wrap: balance; }
+.post-layout { display: grid; grid-template-columns: minmax(0, 780px); }
+.post-layout > .article-body { min-width: 0; }
+.post-page .article-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 16px; line-height: 1.9; color: #bdc9cf; }
+.post-page .article-body > p { margin: 0 0 22px; }
+.post-page .article-body strong { color: #e0e9e9; font-weight: 600; }
+.post-page .article-body h2, .post-page .article-body h3, .post-page .article-body h4 { color: #e2ecec; scroll-margin-top: 32px; }
+.post-page .article-body h2 { font-size: 26px; line-height: 1.5; font-weight: 600; margin: 64px 0 26px; padding-top: 30px; border-top: 1px solid var(--line); }
+.post-page .article-body h3 { font-size: 20px; line-height: 1.5; font-weight: 600; margin: 36px 0 16px; }
+.post-page .article-body h4 { font-size: 16px; font-weight: 600; margin: 28px 0 14px; }
+.post-page .article-body h2 + h3 { margin-top: 22px; }
+.heading-number { color: #7dabae; font-family: "SFMono-Regular", Consolas, monospace; font-size: .75em; font-weight: 400; margin-right: 7px; }
+.post-page .article-body ul, .post-page .article-body ol { padding-left: 1.5em; margin: 18px 0 26px; }
+.post-page .article-body li { padding-left: 5px; margin: 10px 0; white-space: pre-line; }
+.post-page .article-body li::marker { color: #7e9da9; }
+.post-page .article-body li > ul, .post-page .article-body li > ol { margin: 8px 0; }
+.post-page .article-body a { text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #587d7c; }
+.post-page .article-body a:hover { color: #e3fff2; text-decoration-color: currentColor; }
+.article-body .article-inline-link { display: inline; padding: 0; margin: 0; border: 0; font: inherit; }
+.post-page .article-body blockquote { margin: 26px 0; padding: 4px 0 4px 22px; white-space: pre-line; }
+.post-page .article-body .article-summary { margin: 0 0 40px; border-left: 2px solid #83bcb2; background: #10202780; border-radius: 0 6px 6px 0; padding: 22px 26px; font-size: 15px; line-height: 1.95; color: #a9bfc6; }
+.post-page .article-body .article-summary + h2 { margin-top: 36px; }
+.post-page .article-body :not(pre) > code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: .87em; padding: 2px 5px; color: #c3dedb; background: #14242b; border: 1px solid #263a4080; }
+.article-code { margin: 24px 0 32px; border: 1px solid #293c48; border-radius: 6px; overflow: hidden; background: #0d1720; }
+.code-language { padding: 10px 18px; border-bottom: 1px solid #263640; font: 10px/1.5 "SFMono-Regular", Consolas, monospace; letter-spacing: 1.5px; color: #8da5b3; }
+.post-page .article-code pre { border: 0; border-radius: 0; background: transparent; margin: 0; padding: 20px; max-height: 500px; overflow: auto; white-space: pre; overflow-wrap: normal; tab-size: 4; font: 13px/1.8 "SFMono-Regular", Consolas, "Liberation Mono", monospace; color: #c3d1dc; }
+.article-table-frame { margin: 26px 0 32px; min-width: 0; }
+.table-scroll-hint { margin: 0 0 8px; text-align: right; color: #8da4af; font-size: 11px; line-height: 1.5; }
+.post-page .article-table { margin: 0; border-color: #2c3e48; border-radius: 6px; scrollbar-color: #49616b #101b22; }
+.post-page .article-table table { min-width: var(--table-min-width, 560px); font-size: 14px; line-height: 1.75; }
+.post-page .article-table th, .post-page .article-table td { padding: 14px 16px; border: 0; border-bottom: 1px solid #263740; min-width: 125px; white-space: pre-line; }
+.post-page .article-table th { background: #182932; color: #dae7e9; font-size: 12px; }
+.post-page .article-table td + td, .post-page .article-table th + th { border-left: 1px solid #26374080; }
+.post-page .article-table tr:nth-child(even) td { background: #11202a70; }
+.post-page .article-table tr:last-child td { border-bottom: 0; }
+.post-page .article-table tr:hover td { background: #192e3760; }
+.post-page .article-table td { font-variant-numeric: tabular-nums; }
+.post-page .article-table[data-columns="2"] th:first-child, .post-page .article-table[data-columns="2"] td:first-child { width: 28%; }
+.post-page .article-body figure { margin: 32px 0; }
+.post-page .article-body figure img { border-radius: 5px; background: #f4f6f5; }
+.article-image-link { display: block; cursor: zoom-in; }
+.post-page .article-body figcaption { font-size: 12px; line-height: 1.7; color: #8c9fa9; margin-top: 12px; }
+.post-page .article-body figcaption a { border: 0; padding: 0; margin: 0 0 0 10px; font: inherit; display: inline; }
+.post-page .article-body video { border: 1px solid #2a3b45; border-radius: 6px; }
+.post-page .article-body .article-attachment { display: grid; gap: 5px; padding: 14px 18px; margin: 20px 0 28px; border: 1px solid #293b45; border-radius: 5px; background: #10202960; font-size: 13px; white-space: normal; }
+.post-page .article-attachment a { padding: 0; margin: 0; border: 0; font: 13px/1.65 "SFMono-Regular", Consolas, monospace; }
+.attachment-caption { color: #8fa4af; font-size: 12px; line-height: 1.7; }
+.post-page .article-body > .source-link { margin-top: 32px; font-size: 12px; text-decoration: none; }
+.post-toc { min-width: 0; font: 12px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+.post-toc details { border-top: 1px solid var(--line); padding-top: 16px; }
+.post-toc summary { cursor: pointer; color: #bed0d5; font-size: 12px; padding: 4px 0 12px; }
+.post-toc nav { display: grid; gap: 2px; }
+.post-toc a { padding: 7px 0; color: #8fa7b2; }
+.post-toc a:hover, .post-toc a:focus-visible { color: var(--accent); }
+.post-page :is(.article-table, pre, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+[data-section="tech"] .document-main h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1.15; letter-spacing: -1px; }
+[data-section="tech"] .article-card { padding: 30px 0; gap: 20px; }
+[data-section="tech"] .article-card h2 { font-weight: 500; line-height: 1.5; }
+[data-section="tech"] .article-card p { font: 14px/1.85 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; max-width: 660px; }
+@media (min-width: 1100px) {
+  .technical-post .post-layout { grid-template-columns: minmax(0, 780px) 200px; gap: 64px; }
+  .technical-post .post-layout > .article-body { grid-column: 1; grid-row: 1; }
+  .technical-post .post-toc { grid-column: 2; grid-row: 1; align-self: start; position: sticky; top: 32px; }
+}
+@media (max-width: 1099px) {
+  .post-page .document-main { max-width: 852px; }
+  .post-toc { margin-bottom: 32px; }
+  .post-toc details { padding: 12px 18px; border: 1px solid var(--line); border-radius: 5px; }
+  .post-toc summary { padding: 0; }
+  .post-toc nav { padding-top: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
+}
+@media (max-width: 700px) {
+  .post-page .document-main { padding: 38px 22px 64px; }
+  .post-heading { padding-bottom: 24px; margin-bottom: 24px; }
+  .post-page .post-heading h1 { letter-spacing: -.3px; font-size: 28px; line-height: 1.5; }
+  .post-page .article-body { font-size: 15px; line-height: 1.95; }
+  .post-page .article-body .article-summary { padding: 16px 18px; font-size: 14px; }
+  .post-page .article-body h2 { font-size: 23px; margin-top: 48px; padding-top: 24px; }
+  .post-page .article-body h3 { font-size: 18px; margin-top: 30px; }
+  .post-page .article-body h4 { font-size: 15px; }
+  .post-page .article-table th, .post-page .article-table td { padding: 12px 14px; }
+  .post-page .article-code pre { font-size: 12px; max-height: 380px; padding: 16px; }
+  [data-section="tech"] .article-card { gap: 8px 12px; }
+  [data-section="tech"] .article-card h2 { font-size: 20px; }
+}

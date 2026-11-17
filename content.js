@@ -28,7 +28,7 @@ function appendRich(node, block) {
       if (run[flag]) { const wrapper = el(tag); wrapper.append(part); part = wrapper; }
     }
     const href = safeURL(run.url);
-    if (href) { const a = externalLink('', href); a.append(part); part = a; }
+    if (href) { const a = externalLink('', href); a.className = 'article-inline-link'; a.append(part); part = a; }
     node.append(part);
   }
 }
@@ -67,9 +67,9 @@ function renderBlock(block) {
     table.append(body); wrapper.append(table); return wrapper;
   }
   if (block.type === 'file' && safeURL(block.url)) {
-    const p = el('p'), a = externalLink(block.text || '下载附件', block.url);
+    const p = el('p', null, 'article-attachment'), a = externalLink(block.text || '下载附件', block.url);
     a.download = block.text || ''; p.append(a);
-    if (block.caption) p.append(document.createTextNode(` — ${block.caption}`));
+    if (block.caption) p.append(el('span', block.caption, 'attachment-caption'));
     return p;
   }
   if (block.type === 'video' && safeURL(block.url)) {
@@ -85,11 +85,17 @@ function renderBlock(block) {
   if (block.type === 'image' && safeURL(block.url)) {
     const figure = el('figure');
     const img = el('img'); img.src = safeURL(block.url); img.alt = block.alt || ''; img.loading = 'lazy';
-    figure.append(img);
-    if (block.caption) figure.append(el('figcaption', block.caption));
+    const original = externalLink('', block.url); original.className = 'article-image-link';
+    original.setAttribute('aria-label', `查看原图：${img.alt}`); original.append(img); figure.append(original);
+    const caption = el('figcaption', block.caption || '');
+    const imageLink = externalLink('查看原图 ↗', block.url); imageLink.className = 'article-image-source';
+    caption.append(imageLink); figure.append(caption);
     return figure;
   }
   return el('p', block.text || '');
+}
+function articleTitle(post) {
+  return post.category === 'tech' ? post.title.replace(/^\d{4}_/, '').replace(/([\u3400-\u9fff])(?=[A-Za-z])/, '$1 · ') : post.title;
 }
 function renderPosts(data) {
   const posts = data.notion.posts.filter(post => post.category === section).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -100,7 +106,7 @@ function renderPosts(data) {
     card.href = `../post/?id=${encodeURIComponent(post.id)}`;
     card.dataset.transition = section.toUpperCase();
     card.append(el('span', post.date || '', 'article-date'));
-    const text = el('div'); text.append(el('h2', post.title), el('p', post.summary || '')); card.append(text, el('span', '↗', 'article-arrow'));
+    const text = el('div'); text.append(el('h2', articleTitle(post)), el('p', post.summary || '')); card.append(text, el('span', '↗', 'article-arrow'));
     root.append(card);
   }
 }
@@ -108,12 +114,59 @@ function renderPost(data) {
   const id = new URLSearchParams(location.search).get('id');
   const post = data.notion.posts.find(item => item.id === id);
   if (!post) { document.querySelector('#post-title').textContent = 'Not found.'; root.replaceChildren(el('p', '这篇文章尚未收录。请返回文章列表。')); return; }
-  document.title = `${post.title} — jaq/li`;
-  document.querySelector('#post-title').textContent = post.title;
+  document.title = `${articleTitle(post)} — jaq/li`;
+  document.querySelector('#post-title').textContent = articleTitle(post);
   document.querySelector('#post-meta').textContent = `${post.category.toUpperCase()} / ${post.date || 'NOTES'}`;
   document.querySelector('#post-back').href = `../${post.category === 'life' ? 'life' : 'tech'}/`;
   root.replaceChildren(...(post.blocks || []).map(renderBlock));
   if (post.source) root.append(externalLink('在 Notion 阅读原文 ↗', post.source));
+  if (post.category === 'tech') polishTechnicalArticle(post);
+}
+
+function polishTechnicalArticle(post) {
+  document.body.classList.add('technical-post');
+  const headings = [...root.querySelectorAll('h2, h3, h4')];
+  const sourceHeadings = post.blocks.filter(block => ['heading', 'subheading', 'smallheading'].includes(block.type));
+  headings.forEach((heading, index) => {
+    heading.id = `section-${sourceHeadings[index].sourceBlockId || index + 1}`;
+    const parts = heading.textContent.match(/^(\d+(?:\.\d+)*\.?)[\s]+(.+)$/);
+    if (parts) heading.replaceChildren(el('span', parts[1], 'heading-number'), document.createTextNode(` ${parts[2]}`));
+  });
+  const toc = document.querySelector('#post-toc');
+  if (toc && headings.length) {
+    toc.hidden = false;
+    const details = el('details'); details.open = matchMedia('(min-width: 1100px)').matches;
+    details.append(el('summary', '文章目录'));
+    const nav = el('nav'); nav.setAttribute('aria-label', '文章目录');
+    for (const heading of headings.filter(node => node.tagName === 'H2')) {
+      const a = el('a', heading.textContent); a.href = `#${heading.id}`; nav.append(a);
+    }
+    details.append(nav); toc.replaceChildren(details);
+  }
+  if (root.firstElementChild?.tagName === 'BLOCKQUOTE') root.firstElementChild.classList.add('article-summary');
+  for (const p of root.querySelectorAll(':scope > p')) if (!p.textContent.trim()) p.remove();
+  const wrappers = [...root.querySelectorAll('.article-table')];
+  const measure = () => wrappers.forEach(wrapper => { wrapper.previousElementSibling.hidden = wrapper.scrollWidth <= wrapper.clientWidth + 1; });
+  for (const wrapper of wrappers) {
+    const columns = wrapper.querySelector('tr')?.children.length || 2;
+    wrapper.dataset.columns = columns;
+    wrapper.style.setProperty('--table-min-width', `${Math.max(560, columns * 145)}px`);
+    const hint = el('p', '左右滑动查看完整表格', 'table-scroll-hint');
+    const frame = el('div', null, 'article-table-frame');
+    wrapper.before(frame); frame.append(hint, wrapper);
+  }
+  const observer = new ResizeObserver(measure);
+  wrappers.forEach(wrapper => observer.observe(wrapper)); measure();
+  addEventListener('pagehide', () => observer.disconnect(), { once: true });
+  addEventListener('pageshow', () => wrappers.forEach(wrapper => observer.observe(wrapper)));
+  for (const pre of root.querySelectorAll('pre')) {
+    const frame = el('div', null, 'article-code');
+    const language = pre.textContent.trimStart().startsWith('{') ? 'JSON' : 'PYTHON';
+    const label = el('div', language, 'code-language');
+    pre.tabIndex = 0; pre.setAttribute('aria-label', `${language} 代码，可滚动阅读`);
+    pre.before(frame); frame.append(label, pre);
+  }
+  if (location.hash) requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView());
 }
 
 try {
