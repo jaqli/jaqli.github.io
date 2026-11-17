@@ -117,7 +117,7 @@ function renderPost(data) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261118-tech', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261118-tech-published', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {

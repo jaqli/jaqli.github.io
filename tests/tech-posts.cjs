@@ -16,7 +16,7 @@ const articles=[
    page.on('pageerror',error=>errors.push(error.message));
    page.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
    await page.goto(`${origin}/tech/`);await page.waitForSelector('.article-card');
-   assert.equal(await page.locator('.article-card').count(),4);
+   assert.equal(await page.locator('.article-card').count(),2);
    const links=await page.locator('.article-card').evaluateAll(nodes=>nodes.map(a=>a.href));
    for(const [index,article] of articles.entries())assert(links[index].endsWith(`?id=${article.id}`),'new articles appear first');
    for(const article of articles){
@@ -54,14 +54,19 @@ const articles=[
     assert.deepEqual(errors,[]);
     console.log(`PASS ${width}px ${source.title}: complete tables, local images/downloads, playable videos and no runtime/HTTP errors`);
    }
-   // The shared renderer still accepts the original string-list and link formats.
-   for(const category of ['tech','life']){
-    const old=data.notion.posts.find(post=>post.category===category&&!articles.some(a=>a.id===post.id));
-    await page.goto(`${origin}/post/?id=${old.id}`);
+   // Hidden articles must disappear from both the snapshot and their old routes.
+   for(const id of ['ca34487821e84401b9e38d7807e612c8','3b5ad8eeb6f84e33953ca624f017515a']){
+    assert(!data.notion.posts.some(post=>post.id===id));
+    await page.goto(`${origin}/post/?id=${id}`);
     await page.waitForFunction(()=>document.body.dataset.contentReady==='true');
-    assert.equal(await page.locator('#post-title').innerText(),old.title);
-    assert.equal(await page.locator('.article-body > *').count(),old.blocks.length+1);
+    assert.equal(await page.locator('#post-title').innerText(),'Not found.');
    }
+   // The shared renderer still accepts the original article format for life posts.
+   const old=data.notion.posts.find(post=>post.category==='life');
+   await page.goto(`${origin}/post/?id=${old.id}`);
+   await page.waitForFunction(()=>document.body.dataset.contentReady==='true');
+   assert.equal(await page.locator('#post-title').innerText(),old.title);
+   assert.equal(await page.locator('.article-body > *').count(),old.blocks.length+1);
    assert.deepEqual(errors,[]);await page.close();
   }
  }finally{await browser.close();}

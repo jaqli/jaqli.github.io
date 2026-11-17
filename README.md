@@ -75,7 +75,7 @@ ASCII 仅用于三块电脑屏幕中的代码、波形、频谱与状态信息�
 
 `content/site.json` 是网站使用的本地内容快照，由 `content.js` 排版为技术文章、生活随记和文章详情，About Me 由按需加载的 `profile.js` 排版，地址保持 `/cv/`。网页无需 Notion 令牌，也不会在访客浏览器中请求 Notion 或 Scholar API。原文链接保留在各页面。
 
-当前快照收录 13 篇已发布文章（技术 4 篇、生活 9 篇）、119 张本地图片、4 段文章演示视频和 6 份 JSON 附件，以及 Scholar 的 18 条论文记录。新增技术文章为「1103_转场算子OminiShotCut」和「1103_运镜算子VPT-IDM」，均来自 Notion 的公开、已发布、未加锁记录，保留来源日期 2026-11-03。
+当前快照收录 11 篇已发布文章（技术 2 篇、生活 9 篇）、119 张本地图片、4 段文章演示视频和 6 份 JSON 附件，以及 Scholar 的 18 条论文记录。新增技术文章为「1103_转场算子OminiShotCut」和「1103_运镜算子VPT-IDM」，均来自 Notion 的公开、已发布、未加锁记录，保留来源日期 2026-11-03。
 
 About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb79d61040ebad5edaf10e8b7c6e?pvs=74)、Scholar 与作者确认的最新工作信息。介绍围绕视觉生成、世界模型和 3D 视觉，工作经历为腾讯混元视觉生成团队与视频世界模型团队 Senior Researcher，放在论文之前，不推断入职日期。页面只展示 Hy-Nomas、GameCraft 2、GameCraft、TacoDepth、CH3Depth、SDDR、DADP、NVDS 八个项目，按首次发表时间从新到旧排列（同年也按时间排序）；荣誉展示 CVPR 2025 TacoDepth 最佳论文候选、国家奖学金、HUST 荣誉学士三条简短信息，移除教育、竞赛、微信/QQ 及对应图片。Contact 章节和论文末尾的 Scholar 按钮已删除，顶部保留 Scholar、GitHub、邮箱。完整 Scholar 记录仅保存在快照中，不再在网页展开。
 
@@ -90,7 +90,7 @@ About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 - `notion.posts[]`：`id`（稳定的 Notion 页面 ID）、`category`（`tech` 或 `life`）、`title`、`date`、`summary`、`source`、`blocks`。
 - `blocks[]`：`paragraph`、`heading`、`subheading`、`quote`、`code` 使用 `text`；`list` 使用 `items` 与可选 `ordered`；`link` 使用 `text` 和 `url`；`image` 使用 `url` 和 `alt`。
 - 文章地址为 `/post/?id=<Notion 页面 ID>`，分类列表自动指向该地址，正文按本网站风格排版。文本不会作为 HTML 执行。`runs` 可保存段内链接；图片会保存到 `assets/notion/` 并通过相对路径读取，避免临时链接过期。
-- 正文保留表格、四级标题、粗体、行内代码和连续编号列表。表格以 `rows[].cells[]` 保存文字及 `runs`，在窄屏容器内横向滚动；列表兼容原有字符串条目及带 `text`、`runs`、`children` 的对象条目。`file`、`video` 使用本地 `url`，附件保留下载文件名，演示视频保留原片并使用本地封面、原生播放控件及 `preload="none"`，不自动播放。两篇新增文章共保留 24 张表格、168 行数据、4 段视频和 9 个附件入口；`sourceBlockId` 保留与源正文的映射，旧文章和个人资料不参与此次覆盖。
+- 正文保留表格、四级标题、粗体、行内代码和连续编号列表。表格以 `rows[].cells[]` 保存文字及 `runs`，在窄屏容器内横向滚动；列表兼容原有字符串条目及带 `text`、`runs`、`children` 的对象条目。`file`、`video` 使用本地 `url`，附件保留下载文件名，演示视频保留原片并使用本地封面、原生播放控件及 `preload="none"`，不自动播放。两篇新增文章共保留 24 张表格、168 行数据、4 段视频和 9 个附件入口；`sourceBlockId` 保留与源正文的映射，其余已发布文章和个人资料保持不变；Notion 标记为 Invisible 的「MM2023」和「Transformer系列」已从公开列表及正文快照移除。
 - `profile`：`name`、`affiliation`、`bio`、`interests[]`、`publications[]`、`source`、`syncedAt`。每篇论文含 `title`、`authors`、`venue`、`year`、`url`。仅在完成真实资料核对后填写 `syncedAt`。
 - `profile.avatar`：本地 `url`、原图 `source`、`alt`、尺寸；`profile.about`：Notion `source`、独立 `syncedAt`、`experience[]`、`research[]`、`selectedPublications[]`、`awards[]`、`contacts`。Notion 来源项保留 `sourceBlockId`，代表论文用 `scholarURL` 对应完整论文快照，并包含 `links[]` 与本地 `media`（尺寸、来源、可选官方视频地址）。`profile.css` 仅由 About Me 加载，保留全站暗色背景与字符风格的章节编号。
 
