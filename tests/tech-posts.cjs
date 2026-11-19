@@ -30,6 +30,17 @@ const articles=[
     assert.equal(await page.locator('.article-table tr').count(),article.rows);
     assert.equal(await page.locator('.article-body img').count(),article.images);
     assert.equal(await page.locator('.article-body video').count(),2);
+    const columns=page.locator('.article-columns > .article-column');
+    assert.equal(await columns.count(),2,'Notion video columns are retained');
+    const left=await columns.nth(0).boundingBox(),right=await columns.nth(1).boundingBox();
+    if(width>700){
+     assert(Math.abs(left.y-right.y)<1&&left.x+left.width<right.x,'videos sit side by side on desktop');
+     assert(Math.abs(left.width-right.width)<1,'source columns have equal width');
+    }else{
+     assert(Math.abs(left.x-right.x)<1&&left.y+left.height<right.y,'videos stack in source order on mobile');
+    }
+    const sourceVideos=source.blocks.find(block=>block.type==='columns').columns.flatMap(column=>column.blocks).filter(block=>block.type==='video');
+    assert.deepEqual(await page.locator('.article-columns video').evaluateAll(nodes=>nodes.map(video=>new URL(video.src).pathname)),sourceVideos.map(block=>new URL(block.url,`${origin}/post/`).pathname),'video sources keep their original left-to-right order');
     assert.equal(await page.locator('.article-body a[download]').count(),article.files);
     assert((await page.locator('.article-body strong').count())>0,'source emphasis survives import');
     assert((await page.locator('.article-body h4').count())>0,'fourth-level headings render');
@@ -60,6 +71,14 @@ const articles=[
      await img.scrollIntoViewIfNeeded();await img.evaluate(node=>node.decode());
      assert(await img.evaluate(node=>node.naturalWidth>0));
      assert.equal(await img.locator('..').getAttribute('href'),await img.getAttribute('src'),'diagrams link to full resolution originals');
+     const figure=img.locator('xpath=ancestor::figure');
+     assert(await img.evaluate(node=>getComputedStyle(node).filter.includes('invert')),'technical diagrams default to dark display');
+     const toggle=figure.locator('.diagram-toggle');
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+     assert.equal(await img.evaluate(node=>getComputedStyle(node).filter),'none','original colors can be inspected inline');
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-pressed'),'false');
     }
     for(const a of await page.locator('.article-body a[download]').all()){
      const response=await page.request.get(await a.getAttribute('href'));
@@ -68,6 +87,7 @@ const articles=[
     for(const video of await page.locator('.article-body video').all()){
      assert.equal(await video.getAttribute('preload'),'none');
      assert.equal(await video.getAttribute('autoplay'),null);
+     assert.equal(await video.evaluate(node=>getComputedStyle(node).filter),'none','video colors stay original');
      await video.scrollIntoViewIfNeeded();await video.evaluate(node=>node.play());
      await page.waitForFunction(()=>[...document.querySelectorAll('video')].some(v=>!v.paused&&v.currentTime>.1));
      assert(await video.evaluate(node=>node.duration>0&&node.videoWidth>0));
@@ -92,6 +112,7 @@ const articles=[
    await page.waitForFunction(()=>document.body.dataset.contentReady==='true');
    assert.equal(await page.locator('#post-title').innerText(),old.title);
    assert.equal(await page.locator('.article-body > *').count(),old.blocks.length+1);
+   assert.equal(await page.locator('.article-diagram').count(),0,'life photographs are not treated as diagrams');
    assert.deepEqual(errors,[]);await page.close();
   }
  }finally{await browser.close();}

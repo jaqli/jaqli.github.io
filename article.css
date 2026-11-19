@@ -42,10 +42,19 @@
 .post-page .article-table[data-columns="2"] th:first-child, .post-page .article-table[data-columns="2"] td:first-child { width: 28%; }
 .post-page .article-body figure { margin: 32px 0; }
 .post-page .article-body figure img { border-radius: 5px; background: #f4f6f5; }
+.post-page .article-diagram .article-image-link { border: 1px solid #293d48; border-radius: 6px; overflow: hidden; background: #101b24; }
+.post-page .article-diagram:not(.diagram-original) img { filter: invert(.92) hue-rotate(180deg) brightness(.9) saturate(.7); }
+.diagram-toggle { margin-left: 12px; padding: 2px 7px; border: 1px solid #36505a; border-radius: 3px; background: transparent; color: #a7c6c8; font: inherit; }
+.diagram-toggle:hover { background: #192e37; color: #d6f3ed; }
 .article-image-link { display: block; cursor: zoom-in; }
 .post-page .article-body figcaption { font-size: 12px; line-height: 1.7; color: #8c9fa9; margin-top: 12px; }
 .post-page .article-body figcaption a { border: 0; padding: 0; margin: 0 0 0 10px; font: inherit; display: inline; }
 .post-page .article-body video { border: 1px solid #2a3b45; border-radius: 6px; }
+.article-columns { display: grid; grid-template-columns: repeat(var(--column-count, 2), minmax(0, 1fr)); align-items: start; gap: 20px; margin: 32px 0; }
+.article-column { min-width: 0; }
+.post-page .article-column > figure { margin: 0; }
+.article-column > p:empty { display: none; }
+.article-column > * + * { margin-top: 16px; }
 .post-page .article-body .article-attachment { display: grid; gap: 5px; padding: 14px 18px; margin: 20px 0 28px; border: 1px solid #293b45; border-radius: 5px; background: #10202960; font-size: 13px; white-space: normal; }
 .post-page .article-attachment a { padding: 0; margin: 0; border: 0; font: 13px/1.65 "SFMono-Regular", Consolas, monospace; }
 .attachment-caption { color: #8fa4af; font-size: 12px; line-height: 1.7; }
@@ -74,6 +83,7 @@
   .post-toc nav { padding-top: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
 }
 @media (max-width: 700px) {
+  .article-columns { grid-template-columns: 1fr; gap: 24px; }
   .post-page .document-main { padding: 38px 22px 64px; }
   .post-heading { padding-bottom: 24px; margin-bottom: 24px; }
   .post-page .post-heading h1 { letter-spacing: -.3px; font-size: 28px; line-height: 1.5; }

@@ -89,6 +89,7 @@ About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 
 - `notion.posts[]`：`id`（稳定的 Notion 页面 ID）、`category`（`tech` 或 `life`）、`title`、`date`、`summary`、`source`、`blocks`。
 - `blocks[]`：`paragraph`、`heading`、`subheading`、`quote`、`code` 使用 `text`；`list` 使用 `items` 与可选 `ordered`；`link` 使用 `text` 和 `url`；`image` 使用 `url` 和 `alt`。
+- Notion 的并列视频保留为 `columns`，每个 `columns[]` 项保存独立的 `blocks` 和来源块 ID。桌面与平板按原顺序等宽并排，700 px 及以下窄屏按列顺序上下排列，视频保留原生比例和播放控件。
 - 文章地址为 `/post/?id=<Notion 页面 ID>`，分类列表自动指向该地址，正文按本网站风格排版。文本不会作为 HTML 执行。`runs` 可保存段内链接；图片会保存到 `assets/notion/` 并通过相对路径读取，避免临时链接过期。
 - 正文保留表格、四级标题、粗体、行内代码和连续编号列表。表格以 `rows[].cells[]` 保存文字及 `runs`，在窄屏容器内横向滚动；列表兼容原有字符串条目及带 `text`、`runs`、`children` 的对象条目。`file`、`video` 使用本地 `url`，附件保留下载文件名，演示视频保留原片并使用本地封面、原生播放控件及 `preload="none"`，不自动播放。两篇新增文章共保留 24 张表格、168 行数据、4 段视频和 9 个附件入口；`sourceBlockId` 保留与源正文的映射，其余已发布文章和个人资料保持不变；Notion 标记为 Invisible 的「MM2023」和「Transformer系列」已从公开列表及正文快照移除。
 - `profile`：`name`、`affiliation`、`bio`、`interests[]`、`publications[]`、`source`、`syncedAt`。每篇论文含 `title`、`authors`、`venue`、`year`、`url`。仅在完成真实资料核对后填写 `syncedAt`。
@@ -97,6 +98,8 @@ About Me 综合 [Notion About](https://familiar-koi-5e4.notion.site/About-fb5deb
 这是可审阅的本地内容快照，不是自动同步服务。当前按来源页面 ID 保持映射；`LIFE` 与年度生活文章进入生活页，技术学习及 AI 相关笔记进入技术页。原文链接与原始分类保留在记录中。可使用公开来源或 Notion 官方导出的 Markdown/HTML ZIP 更新快照，不需要网站读者登录 Notion。
 
 文章阅读样式位于 `article.css`，仅由技术列表和正文页面加载。技术标题展示时去掉重复的日期前缀，源标题仍保存在快照中；正文采用约 780 px 阅读宽度，桌面侧栏目录可直接跳至六个主章节，窄屏折叠目录。宽表格独立滚动并在溢出时显示提示，代码保留空格与换行且限制可视高度，图示可点击查看原图；附件名称和说明分行显示。目录锚点按来源块 ID 生成，支持带锚点的直达和刷新。
+
+技术文章中的架构图、流程图通过 `appearance: "diagram"` 标记为暗色阅读图示，由 CSS 调整显示亮度与配色；图示可切换原色并打开原图，源文件保持原样。照片、视频及其他未标记的图片使用原色。
 
 ## 页面切换
 

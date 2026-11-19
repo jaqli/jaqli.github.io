@@ -33,6 +33,16 @@ function appendRich(node, block) {
   }
 }
 function renderBlock(block) {
+  if (block.type === 'columns') {
+    const group = el('div', null, 'article-columns');
+    group.style.setProperty('--column-count', String(block.columns.length));
+    for (const column of block.columns) {
+      const node = el('div', null, 'article-column');
+      node.append(...column.blocks.map(renderBlock));
+      group.append(node);
+    }
+    return group;
+  }
   const tags = { paragraph: 'p', heading: 'h2', subheading: 'h3', smallheading: 'h4', quote: 'blockquote', code: 'pre' };
   if (tags[block.type]) {
     const node = el(tags[block.type]);
@@ -84,11 +94,23 @@ function renderBlock(block) {
   if (block.type === 'link') return externalLink(block.text || '原文 ↗', block.url);
   if (block.type === 'image' && safeURL(block.url)) {
     const figure = el('figure');
+    if (block.appearance === 'diagram') figure.classList.add('article-diagram');
     const img = el('img'); img.src = safeURL(block.url); img.alt = block.alt || ''; img.loading = 'lazy';
     const original = externalLink('', block.url); original.className = 'article-image-link';
     original.setAttribute('aria-label', `查看原图：${img.alt}`); original.append(img); figure.append(original);
     const caption = el('figcaption', block.caption || '');
     const imageLink = externalLink('查看原图 ↗', block.url); imageLink.className = 'article-image-source';
+    if (block.appearance === 'diagram') {
+      const toggle = el('button', '原色显示', 'diagram-toggle'); toggle.type = 'button';
+      toggle.setAttribute('aria-pressed', 'false');
+      toggle.setAttribute('aria-label', `原色显示：${img.alt}`);
+      toggle.addEventListener('click', () => {
+        const original = figure.classList.toggle('diagram-original');
+        toggle.setAttribute('aria-pressed', String(original));
+        toggle.textContent = original ? '暗色显示' : '原色显示';
+      });
+      caption.append(toggle);
+    }
     caption.append(imageLink); figure.append(caption);
     return figure;
   }
@@ -170,7 +192,7 @@ function polishTechnicalArticle(post) {
 }
 
 try {
-  const response = await fetch(new URL('./content/site.json?v=20261118-tech-published', import.meta.url));
+  const response = await fetch(new URL('./content/site.json?v=20261119-media', import.meta.url));
   if (!response.ok) throw new Error('Content unavailable');
   const data = await response.json();
   if (section === 'cv') {

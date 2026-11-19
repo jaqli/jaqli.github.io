@@ -2178,24 +2178,40 @@
             "sourceBlockId": "d90a59b4-bb47-824d-be1e-01eee8081740"
           },
           {
-            "type": "video",
-            "url": "../assets/notion/bf5aab5bd80f4c0787e90a356bf74f82.mp4",
-            "text": "ae2c14d86b08c62e0d35715a9f02a04b_v1_v2_compare.mp4",
-            "sourceBlockId": "ff8a59b4-bb47-8254-9315-0155106fbb13",
-            "poster": "../assets/notion/bf5aab5bd80f4c0787e90a356bf74f82.jpg"
-          },
-          {
-            "type": "video",
-            "url": "../assets/notion/2d1df6c431f6408f901da368d644c7cc.mp4",
-            "text": "4cce70fd0d77f9dfe88e0ffcd98d3539_v1_v2_compare.mp4",
-            "sourceBlockId": "bdca59b4-bb47-8361-9255-8105728528e9",
-            "poster": "../assets/notion/2d1df6c431f6408f901da368d644c7cc.jpg"
-          },
-          {
-            "type": "paragraph",
-            "text": "",
-            "runs": [],
-            "sourceBlockId": "bb4a59b4-bb47-82b1-adfa-8122bc80bb1b"
+            "type": "columns",
+            "sourceBlockId": "960a59b4-bb47-82d7-b764-0174154c18c0",
+            "columns": [
+              {
+                "sourceBlockId": "ffda59b4-bb47-83dc-9f4b-819d090c5c9a",
+                "blocks": [
+                  {
+                    "type": "video",
+                    "url": "../assets/notion/bf5aab5bd80f4c0787e90a356bf74f82.mp4",
+                    "text": "ae2c14d86b08c62e0d35715a9f02a04b_v1_v2_compare.mp4",
+                    "sourceBlockId": "ff8a59b4-bb47-8254-9315-0155106fbb13",
+                    "poster": "../assets/notion/bf5aab5bd80f4c0787e90a356bf74f82.jpg"
+                  }
+                ]
+              },
+              {
+                "sourceBlockId": "2c0a59b4-bb47-82a3-9e0f-01bfe12d4dfc",
+                "blocks": [
+                  {
+                    "type": "video",
+                    "url": "../assets/notion/2d1df6c431f6408f901da368d644c7cc.mp4",
+                    "text": "4cce70fd0d77f9dfe88e0ffcd98d3539_v1_v2_compare.mp4",
+                    "sourceBlockId": "bdca59b4-bb47-8361-9255-8105728528e9",
+                    "poster": "../assets/notion/2d1df6c431f6408f901da368d644c7cc.jpg"
+                  },
+                  {
+                    "type": "paragraph",
+                    "text": "",
+                    "runs": [],
+                    "sourceBlockId": "bb4a59b4-bb47-82b1-adfa-8122bc80bb1b"
+                  }
+                ]
+              }
+            ]
           },
           {
             "type": "heading",
@@ -3125,7 +3141,8 @@
             "text": "1103_OmniShotCut_0724_architecture.svg",
             "sourceBlockId": "878a59b4-bb47-82a4-a538-011bd18fc991",
             "caption": "0724 模型结构与关键张量形状；B 为 batch size。",
-            "alt": "0724 模型结构与关键张量形状；B 为 batch size。"
+            "alt": "0724 模型结构与关键张量形状；B 为 batch size。",
+            "appearance": "diagram"
           },
           {
             "type": "file",
@@ -4985,18 +5002,34 @@
             "sourceBlockId": "e11a59b4-bb47-824f-8abf-81a08ab22425"
           },
           {
-            "type": "video",
-            "url": "../assets/notion/f4c019ab99db45c2a4be10e9151c43c2.mp4",
-            "text": "76c9156fb4ea476a59e3c3b41b7ac7d8_0_215_dual_hud_zoom_out.mp4",
-            "sourceBlockId": "e01a59b4-bb47-8218-bc59-013125b72829",
-            "poster": "../assets/notion/f4c019ab99db45c2a4be10e9151c43c2.jpg"
-          },
-          {
-            "type": "video",
-            "url": "../assets/notion/d726c217db1842749db26611bbca5f38.mp4",
-            "text": "5a14d9274d3ebd92f4aa1f3fdf28c7c4_720_1868_first_half_minus_last3s_dual_hud.mp4",
-            "sourceBlockId": "b0ea59b4-bb47-824d-86c6-8182d6902c31",
-            "poster": "../assets/notion/d726c217db1842749db26611bbca5f38.jpg"
+            "type": "columns",
+            "sourceBlockId": "931a59b4-bb47-83e5-b732-01c5fa8df3b7",
+            "columns": [
+              {
+                "sourceBlockId": "ab0a59b4-bb47-839c-8ce4-01f8a492522c",
+                "blocks": [
+                  {
+                    "type": "video",
+                    "url": "../assets/notion/f4c019ab99db45c2a4be10e9151c43c2.mp4",
+                    "text": "76c9156fb4ea476a59e3c3b41b7ac7d8_0_215_dual_hud_zoom_out.mp4",
+                    "sourceBlockId": "e01a59b4-bb47-8218-bc59-013125b72829",
+                    "poster": "../assets/notion/f4c019ab99db45c2a4be10e9151c43c2.jpg"
+                  }
+                ]
+              },
+              {
+                "sourceBlockId": "d68a59b4-bb47-8312-aa1a-81eb38fbe76e",
+                "blocks": [
+                  {
+                    "type": "video",
+                    "url": "../assets/notion/d726c217db1842749db26611bbca5f38.mp4",
+                    "text": "5a14d9274d3ebd92f4aa1f3fdf28c7c4_720_1868_first_half_minus_last3s_dual_hud.mp4",
+                    "sourceBlockId": "b0ea59b4-bb47-824d-86c6-8182d6902c31",
+                    "poster": "../assets/notion/d726c217db1842749db26611bbca5f38.jpg"
+                  }
+                ]
+              }
+            ]
           },
           {
             "type": "heading",
@@ -6498,7 +6531,8 @@
             "text": "1103_VPT_IDM_v1_1_ep000_architecture.svg",
             "sourceBlockId": "06ca59b4-bb47-83e4-afc7-81b8538fb5c2",
             "caption": "v1.1 ep000 五头结构与张量形状。图示推理及固定窗口输入；CameraBench 训练整片均匀采样 144 帧，见 2.2。",
-            "alt": "v1.1 ep000 五头结构与张量形状。图示推理及固定窗口输入；CameraBench 训练整片均匀采样 144 帧，见 2.2。"
+            "alt": "v1.1 ep000 五头结构与张量形状。图示推理及固定窗口输入；CameraBench 训练整片均匀采样 144 帧，见 2.2。",
+            "appearance": "diagram"
           },
           {
             "type": "file",
@@ -9035,7 +9069,8 @@
             "text": "1103_VPT_IDM_v003_r5_strategy_flow.png",
             "sourceBlockId": "93ea59b4-bb47-826a-9db2-0119ea646680",
             "caption": "v003_r5 策略流程图：位姿 / 光流联合校验、三路分源修正、SHK 共存与独立 zoom 输出；关键联合门槛详见 6.2.4。",
-            "alt": "v003_r5 策略流程图：位姿 / 光流联合校验、三路分源修正、SHK 共存与独立 zoom 输出；关键联合门槛详见 6.2.4。"
+            "alt": "v003_r5 策略流程图：位姿 / 光流联合校验、三路分源修正、SHK 共存与独立 zoom 输出；关键联合门槛详见 6.2.4。",
+            "appearance": "diagram"
           },
           {
             "type": "file",
